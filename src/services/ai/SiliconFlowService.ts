@@ -1,14 +1,6 @@
-import { AISettings } from '../../types';
-import { BaseAIService, AIMessage, AIServiceConfig, AIProviderType, AIModel } from './BaseAIService';
-import { BaseHTTPClient } from './BaseHTTPClient';
-
-interface SiliconFlowResponse {
-    choices: Array<{
-        message: {
-            content: string;
-        };
-    }>;
-}
+import type { AISettings } from '../../types/ai';
+import { AIServiceConfig, AIProviderType, AIModel } from './BaseAIService';
+import { OpenAICompatibleService } from './OpenAICompatibleService';
 
 interface SiliconFlowModelsResponse {
     data: Array<{
@@ -20,7 +12,7 @@ interface SiliconFlowModelsResponse {
  * SiliconFlow AI 服务
  * 使用 OpenAI 兼容的 API 格式
  */
-export class SiliconFlowService extends BaseAIService {
+export class SiliconFlowService extends OpenAICompatibleService {
     constructor(settings: AISettings) {
         if (!settings.siliconflow?.apiKey) {
             throw new Error('SiliconFlow API key is required');
@@ -40,23 +32,14 @@ export class SiliconFlowService extends BaseAIService {
         return 'https://api.siliconflow.cn/v1';
     }
 
-    protected getEndpoint(): string {
-        return '/chat/completions';
-    }
-
-    protected formatRequestBody(messages: AIMessage[]): any {
+    protected getChatOptions(): Record<string, unknown> {
         return {
-            model: this.model,
-            messages: messages,
             stream: false
         };
     }
 
-    protected parseResponse(response: SiliconFlowResponse): string {
-        if (!response.choices?.[0]?.message?.content) {
-            throw new Error('Unexpected API response format from SiliconFlow');
-        }
-        return response.choices[0].message.content;
+    protected getInvalidResponseMessage(): string {
+        return 'Unexpected API response format from SiliconFlow';
     }
 
     getProviderType(): AIProviderType {

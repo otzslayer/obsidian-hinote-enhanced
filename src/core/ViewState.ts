@@ -1,5 +1,5 @@
 import { TFile } from "obsidian";
-import { HighlightInfo } from '../types';
+import { HighlightInfo } from '../types/highlight';
 
 /**
  * HiNote 视图状态管理

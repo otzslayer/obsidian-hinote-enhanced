@@ -1,5 +1,5 @@
 import { TFile } from "obsidian";
-import { HighlightInfo } from "../../types";
+import { HighlightInfo } from "../../types/highlight";
 import CommentPlugin from "../../../main";
 
 /**

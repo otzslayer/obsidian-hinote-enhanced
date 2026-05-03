@@ -19,6 +19,17 @@ interface OllamaVersionResponse {
     version: string;
 }
 
+interface OllamaChatResponse {
+    message?: {
+        content?: string;
+    };
+}
+
+interface OllamaPullResponse {
+    ok?: boolean;
+    status?: number;
+}
+
 export class OllamaService {
     private retryAttempts = 3;
     private retryDelay = 1000; // ms
@@ -37,10 +48,10 @@ export class OllamaService {
         try {
             await this.ensureConnection();
 
-            const response = await this.makeRequest({
+            const response = await this.makeRequest<OllamaModelsResponse>({
                 endpoint: '/api/tags',
                 method: 'GET'
-            }) as OllamaModelsResponse;
+            });
 
             if (!response || !response.models) {
                 throw new Error('Invalid API response format');
@@ -56,7 +67,7 @@ export class OllamaService {
         try {
             await this.ensureConnection();
 
-            const response = await this.makeRequest({
+            const response = await this.makeRequest<OllamaResponse>({
                 endpoint: '/api/generate',
                 method: 'POST',
                 body: JSON.stringify({
@@ -79,7 +90,7 @@ export class OllamaService {
     async pullModel(modelName: string): Promise<void> {
         try {
             new Notice(`Downloading model ${modelName}...`);
-            const response = await this.makeRequest({
+            const response = await this.makeRequest<OllamaPullResponse>({
                 endpoint: '/api/pull',
                 method: 'POST',
                 body: JSON.stringify({
@@ -93,7 +104,8 @@ export class OllamaService {
 
             new Notice(`Model ${modelName} downloaded successfully`);
         } catch (error) {
-            throw new Error(`Failed to download model: ${error.message}`);
+            const message = error instanceof Error ? error.message : String(error);
+            throw new Error(`Failed to download model: ${message}`);
         }
     }
 
@@ -101,7 +113,7 @@ export class OllamaService {
         try {
             await this.ensureConnection();
 
-            const response = await this.makeRequest({
+            const response = await this.makeRequest<OllamaChatResponse>({
                 endpoint: '/api/chat',
                 method: 'POST',
                 body: JSON.stringify({
@@ -137,7 +149,7 @@ export class OllamaService {
         }
         
         try {
-            const response = await this.makeRequest({
+            const response = await this.makeRequest<OllamaVersionResponse>({
                 endpoint: '/api/version',
                 method: 'GET'
             });
@@ -148,11 +160,11 @@ export class OllamaService {
         }
     }
 
-    private async makeRequest(params: {
+    private async makeRequest<T = unknown>(params: {
         endpoint: string;
         method: string;
         body?: string;
-    }): Promise<any> {
+    }): Promise<T> {
         let lastError: Error | null = null;
 
         for (let attempt = 1; attempt <= this.retryAttempts; attempt++) {
@@ -174,13 +186,13 @@ export class OllamaService {
                     try {
                         // Some Ollama endpoints might return empty responses
                         if (!response.text) {
-                            return {};
+                            return {} as T;
                         }
 
                         // Try to parse as JSON
-                        const jsonResponse = JSON.parse(response.text);
+                        const jsonResponse = JSON.parse(response.text) as T;
                         return jsonResponse;
-                    } catch (e) {
+                    } catch {
                         throw new Error('Invalid JSON response from server');
                     }
                 }
@@ -188,11 +200,11 @@ export class OllamaService {
                 // Handle non-200 responses
                 let errorMessage = `HTTP error! status: ${response.status}`;
                 try {
-                    const errorJson = JSON.parse(response.text);
+                    const errorJson = JSON.parse(response.text) as { error?: string };
                     if (errorJson.error) {
                         errorMessage = errorJson.error;
                     }
-                } catch (e) {
+                } catch {
                     // If we can't parse the error as JSON, use the raw text
                     if (response.text) {
                         errorMessage = response.text;
@@ -200,7 +212,7 @@ export class OllamaService {
                 }
                 throw new Error(errorMessage);
             } catch (error) {
-                lastError = error;
+                lastError = error instanceof Error ? error : new Error(String(error));
                 if (attempt < this.retryAttempts) {
                     await this.delay(this.retryDelay * attempt);
                     continue;
@@ -212,15 +224,17 @@ export class OllamaService {
         throw lastError;
     }
 
-    private handleError(error: any): Error {
-        if (error.message.includes('ECONNREFUSED')) {
+    private handleError(error: unknown): Error {
+        const message = error instanceof Error ? error.message : String(error);
+
+        if (message.includes('ECONNREFUSED')) {
             new Notice('Ollama service is not running. Please start the service.');
             return new Error('Unable to connect to Ollama service. Please ensure the service is running.');
         }
-        if (error instanceof TypeError && error.message.includes('Invalid URL')) {
+        if (error instanceof TypeError && message.includes('Invalid URL')) {
             return new Error(`Invalid Ollama service URL: ${this.baseUrl}`);
         }
-        return error;
+        return error instanceof Error ? error : new Error(message);
     }
 
     private delay(ms: number): Promise<void> {

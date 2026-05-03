@@ -1,13 +1,13 @@
 import { Setting, Notice, Modal } from 'obsidian';
 import { t } from '../i18n';
-import { DEFAULT_SETTINGS } from '../types';
 import { RegexRuleEditor } from './RegexRuleEditor';
+import type CommentPlugin from '../../main';
 
 export class GeneralSettingsTab {
-    private plugin: any;
+    private plugin: CommentPlugin;
     private containerEl: HTMLElement;
 
-    constructor(plugin: any, containerEl: HTMLElement) {
+    constructor(plugin: CommentPlugin, containerEl: HTMLElement) {
         this.plugin = plugin;
         this.containerEl = containerEl;
     }

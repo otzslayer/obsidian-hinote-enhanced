@@ -1,5 +1,5 @@
 import { TFile } from 'obsidian';
-import { HighlightInfo as HiNote } from '../types';
+import { HighlightInfo as HiNote } from '../types/highlight';
 import { HiNoteDataManager } from '../storage/HiNoteDataManager';
 import { IHighlightRepository } from './IHighlightRepository';
 

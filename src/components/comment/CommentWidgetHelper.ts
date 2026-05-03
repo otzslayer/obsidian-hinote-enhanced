@@ -1,6 +1,5 @@
-import { Plugin, MarkdownRenderer, Component, App } from "obsidian";
-import { HighlightInfo as HiNote, CommentItem } from "../../types";
-import { setIcon } from "obsidian";
+import { MarkdownRenderer, Component, App, setIcon } from "obsidian";
+import { HighlightInfo as HiNote, CommentItem } from "../../types/highlight";
 
 /**
  * 批注小部件辅助类
@@ -107,7 +106,11 @@ export class CommentWidgetHelper {
             containerEl,
             '',
             new Component()
-        ).catch(error => {
+        ).then(() => {
+            containerEl.querySelectorAll('ul, ol').forEach(list => {
+                list.addClass('tooltip-markdown-list');
+            });
+        }).catch(error => {
             console.error('Error rendering markdown in tooltip:', error);
             containerEl.textContent = content;
         });
@@ -118,6 +121,7 @@ export class CommentWidgetHelper {
      */
     static updateTooltipPosition(widget: HTMLElement, tooltip: HTMLElement): void {
         const buttonRect = widget.getBoundingClientRect();
+        tooltip.style.position = 'fixed';
         tooltip.style.top = `${buttonRect.bottom + 4}px`;
         tooltip.style.left = `${buttonRect.right - tooltip.offsetWidth}px`;
     }
@@ -138,6 +142,30 @@ export class CommentWidgetHelper {
         button.addEventListener("mouseleave", () => {
             tooltip.addClass("hi-note-tooltip-hidden");
         });
+    }
+
+    /**
+     * 没有评论时，只有悬停在高亮区域才显示添加批注按钮
+     */
+    static setupEmptyCommentHover(widget: HTMLElement, button: HTMLElement): void {
+        button.addClass("hi-note-button-hidden");
+
+        widget.addEventListener("mouseenter", () => {
+            button.removeClass("hi-note-button-hidden");
+        });
+
+        widget.addEventListener("mouseleave", () => {
+            button.addClass("hi-note-button-hidden");
+        });
+    }
+
+    /**
+     * 让拥有独立生命周期的 Widget 能清理窗口监听器
+     */
+    static registerResizePositioning(widget: HTMLElement, tooltip: HTMLElement): () => void {
+        const resizeListener = () => this.updateTooltipPosition(widget, tooltip);
+        window.addEventListener("resize", resizeListener);
+        return resizeListener;
     }
 
     /**
@@ -206,5 +234,18 @@ export class CommentWidgetHelper {
         }
         
         return observer;
+    }
+
+    /**
+     * 根据高亮 ID 清理工具提示，避免 CSS selector 转义问题
+     */
+    static removeTooltipsForHighlight(highlight: HiNote): void {
+        if (!highlight.id) return;
+
+        document.querySelectorAll(".hi-note-tooltip").forEach(tooltip => {
+            if (tooltip.getAttribute("data-highlight-id") === highlight.id) {
+                tooltip.remove();
+            }
+        });
     }
 }

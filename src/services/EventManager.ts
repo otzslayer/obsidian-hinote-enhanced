@@ -55,7 +55,7 @@ export class EventManager {
      */
     public on<K extends keyof HighlightEvents>(
         event: K,
-        callback: (...args: HighlightEvents[K]) => any
+        callback: (...args: HighlightEvents[K]) => unknown
     ): EventRef {
         return this.events.on(event, callback);
     }
@@ -65,7 +65,7 @@ export class EventManager {
      */
     public off<K extends keyof HighlightEvents>(
         event: K,
-        callback: (...args: HighlightEvents[K]) => any
+        callback: (...args: HighlightEvents[K]) => unknown
     ) {
         this.events.off(event, callback);
     }

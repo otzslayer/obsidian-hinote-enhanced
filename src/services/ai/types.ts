@@ -1,3 +1,5 @@
+import type { AISettings } from '../../types/ai';
+
 /**
  * AI 服务类型定义
  * 统一的 AI 服务接口和类型
@@ -165,7 +167,7 @@ export interface IAIServiceFactory {
     /**
      * 创建服务实例
      */
-    create(config: any): IAIService;
+    create(settings: AISettings): IAIService;
 
     /**
      * 检查是否支持该提供商

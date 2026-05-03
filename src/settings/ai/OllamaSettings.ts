@@ -1,10 +1,20 @@
-import { Setting, Notice } from 'obsidian';
-import { BaseAIServiceSettings, AIModel } from './AIServiceSettings';
-import { AITestHelper } from '../../services/ai';
-import { OllamaService } from '../../services/ai/OllamaService';
+import { Setting } from 'obsidian';
+import { BaseAIServiceSettings } from './AIServiceSettings';
+import { OllamaService } from '../../services/ai';
 import { t } from '../../i18n';
 
 export class OllamaSettings extends BaseAIServiceSettings {
+    private getOllamaSettings(defaultHost: string) {
+        if (!this.plugin.settings.ai.ollama) {
+            this.plugin.settings.ai.ollama = {
+                host: defaultHost,
+                model: ''
+            };
+        }
+
+        return this.plugin.settings.ai.ollama;
+    }
+
     async display(containerEl: HTMLElement): Promise<void> {
         const settingsContainer = containerEl.createEl('div', {
             cls: 'ai-service-settings'
@@ -17,9 +27,9 @@ export class OllamaSettings extends BaseAIServiceSettings {
 
         // Set default host if not configured
         const defaultHost = 'http://localhost:11434';
-        if (!this.plugin.settings.ai.ollama?.host) {
-            if (!this.plugin.settings.ai.ollama) this.plugin.settings.ai.ollama = {};
-            this.plugin.settings.ai.ollama.host = defaultHost;
+        const ollamaSettings = this.getOllamaSettings(defaultHost);
+        if (!ollamaSettings.host) {
+            ollamaSettings.host = defaultHost;
             await this.plugin.saveSettings();
         }
 
@@ -30,12 +40,9 @@ export class OllamaSettings extends BaseAIServiceSettings {
             .addText(text => {
                 text
                     .setPlaceholder(defaultHost)
-                    .setValue(this.plugin.settings.ai.ollama?.host || defaultHost)
+                    .setValue(ollamaSettings.host || defaultHost)
                     .onChange(async (value) => {
-                        if (!this.plugin.settings.ai.ollama) {
-                            this.plugin.settings.ai.ollama = {};
-                        }
-                        this.plugin.settings.ai.ollama.host = value || defaultHost;
+                        this.getOllamaSettings(defaultHost).host = value || defaultHost;
                         await this.plugin.saveSettings();
                     });
                 return text;
@@ -45,7 +52,7 @@ export class OllamaSettings extends BaseAIServiceSettings {
         hostSetting.addButton(button => {
             button.setButtonText(t('Check'));
             button.onClick(async () => {
-                const host = this.plugin.settings.ai.ollama?.host || defaultHost;
+                const host = this.getOllamaSettings(defaultHost).host || defaultHost;
                 if (!host || host.trim() === '') {
                     this.showButtonStatus(button.buttonEl, 'warning');
                     return;
@@ -63,8 +70,8 @@ export class OllamaSettings extends BaseAIServiceSettings {
         });
 
         // 默认显示模型选择（如果有保存的模型列表）
-        if (this.plugin.settings.ai.ollama?.availableModels?.length) {
-            this.displayOllamaModelDropdown(settingsContainer, this.plugin.settings.ai.ollama.availableModels);
+        if (ollamaSettings.availableModels?.length) {
+            this.displayOllamaModelDropdown(settingsContainer, ollamaSettings.availableModels);
         }
     }
 
@@ -85,17 +92,14 @@ export class OllamaSettings extends BaseAIServiceSettings {
                 );
 
                 // 修改这里的默认值选择逻辑
-                const currentModel = this.plugin.settings.ai.ollama?.model;
+                const currentModel = this.getOllamaSettings('http://localhost:11434').model;
                 const defaultModel = models.includes(currentModel) ? currentModel : models[0];
 
                 return dropdown
                     .addOptions(options)
-                    .setValue(defaultModel)
+                    .setValue(defaultModel || '')
                     .onChange(async (value) => {
-                        if (!this.plugin.settings.ai.ollama) {
-                            this.plugin.settings.ai.ollama = {};
-                        }
-                        this.plugin.settings.ai.ollama.model = value;  // 确保保存到正确的位置
+                        this.getOllamaSettings('http://localhost:11434').model = value;
                         await this.plugin.saveSettings();
                     });
             });

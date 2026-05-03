@@ -4,7 +4,7 @@
  */
 
 import { AIMessage, AIModel, AIProviderType } from './BaseAIService';
-import { AISettings } from '../../types';
+import type { AISettings } from '../../types/ai';
 import { AIServiceRegistry } from './AIServiceRegistry';
 import {
     OpenAIServiceFactory,

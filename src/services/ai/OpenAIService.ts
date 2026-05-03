@@ -1,18 +1,11 @@
-import { BaseAIService, AIMessage, AIServiceConfig, AIProviderType, AIModel } from './BaseAIService';
-
-interface OpenAIResponse {
-    choices: Array<{
-        message: {
-            content: string;
-        };
-    }>;
-}
+import { AIServiceConfig, AIProviderType, AIModel } from './BaseAIService';
+import { OpenAICompatibleService } from './OpenAICompatibleService';
 
 /**
  * OpenAI AI 服务
  * 支持 GPT-4o, GPT-4o-mini, GPT-o1 等模型
  */
-export class OpenAIService extends BaseAIService {
+export class OpenAIService extends OpenAICompatibleService {
     constructor(
         apiKey: string,
         model: string = 'gpt-4o',
@@ -30,26 +23,6 @@ export class OpenAIService extends BaseAIService {
 
     protected getDefaultBaseUrl(): string {
         return 'https://api.openai.com/v1';
-    }
-
-    protected getEndpoint(): string {
-        return '/chat/completions';
-    }
-
-    protected formatRequestBody(messages: AIMessage[]): any {
-        return {
-            model: this.model,
-            messages: messages,
-            temperature: this.temperature,
-            max_tokens: this.maxTokens
-        };
-    }
-
-    protected parseResponse(response: OpenAIResponse): string {
-        if (!response.choices?.[0]?.message?.content) {
-            throw new Error('Invalid response format from OpenAI API');
-        }
-        return response.choices[0].message.content;
     }
 
     getProviderType(): AIProviderType {

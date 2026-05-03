@@ -50,7 +50,7 @@ export class GeminiService extends BaseAIService {
         };
     }
 
-    protected formatRequestBody(messages: AIMessage[]): any {
+    protected formatRequestBody(messages: AIMessage[]): Record<string, unknown> {
         // 将统一的 AIMessage 格式转换为 Gemini 格式
         const contents = messages.map(msg => ({
             role: msg.role === 'assistant' ? 'model' : 'user',
@@ -72,11 +72,12 @@ export class GeminiService extends BaseAIService {
         };
     }
 
-    protected parseResponse(response: GeminiResponse): string {
-        if (!response.candidates?.[0]?.content?.parts?.[0]?.text) {
+    protected parseResponse(response: unknown): string {
+        const data = response as GeminiResponse;
+        if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
             throw new Error('Invalid response format from Gemini API');
         }
-        return response.candidates[0].content.parts[0].text;
+        return data.candidates[0].content.parts[0].text;
     }
 
     getProviderType(): AIProviderType {

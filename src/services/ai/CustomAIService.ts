@@ -1,10 +1,12 @@
 import { BaseHTTPClient } from './BaseHTTPClient';
 import { AIProviderType } from './BaseAIService';
+import type { AIModel } from './BaseAIService';
 
 /**
  * API 类型检测结果
  */
 export type APIType = 'openai' | 'anthropic' | 'gemini';
+type CustomAIMessage = { role: string; content: string };
 
 /**
  * OpenAI 兼容格式的响应
@@ -100,7 +102,7 @@ export class CustomAIService {
         // 2. 如果 URL 检测失败，尝试通过测试请求来检测
         // 优先尝试 OpenAI 格式（最常见）
         try {
-            await this.testOpenAIFormat();
+            await this.requestOpenAICompatible(this.createTestMessages(), { max_tokens: 5 });
             this.detectedApiType = 'openai';
             return 'openai';
         } catch (error) {
@@ -109,7 +111,7 @@ export class CustomAIService {
 
         // 尝试 Anthropic 格式
         try {
-            await this.testAnthropicFormat();
+            await this.requestAnthropicCompatible(this.createTestMessages(), 5);
             this.detectedApiType = 'anthropic';
             return 'anthropic';
         } catch (error) {
@@ -118,7 +120,7 @@ export class CustomAIService {
 
         // 尝试 Gemini 格式
         try {
-            await this.testGeminiFormat();
+            await this.requestGeminiCompatible(this.createTestMessages());
             this.detectedApiType = 'gemini';
             return 'gemini';
         } catch (error) {
@@ -134,70 +136,24 @@ export class CustomAIService {
      * 测试 OpenAI 格式
      */
     private async testOpenAIFormat(): Promise<boolean> {
-        const endpoint = this.baseUrl.includes('/chat/completions') 
-            ? this.baseUrl 
-            : `${this.baseUrl}/chat/completions`;
-
-        const response = await this.httpClient.request<OpenAIResponse>({
-            url: endpoint,
-            method: 'POST',
-            headers: this.buildHeaders(),
-            body: JSON.stringify({
-                model: this.model,
-                messages: [{ role: 'user', content: 'test' }],
-                max_tokens: 5
-            })
-        });
-
-        return !!response.choices?.[0]?.message?.content;
+        const content = await this.requestOpenAICompatible(this.createTestMessages(), { max_tokens: 5 });
+        return !!content;
     }
 
     /**
      * 测试 Anthropic 格式
      */
     private async testAnthropicFormat(): Promise<boolean> {
-        const endpoint = this.baseUrl.includes('/messages') 
-            ? this.baseUrl 
-            : `${this.baseUrl}/messages`;
-
-        const response = await this.httpClient.request<AnthropicResponse>({
-            url: endpoint,
-            method: 'POST',
-            headers: {
-                ...this.buildHeaders('ApiKey'),
-                'anthropic-version': '2023-06-01'
-            },
-            body: JSON.stringify({
-                model: this.model,
-                messages: [{ role: 'user', content: 'test' }],
-                max_tokens: 5
-            })
-        });
-
-        return !!response.content?.[0]?.text;
+        const content = await this.requestAnthropicCompatible(this.createTestMessages(), 5);
+        return !!content;
     }
 
     /**
      * 测试 Gemini 格式
      */
     private async testGeminiFormat(): Promise<boolean> {
-        const endpoint = `${this.baseUrl}/${this.model}:generateContent`;
-
-        const response = await this.httpClient.request<GeminiResponse>({
-            url: `${endpoint}?key=${this.apiKey}`,
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...this.customHeaders
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{ text: 'test' }]
-                }]
-            })
-        });
-
-        return !!response.candidates?.[0]?.content?.parts?.[0]?.text;
+        const content = await this.requestGeminiCompatible(this.createTestMessages());
+        return !!content;
     }
 
     /**
@@ -210,7 +166,7 @@ export class CustomAIService {
     /**
      * 聊天接口
      */
-    async chat(messages: { role: string, content: string }[]): Promise<string> {
+    async chat(messages: CustomAIMessage[]): Promise<string> {
         // 自动检测 API 类型
         const apiType = await this.detectAPIType();
 
@@ -230,28 +186,9 @@ export class CustomAIService {
     /**
      * OpenAI 兼容格式的聊天
      */
-    private async chatOpenAICompatible(messages: { role: string, content: string }[]): Promise<string> {
-        const endpoint = this.baseUrl.includes('/chat/completions') 
-            ? this.baseUrl 
-            : `${this.baseUrl}/chat/completions`;
-
+    private async chatOpenAICompatible(messages: CustomAIMessage[]): Promise<string> {
         try {
-            const response = await this.httpClient.request<OpenAIResponse>({
-                url: endpoint,
-                method: 'POST',
-                headers: this.buildHeaders(),
-                body: JSON.stringify({
-                    model: this.model,
-                    messages: messages,
-                    temperature: 0.7
-                })
-            });
-
-            if (!response.choices?.[0]?.message?.content) {
-                throw new Error('Invalid response format from custom AI API');
-            }
-
-            return response.choices[0].message.content;
+            return await this.requestOpenAICompatible(messages);
         } catch (error) {
             if (error instanceof Error) {
                 throw error;
@@ -263,31 +200,9 @@ export class CustomAIService {
     /**
      * Anthropic 兼容格式的聊天
      */
-    private async chatAnthropicCompatible(messages: { role: string, content: string }[]): Promise<string> {
-        const endpoint = this.baseUrl.includes('/messages') 
-            ? this.baseUrl 
-            : `${this.baseUrl}/messages`;
-
+    private async chatAnthropicCompatible(messages: CustomAIMessage[]): Promise<string> {
         try {
-            const response = await this.httpClient.request<AnthropicResponse>({
-                url: endpoint,
-                method: 'POST',
-                headers: {
-                    ...this.buildHeaders('ApiKey'),
-                    'anthropic-version': '2023-06-01'
-                },
-                body: JSON.stringify({
-                    model: this.model,
-                    messages: messages,
-                    max_tokens: 4096
-                })
-            });
-
-            if (!response.content?.[0]?.text) {
-                throw new Error('Invalid response format from custom AI API');
-            }
-
-            return response.content[0].text;
+            return await this.requestAnthropicCompatible(messages, 4096);
         } catch (error) {
             if (error instanceof Error) {
                 throw error;
@@ -299,39 +214,109 @@ export class CustomAIService {
     /**
      * Gemini 兼容格式的聊天
      */
-    private async chatGeminiCompatible(messages: { role: string, content: string }[]): Promise<string> {
-        const endpoint = `${this.baseUrl}/${this.model}:generateContent`;
-
+    private async chatGeminiCompatible(messages: CustomAIMessage[]): Promise<string> {
         try {
-            // 转换消息格式为 Gemini 格式
-            const contents = messages.map(msg => ({
-                role: msg.role === 'assistant' ? 'model' : 'user',
-                parts: [{ text: msg.content }]
-            }));
-
-            const response = await this.httpClient.request<GeminiResponse>({
-                url: `${endpoint}?key=${this.apiKey}`,
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.customHeaders
-                },
-                body: JSON.stringify({
-                    contents: contents
-                })
-            });
-
-            if (!response.candidates?.[0]?.content?.parts?.[0]?.text) {
-                throw new Error('Invalid response format from custom AI API');
-            }
-
-            return response.candidates[0].content.parts[0].text;
+            return await this.requestGeminiCompatible(messages);
         } catch (error) {
             if (error instanceof Error) {
                 throw error;
             }
             throw new Error('Failed to generate response from custom AI API');
         }
+    }
+
+    private async requestOpenAICompatible(
+        messages: CustomAIMessage[],
+        extraBody: Record<string, unknown> = {}
+    ): Promise<string> {
+        const response = await this.httpClient.request<OpenAIResponse>({
+            url: this.getOpenAIEndpoint(),
+            method: 'POST',
+            headers: this.buildHeaders(),
+            body: JSON.stringify({
+                model: this.model,
+                messages,
+                temperature: 0.7,
+                ...extraBody
+            })
+        });
+
+        const content = response.choices?.[0]?.message?.content;
+        if (!content) {
+            throw new Error('Invalid response format from custom AI API');
+        }
+
+        return content;
+    }
+
+    private async requestAnthropicCompatible(
+        messages: CustomAIMessage[],
+        maxTokens: number
+    ): Promise<string> {
+        const response = await this.httpClient.request<AnthropicResponse>({
+            url: this.getAnthropicEndpoint(),
+            method: 'POST',
+            headers: {
+                ...this.buildHeaders('ApiKey'),
+                'anthropic-version': '2023-06-01'
+            },
+            body: JSON.stringify({
+                model: this.model,
+                messages,
+                max_tokens: maxTokens
+            })
+        });
+
+        const content = response.content?.[0]?.text;
+        if (!content) {
+            throw new Error('Invalid response format from custom AI API');
+        }
+
+        return content;
+    }
+
+    private async requestGeminiCompatible(messages: CustomAIMessage[]): Promise<string> {
+        const response = await this.httpClient.request<GeminiResponse>({
+            url: `${this.getGeminiEndpoint()}?key=${this.apiKey}`,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...this.customHeaders
+            },
+            body: JSON.stringify({
+                contents: messages.map(msg => ({
+                    role: msg.role === 'assistant' ? 'model' : 'user',
+                    parts: [{ text: msg.content }]
+                }))
+            })
+        });
+
+        const content = response.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!content) {
+            throw new Error('Invalid response format from custom AI API');
+        }
+
+        return content;
+    }
+
+    private getOpenAIEndpoint(): string {
+        return this.baseUrl.includes('/chat/completions')
+            ? this.baseUrl
+            : `${this.baseUrl}/chat/completions`;
+    }
+
+    private getAnthropicEndpoint(): string {
+        return this.baseUrl.includes('/messages')
+            ? this.baseUrl
+            : `${this.baseUrl}/messages`;
+    }
+
+    private getGeminiEndpoint(): string {
+        return `${this.baseUrl}/${this.model}:generateContent`;
+    }
+
+    private createTestMessages(): CustomAIMessage[] {
+        return [{ role: 'user', content: 'test' }];
     }
 
     /**
@@ -358,7 +343,7 @@ export class CustomAIService {
     /**
      * 列出可用模型
      */
-    async listModels(): Promise<any[]> {
+    async listModels(): Promise<AIModel[]> {
         // Custom 服务通常只有一个配置的模型
         return [{
             id: this.model,

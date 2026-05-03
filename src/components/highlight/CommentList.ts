@@ -1,4 +1,4 @@
-import { CommentItem, HighlightInfo } from "../../types";
+import { CommentItem, HighlightInfo } from "../../types/highlight";
 import { MarkdownRenderer, Component, App } from "obsidian";
 import { t } from "../../i18n";
 
@@ -9,10 +9,11 @@ export class CommentList extends Component {
     constructor(
         parentEl: HTMLElement,
         private highlight: HighlightInfo,
-        private onCommentEdit: (comment: CommentItem) => void
+        private onCommentEdit: (comment: CommentItem) => void,
+        app: App
     ) {
         super();
-        this.app = (window as any).app;
+        this.app = app;
         this.render(parentEl);
     }
 

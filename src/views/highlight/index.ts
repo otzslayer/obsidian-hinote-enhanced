@@ -1,9 +1,12 @@
 /**
  * Highlight 模块统一导出
  */
-// HighlightDataManager 已迁移到 services/highlight/HighlightDataService
-export { HighlightRenderManager } from './HighlightRenderManager';
-export { VirtualHighlightManager } from './VirtualHighlightManager';
-export { HighlightFlashcardManager } from './HighlightFlashcardManager';
-export { HighlightDeletionManager } from './HighlightDeletionManager';
-export { HighlightIconManager } from './HighlightIconManager';
+export { HighlightRenderManager, HighlightRenderController } from './rendering';
+export { VirtualHighlightManager } from './virtual';
+export { FlashcardViewManager, HighlightFlashcardManager } from './flashcards';
+export { HighlightDeletionManager, HighlightIconManager } from './actions';
+export { ExportManager } from './exports';
+export { CanvasHighlightProcessor } from './canvas';
+export { CommentController, CommentInputManager } from './comments';
+export { HighlightListController, InfiniteScrollManager } from './list';
+export { PreviewWidgetRenderer, PreviewHighlightResolver } from './preview';

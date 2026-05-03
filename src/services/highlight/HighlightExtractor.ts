@@ -1,7 +1,13 @@
 import { App, TFile } from "obsidian";
-import { HighlightInfo, PluginSettings } from '../../types';
+import type { HighlightInfo } from '../../types/highlight';
+import type { PluginSettings } from '../../types/settings';
 import { ExcludePatternMatcher } from '../ExcludePatternMatcher';
 import { BlockIdService } from '../BlockIdService';
+import { ObsidianInternals } from '../../utils/ObsidianInternals';
+
+interface PluginWithSettings {
+    settings?: PluginSettings;
+}
 
 /**
  * 高亮提取器
@@ -22,15 +28,13 @@ export class HighlightExtractor {
         /==([^=\n](?:[^=\n]|=[^=\n])*?[^=\n])==|<mark[^>]*>([\s\S]*?)<\/mark>|<span[^>]*>([\s\S]*?)<\/span>/g;
 
     private blockIdService: BlockIdService;
-    private settings: PluginSettings;
+    private settings?: PluginSettings;
     
     // 文件内容缓存
     private contentCache = new Map<string, {content: string, mtime: number}>();
 
     constructor(private app: App) {
-        const plugins = (app as any).plugins;
-        const plugin = plugins && plugins.plugins ? 
-            plugins.plugins['hi-note'] : undefined;
+        const plugin = ObsidianInternals.getPluginById<PluginWithSettings>(app, 'hi-note');
         this.settings = plugin?.settings;
         this.blockIdService = new BlockIdService(app);
     }
@@ -58,9 +62,10 @@ export class HighlightExtractor {
         const highlights: HighlightInfo[] = [];
         
         // 如果使用自定义规则且有规则配置
-        if (this.settings.useCustomPattern && this.settings.regexRules?.length > 0) {
+        const settings = this.settings;
+        if (settings?.useCustomPattern && settings.regexRules?.length > 0) {
             // 遍历所有启用的规则
-            for (const rule of this.settings.regexRules.filter(r => r.enabled)) {
+            for (const rule of settings.regexRules.filter(r => r.enabled)) {
                 try {
                     const pattern = new RegExp(rule.pattern, 'g');
                     this.processRegexMatches(content, pattern, highlights, file, rule.color);

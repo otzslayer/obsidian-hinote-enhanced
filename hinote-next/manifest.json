@@ -1,0 +1,10 @@
+{
+	"id": "hi-note-next",
+	"name": "HiNote Next",
+	"version": "0.1.0",
+	"minAppVersion": "1.8.0",
+	"description": "A cleaner rewrite of HiNote focused on stable highlight comments.",
+	"author": "Kai",
+	"authorUrl": "https://github.com/CatMuse",
+	"isDesktopOnly": false
+}

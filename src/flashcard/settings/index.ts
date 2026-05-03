@@ -1,0 +1,1 @@
+export { FlashcardSettingsTab } from "./FlashcardSettingsTab";

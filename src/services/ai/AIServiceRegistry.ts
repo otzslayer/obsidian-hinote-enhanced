@@ -4,6 +4,7 @@
  */
 
 import { IAIService, IAIServiceFactory, AIProviderType, AIServiceError, AIErrorCode } from './BaseAIService';
+import type { AISettings } from '../../types/ai';
 
 export class AIServiceRegistry {
     private factories = new Map<AIProviderType, IAIServiceFactory>();
@@ -27,7 +28,7 @@ export class AIServiceRegistry {
     /**
      * 获取服务实例（懒加载）
      */
-    getService(provider: AIProviderType, config: any): IAIService {
+    getService(provider: AIProviderType, config: AISettings): IAIService {
         // 检查缓存
         if (this.instances.has(provider)) {
             const instance = this.instances.get(provider)!;

@@ -1,6 +1,7 @@
 import { Setting, ButtonComponent, TextComponent, ToggleComponent, setIcon } from 'obsidian';
-import { RegexRule } from '../types';
+import type { RegexRule } from '../types/highlight';
 import { t } from '../i18n';
+import type CommentPlugin from '../../main';
 
 /**
  * 正则表达式规则编辑器组件
@@ -8,11 +9,11 @@ import { t } from '../i18n';
  */
 export class RegexRuleEditor {
   private containerEl: HTMLElement;
-  private plugin: any;
+  private plugin: CommentPlugin;
   private rules: RegexRule[];
   private rulesContainer: HTMLElement;
 
-  constructor(containerEl: HTMLElement, plugin: any) {
+  constructor(containerEl: HTMLElement, plugin: CommentPlugin) {
     this.containerEl = containerEl;
     this.plugin = plugin;
     this.rules = plugin.settings.regexRules || [];

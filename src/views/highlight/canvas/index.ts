@@ -1,0 +1,1 @@
+export { CanvasHighlightProcessor } from './CanvasHighlightProcessor';

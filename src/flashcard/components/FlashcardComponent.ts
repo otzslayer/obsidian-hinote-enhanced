@@ -1,5 +1,4 @@
-import { Component } from "obsidian";
-import { HighlightInfo as HiNote } from "../../types";
+import { App, Component } from "obsidian";
 import { LicenseManager } from "../../services/LicenseManager";
 import { FSRSManager } from "../services/FSRSManager";
 import { 
@@ -13,10 +12,14 @@ import {
 import { t } from "../../i18n";
 
 import { FlashcardRenderer } from "./FlashcardRenderer";
-import { FlashcardOperations } from "./FlashcardOperations";
-import { FlashcardGroupManager } from "./FlashcardGroupManager";
-import { FlashcardProgressManager } from "./FlashcardProgress";
-import { FlashcardUtils } from "./FlashcardUtils";
+import {
+    FlashcardOperations,
+    FlashcardGroupManager,
+    FlashcardProgressManager,
+    FlashcardUtils
+} from "./controllers";
+import type CommentPlugin from "../../../main";
+import type { FlashcardRatingButton } from "./FlashcardComponentContext";
 
 /**
  * 闪卡组件，整合所有闪卡相关功能
@@ -34,14 +37,14 @@ export class FlashcardComponent extends Component {
     private currentCard: FlashcardState | null = null;
     private currentGroupName: string = '';
     private currentGroupId: string = '';
-    private app: any;
+    private app: App;
     private completionMessage: string | null = null;
     
     // 存储每个分组的学习进度和完成状态
     private groupProgress: Record<string, GroupProgressState> = {};
 
     // 评分按钮配置
-    private readonly ratingButtons = [
+    private readonly ratingButtons: FlashcardRatingButton[] = [
         { label: t('Again'), rating: FSRS_RATING.AGAIN, key: '1', ratingText: 'again' },
         { label: t('Hard'), rating: FSRS_RATING.HARD, key: '2', ratingText: 'hard' },
         { label: t('Good'), rating: FSRS_RATING.GOOD, key: '3', ratingText: 'good' },
@@ -55,7 +58,7 @@ export class FlashcardComponent extends Component {
     public progressManager: FlashcardProgressManager;
     public utils: FlashcardUtils;
 
-    constructor(container: HTMLElement, plugin: any) {
+    constructor(container: HTMLElement, plugin: CommentPlugin) {
         super();
         this.container = container;
         this.app = plugin.app;
@@ -79,7 +82,7 @@ export class FlashcardComponent extends Component {
         
         // 设置当前分组 ID
         if (this.currentGroupName) {
-            const group = this.fsrsManager.getCardGroups().find((g: any) => g.name === this.currentGroupName);
+            const group = this.fsrsManager.getCardGroups().find((g: CardGroup) => g.name === this.currentGroupName);
             if (group) {
                 this.currentGroupId = group.id;
             } else {
@@ -205,7 +208,7 @@ export class FlashcardComponent extends Component {
         return this.isActive;
     }
     
-    public getApp(): any {
+    public getApp(): App {
         return this.app;
     }
     
@@ -245,7 +248,7 @@ export class FlashcardComponent extends Component {
         this.currentGroupName = groupName;
         // 更新分组 ID
         if (groupName) {
-            const group = this.fsrsManager.getCardGroups().find((g: any) => g.name === groupName);
+            const group = this.fsrsManager.getCardGroups().find((g: CardGroup) => g.name === groupName);
             if (group) {
                 this.currentGroupId = group.id;
             } else {
@@ -264,7 +267,7 @@ export class FlashcardComponent extends Component {
         this.currentGroupId = groupId;
         // 更新分组名称
         if (groupId) {
-            const group = this.fsrsManager.getCardGroups().find((g: any) => g.id === groupId);
+            const group = this.fsrsManager.getCardGroups().find((g: CardGroup) => g.id === groupId);
             this.currentGroupName = group ? group.name : '';
         } else {
             this.currentGroupName = '';
@@ -348,7 +351,7 @@ export class FlashcardComponent extends Component {
         }
     }
     
-    public getGroupProgress(groupName?: string): { currentIndex: number, isFlipped: boolean } | null {
+    public getGroupProgress(groupName?: string): GroupProgressState | null {
         const name = groupName || this.currentGroupName;
         return this.groupProgress[name] || null;
     }

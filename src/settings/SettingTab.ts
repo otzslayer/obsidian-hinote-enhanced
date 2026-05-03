@@ -1,20 +1,19 @@
 import { App, PluginSettingTab } from 'obsidian';
-import { PluginSettings } from '../types';
 import { GeneralSettingsTab } from './GeneralSettingsTab';
 import { AIServiceTab } from './AIServiceTab';
-import { FlashcardSettingsTab } from '../flashcard/settings/FlashcardSettingsTab';
+import { FlashcardSettingsTab } from '../flashcard';
 import { t } from '../i18n';
 import { LicenseManager } from '../services/LicenseManager';
+import type CommentPlugin from '../../main';
+import { ObsidianInternals } from '../utils/ObsidianInternals';
 
 export class AISettingTab extends PluginSettingTab {
-    plugin: any;
-    DEFAULT_SETTINGS: PluginSettings;
+    plugin: CommentPlugin;
     private licenseManager: LicenseManager;
 
-    constructor(app: App, plugin: any) {
+    constructor(app: App, plugin: CommentPlugin) {
         super(app, plugin);
         this.plugin = plugin;
-        this.DEFAULT_SETTINGS = plugin.DEFAULT_SETTINGS;
         this.licenseManager = new LicenseManager(this.plugin);
     }
 
@@ -86,7 +85,7 @@ export class AISettingTab extends PluginSettingTab {
                 descriptionDiv.createEl('span', { text: t('Get your license key from') + ' ' });
                 
                 // 根据语言设置不同的链接
-                const locale = (window as any).moment?.locale() || 'en';
+                const locale = ObsidianInternals.getMomentLocale();
                 const websiteUrl = locale.startsWith('zh') ? 'https://www.hinote.vip/index.html' : 'https://www.hinote.vip/en.html';
                 
                 const link = descriptionDiv.createEl('a', { 

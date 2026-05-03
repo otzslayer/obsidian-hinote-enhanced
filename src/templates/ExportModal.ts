@@ -1,27 +1,21 @@
 import { App, Modal, Notice } from 'obsidian';
-import { HighlightInfo } from '../types';
+import { HighlightInfo } from '../types/highlight';
 import { getTemplate, templates } from './index';
-import { CommentItem } from '../types';
+import { CommentItem } from '../types/highlight';
 import { t } from "../i18n";
 import { exportStyles } from './exportStyles';
+import type html2canvas from 'html2canvas';
 
-interface Html2CanvasOptions {
-    backgroundColor: string;
-    scale: number;
-    useCORS: boolean;
-    allowTaint: boolean;
-    logging: boolean;
-    onclone: (clonedDoc: Document) => void;
-}
+type Html2Canvas = typeof html2canvas;
 
 export class ExportPreviewModal extends Modal {
     private highlight: HighlightInfo & { comments?: CommentItem[] };
-    private html2canvasInstance: any;
+    private html2canvasInstance: Html2Canvas;
     private selectedTemplateId: string = 'default';
     private previewContainer: HTMLElement;
     private includeComments: boolean = false;
 
-    constructor(app: App, highlight: HighlightInfo & { comments?: CommentItem[] }, html2canvas: any) {
+    constructor(app: App, highlight: HighlightInfo & { comments?: CommentItem[] }, html2canvas: Html2Canvas) {
         super(app);
         this.highlight = highlight;
         this.html2canvasInstance = html2canvas;

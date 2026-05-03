@@ -2,7 +2,7 @@ import { moment } from 'obsidian';
 import en from './en';
 import zh from './zh';
 
-const translations: { [key: string]: any } = {
+const translations: Record<string, Record<string, string>> = {
     en,
     zh
 };

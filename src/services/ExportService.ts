@@ -1,26 +1,32 @@
 import { App, TFile } from "obsidian";
-import { HighlightInfo, CommentItem } from "../types";
+import { HighlightInfo, CommentItem } from "../types/highlight";
 import { HighlightRepository } from "../repositories/HighlightRepository";
 import { t } from "../i18n";
 import { HighlightService } from "./HighlightService";
 import { IdGenerator } from '../utils/IdGenerator';
+import { ObsidianInternals } from "../utils/ObsidianInternals";
+import type { PluginSettings } from "../types/settings";
+
+interface PluginWithSettings {
+    settings?: PluginSettings;
+}
 
 export class ExportService {
     private highlightService: HighlightService;
 
     constructor(
         private app: App,
-        private highlightRepository: HighlightRepository
+        private highlightRepository: HighlightRepository,
+        highlightService?: HighlightService
     ) {
-        this.highlightService = new HighlightService(app);
+        this.highlightService = highlightService ?? new HighlightService(app);
     }
     
     /**
      * 获取插件实例
      */
-    private getPluginInstance(): any {
-        const plugins = (this.app as any).plugins;
-        return plugins && plugins.plugins ? plugins.plugins['hi-note'] : undefined;
+    private getPluginSettings(): PluginSettings | undefined {
+        return ObsidianInternals.getPluginById<PluginWithSettings>(this.app, 'hi-note')?.settings;
     }
     
     /**
@@ -69,8 +75,7 @@ export class ExportService {
             throw new Error(t("No highlights to export."));
         }
         
-        // 获取插件实例和设置
-        const hiNotePlugin = this.getPluginInstance();
+        const settings = this.getPluginSettings();
         
         // 按文件分组高亮
         const highlightsByFile: Record<string, HighlightInfo[]> = {};
@@ -98,7 +103,7 @@ export class ExportService {
             
             // 使用模板或默认方式生成内容
             const fileHighlights = highlightsByFile[filePath];
-            const customTemplate = hiNotePlugin?.settings?.export?.exportTemplate;
+            const customTemplate = settings?.export?.exportTemplate;
             
             // 如果有自定义模板且不为空，使用模板解析方式
             if (customTemplate && customTemplate.trim() !== '') {
@@ -116,7 +121,7 @@ export class ExportService {
         const content = contentParts.join("\n");
         
         // 获取导出路径并创建文件
-        const exportPath = hiNotePlugin?.settings?.export?.exportPath || '';
+        const exportPath = settings?.export?.exportPath || '';
         const fileName = `Selected Highlights ${window.moment().format("YYYYMMDDHHmmss")}`;
         
         return await this.createExportFile(fileName, content, exportPath);
@@ -138,8 +143,8 @@ export class ExportService {
         const content = await this.generateExportContent(sourceFile, highlights);
 
         // 获取导出路径并创建文件
-        const hiNotePlugin = this.getPluginInstance();
-        const exportPath = hiNotePlugin?.settings?.export?.exportPath || '';
+        const settings = this.getPluginSettings();
+        const exportPath = settings?.export?.exportPath || '';
         const fileName = `${sourceFile.basename} - HiNote ${window.moment().format("YYYYMMDDHHmmss")}`;
         
         return await this.createExportFile(fileName, content, exportPath);
@@ -201,11 +206,10 @@ export class ExportService {
      * 生成导出内容
      */
     private async generateExportContent(file: TFile, highlights: HighlightInfo[]): Promise<string> {
-        // 获取插件实例和设置
-        const hiNotePlugin = this.getPluginInstance();
+        const settings = this.getPluginSettings();
         
         // 检查是否有自定义模板
-        const customTemplate = hiNotePlugin?.settings?.export?.exportTemplate;
+        const customTemplate = settings?.export?.exportTemplate;
         
         // 如果有自定义模板且不为空，使用模板解析方式
         if (customTemplate && customTemplate.trim() !== '') {

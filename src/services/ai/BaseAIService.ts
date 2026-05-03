@@ -62,13 +62,13 @@ export abstract class BaseAIService implements IAIService {
      * 格式化请求体
      * 子类必须实现，将统一的消息格式转换为特定 API 的格式
      */
-    protected abstract formatRequestBody(messages: AIMessage[]): any;
+    protected abstract formatRequestBody(messages: AIMessage[]): Record<string, unknown>;
 
     /**
      * 解析响应
      * 子类必须实现，从 API 响应中提取文本内容
      */
-    protected abstract parseResponse(response: any): string;
+    protected abstract parseResponse(response: unknown): string;
 
     /**
      * 获取提供商类型
@@ -170,7 +170,7 @@ export abstract class BaseAIService implements IAIService {
      * 错误处理
      * 将原始错误包装为 AIServiceError
      */
-    protected handleError(error: any): AIServiceError {
+    protected handleError(error: unknown): AIServiceError {
         // 如果已经是 AIServiceError，直接返回
         if (error instanceof AIServiceError) {
             return error;
@@ -178,7 +178,7 @@ export abstract class BaseAIService implements IAIService {
 
         // 判断错误类型
         let code = AIErrorCode.API_ERROR;
-        let message = error.message || 'Unknown error';
+        const message = error instanceof Error ? error.message : 'Unknown error';
 
         if (message.includes('connect') || message.includes('ECONNREFUSED')) {
             code = AIErrorCode.CONNECTION_FAILED;
@@ -202,13 +202,13 @@ export abstract class BaseAIService implements IAIService {
      * 验证响应格式
      * 通用的响应验证辅助方法
      */
-    protected validateResponse(response: any, path: string[]): boolean {
-        let current = response;
+    protected validateResponse(response: unknown, path: string[]): boolean {
+        let current: unknown = response;
         for (const key of path) {
             if (!current || typeof current !== 'object' || !(key in current)) {
                 return false;
             }
-            current = current[key];
+            current = (current as Record<string, unknown>)[key];
         }
         return true;
     }

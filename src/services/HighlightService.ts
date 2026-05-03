@@ -1,11 +1,13 @@
 import { App, TFile } from "obsidian";
-import { HighlightInfo } from '../types';
-import { HighlightInfo as HiNote } from '../types';
+import { HighlightInfo } from '../types/highlight';
+import { HighlightInfo as HiNote } from '../types/highlight';
 import { HighlightRepository } from '../repositories/HighlightRepository';
-import { HighlightExtractor } from './highlight/HighlightExtractor';
-import { HighlightMatcher } from './highlight/HighlightMatcher';
-import { HighlightIndexer } from './highlight/HighlightIndexer';
-import { HighlightBatchOps } from './highlight/HighlightBatchOps';
+import {
+    HighlightBatchOps,
+    HighlightExtractor,
+    HighlightIndexer,
+    HighlightMatcher
+} from './highlight';
 
 /**
  * 高亮服务 - Facade 门面模式

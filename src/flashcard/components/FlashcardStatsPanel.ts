@@ -60,7 +60,7 @@ export class FlashcardStatsPanel {
      */
     private renderHeatmap() {
         // 直接在主容器中创建热力图
-        this.createHeatmap(this.containerEl, (this.fsrsManager as any).storage?.dailyStats || []);
+        this.createHeatmap(this.containerEl, this.fsrsManager.getDailyStats());
     }
     
     /**

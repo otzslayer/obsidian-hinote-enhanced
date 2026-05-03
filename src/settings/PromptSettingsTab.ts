@@ -1,14 +1,13 @@
 import { Setting, TextAreaComponent, Notice } from 'obsidian';
 import { setIcon } from 'obsidian';
-import { HiNoteView } from '../core/HiNoteView';
-import { PluginSettings } from '../types';
 import { t } from '../i18n'; // 导入新的翻译系统
+import type CommentPlugin from '../../main';
 
 export class PromptSettingsTab {
-    private plugin: any;
+    private plugin: CommentPlugin;
     private containerEl: HTMLElement;
 
-    constructor(plugin: any, containerEl: HTMLElement) {
+    constructor(plugin: CommentPlugin, containerEl: HTMLElement) {
         this.plugin = plugin;
         this.containerEl = containerEl;
     }
@@ -93,12 +92,6 @@ export class PromptSettingsTab {
                 newPromptSection.remove();
                 this.displayPromptList(container);
                 new Notice(t('Prompt added'));
-
-                // 更新所有 AI 下拉菜单
-                const commentView = this.plugin.app.workspace.getLeavesOfType('hinote-view')[0]?.view as HiNoteView;
-                if (commentView) {
-                    commentView.updateAIDropdowns();
-                }
             }
         };
 
@@ -199,12 +192,6 @@ export class PromptSettingsTab {
                 delete this.plugin.settings.ai.prompts[name];
                 await this.plugin.saveSettings();
                 promptItem.remove();
-
-                // 更新所有 AI 下拉菜单
-                const commentView = this.plugin.app.workspace.getLeavesOfType('hinote-view')[0]?.view as HiNoteView;
-                if (commentView) {
-                    commentView.updateAIDropdowns();
-                }
             };
 
             saveBtn.onclick = async () => {
@@ -222,12 +209,6 @@ export class PromptSettingsTab {
                     // 重新显示列表
                     this.displayPromptList(container);
                     new Notice(t('Prompt updated'));
-
-                    // 更新所有 AI 下拉菜单
-                    const commentView = this.plugin.app.workspace.getLeavesOfType('hinote-view')[0]?.view as HiNoteView;
-                    if (commentView) {
-                        commentView.updateAIDropdowns();
-                    }
                 }
             };
 

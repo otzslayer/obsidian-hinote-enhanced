@@ -1,4 +1,4 @@
-import { HighlightInfo, CommentItem } from "../../types";
+import { HighlightInfo, CommentItem } from "../../types/highlight";
 import { TFile } from "obsidian";
 import type CommentPlugin from "../../../main";
 

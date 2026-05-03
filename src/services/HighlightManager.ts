@@ -1,5 +1,5 @@
 import { App, TFile } from 'obsidian';
-import { HighlightInfo as HiNote } from '../types';
+import { HighlightInfo as HiNote } from '../types/highlight';
 import { IHighlightRepository } from '../repositories/IHighlightRepository';
 import { EventManager } from './EventManager';
 import { HighlightService } from './HighlightService';

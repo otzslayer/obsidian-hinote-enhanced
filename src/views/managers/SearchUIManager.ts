@@ -1,8 +1,8 @@
 import { TFile } from "obsidian";
-import { HighlightInfo } from "../../types";
+import { HighlightInfo } from "../../types/highlight";
 import CommentPlugin from "../../../main";
 import { SearchUIHelper } from "./SearchUIHelper";
-import { SearchService } from "../../services/search/SearchService";
+import { SearchService } from "../../services/search";
 
 /**
  * 搜索 UI 管理器

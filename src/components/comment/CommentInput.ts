@@ -1,16 +1,16 @@
-import { CommentItem, HighlightInfo } from "../../types";
-import { t } from "../../i18n";
-import { Platform, Notice, setIcon } from "obsidian";
-import { AIServiceManager } from "../../services/ai";
+import { CommentItem, HighlightInfo } from "../../types/highlight";
+import { Platform } from "obsidian";
 import type CommentPlugin from "../../../main";
+import { InlineAICommentHandler } from "./InlineAICommentHandler";
+import { CommentInputSaveController } from "./CommentInputSaveController";
+import { CommentInputActionBar } from "./CommentInputActionBar";
 
 export class CommentInput {
     private textarea: HTMLTextAreaElement;
     private actionHint: HTMLElement;
     private cancelEdit: () => void = () => {};
-    private isProcessing = false;
-    private isAIProcessing = false;
-    private originalContent = '';
+    private inlineAI: InlineAICommentHandler;
+    private saveController: CommentInputSaveController;
     private boundHandleOutsideClick: (e: MouseEvent) => void;
     private commentEl: Element | null = null; // 保存批注元素引用，用于移除 editing 类
 
@@ -26,6 +26,19 @@ export class CommentInput {
         }
     ) {
         this.boundHandleOutsideClick = this.handleOutsideClick.bind(this);
+        this.inlineAI = new InlineAICommentHandler({
+            plugin: this.plugin,
+            highlight: this.highlight,
+            existingComment: this.existingComment,
+            getTextarea: () => this.textarea,
+            getActionHint: () => this.actionHint,
+            resizeTextarea: () => this.autoResizeTextarea()
+        });
+        this.saveController = new CommentInputSaveController({
+            getTextarea: () => this.textarea,
+            onSave: this.options.onSave,
+            onSaved: () => this.destroy()
+        });
         document.addEventListener('click', this.boundHandleOutsideClick);
         
         // 通知 HighlightCard 当前正在显示输入框
@@ -81,51 +94,10 @@ export class CommentInput {
             footer.addClass('hi-note-hidden');
         }
 
-        // 添加快捷键提示和删除按钮
-        this.actionHint = commentEl.createEl('div', {
-            cls: 'hi-note-actions-hint'
-        });
-        
-        // 阻止操作提示区域的点击事件冒泡
-        this.actionHint.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-
-        // 设置快捷键提示或保存按钮
-        this.setupActionHint();
-
-        // 删除按钮
-        if (this.options.onDelete) {
-            const deleteLink = this.actionHint.createEl('div', {
-                cls: 'hi-note-delete-link',
-                text: t('Delete comment')
-            });
-
-            deleteLink.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                
-                if (this.isProcessing) return;
-                this.isProcessing = true;
-                
-                // 先移除事件监听器，避免在删除过程中触发
-                document.removeEventListener('click', this.boundHandleOutsideClick);
-                
-                try {
-                    await this.options.onDelete?.();
-                    
-                    // 删除成功后销毁输入框
-                    // 使用 setTimeout 延迟销毁，确保 DOM 更新完成
-                    setTimeout(() => {
-                        this.destroySafe();
-                    }, 0);
-                } catch (error) {
-                    console.error('删除评论失败:', error);
-                    // 如果删除失败，恢复事件监听器
-                    document.addEventListener('click', this.boundHandleOutsideClick);
-                    this.isProcessing = false;
-                }
-            });
-        }
+        this.actionHint = new CommentInputActionBar(commentEl as HTMLElement, {
+            onSave: async () => await this.handleSave(),
+            onDelete: this.options.onDelete ? async () => await this.handleDelete() : undefined
+        }).render();
 
         this.setupKeyboardEvents(contentEl, footer || undefined);
 
@@ -170,18 +142,9 @@ export class CommentInput {
             commentsList.insertBefore(inputSection, commentsList.firstChild);
         }
 
-        // 添加快捷键提示和操作区域
-        this.actionHint = inputSection.createEl('div', {
-            cls: 'hi-note-actions-hint'
-        });
-        
-        // 阻止操作提示区域的点击事件冒泡
-        this.actionHint.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-
-        // 设置快捷键提示或保存按钮
-        this.setupActionHint();
+        this.actionHint = new CommentInputActionBar(inputSection, {
+            onSave: async () => await this.handleSave()
+        }).render();
 
         this.setupKeyboardEvents();
         
@@ -203,7 +166,7 @@ export class CommentInput {
             // Tab键触发AI内联生成
             if (e.key === 'Tab') {
                 e.preventDefault();
-                await this.handleInlineAI();
+                await this.inlineAI.generate();
                 return;
             }
             
@@ -220,22 +183,7 @@ export class CommentInput {
                 // 非移动端上 Enter 键为保存
                 e.preventDefault();
                 
-                if (this.isProcessing) return;
-                
-                const content = this.textarea.value.trim();
-                if (!content) return;
-
-                this.isProcessing = true;
-                this.textarea.disabled = true;
-
-                try {
-                    await this.options.onSave(content);
-                    // 保存成功后销毁
-                    this.destroy();
-                } catch (error) {
-                    this.textarea.disabled = false;
-                    this.isProcessing = false;
-                }
+                await this.saveController.saveCurrentContent();
             }
         };
     }
@@ -265,7 +213,7 @@ export class CommentInput {
 
 
     private handleOutsideClick(e: MouseEvent) {
-        if (!this.textarea || this.isProcessing) return;
+        if (!this.textarea || this.saveController.isProcessing()) return;
         
         const clickedElement = e.target as HTMLElement;
         const isOutside = !this.textarea.contains(clickedElement) && 
@@ -276,133 +224,14 @@ export class CommentInput {
             e.preventDefault();
             e.stopPropagation();
             
-            this.isProcessing = true;
             const content = this.textarea.value.trim();
             
             if (content) {
                 // 有内容时保存
-                this.textarea.disabled = true;
-                
-                this.options.onSave(content)
-                    .then(() => {
-                        this.destroy();
-                    })
-                    .catch(() => {
-                        this.textarea.disabled = false;
-                        this.isProcessing = false;
-                    });
+                void this.saveController.saveCurrentContent();
             } else {
                 // 没有内容时取消
                 this.cancel();
-            }
-        }
-    }
-
-    /**
-     * 处理AI内联生成功能
-     */
-    private async handleInlineAI() {
-        const userPrompt = this.textarea.value.trim();
-        if (!userPrompt) {
-            new Notice(t('Please enter AI instruction'));
-            return;
-        }
-
-        // 如果已经在处理AI请求，则忽略
-        if (this.isAIProcessing) {
-            return;
-        }
-
-        // 保存原始内容，以便出错时恢复
-        this.originalContent = userPrompt;
-        
-        try {
-            this.setAILoading(true);
-            
-            // 获取高亮文本
-            const highlightText = this.highlight.text || '';
-            
-            // 用户输入作为指令，高亮文本默认作为上下文
-            // 如果用户输入中包含 {{highlight}} 占位符，则会被替换
-            // 否则，高亮文本会自动作为上下文传递给 AI
-            const aiService = new AIServiceManager(this.plugin.settings.ai);
-            const response = await aiService.generateResponse(
-                userPrompt,
-                highlightText,
-                this.existingComment?.content || ''
-            );
-            
-            // 替换输入框内容为AI响应
-            this.textarea.value = response;
-            this.autoResizeTextarea();
-            
-            // 显示成功提示
-            new Notice(t('AI response generated'));
-            
-        } catch (error) {
-            console.error('AI内联生成失败:', error);
-            
-            // 恢复原始内容
-            this.textarea.value = this.originalContent;
-            
-            // 显示错误提示
-            new Notice(t(`AI generation failed: ${error.message}`));
-            
-        } finally {
-            this.setAILoading(false);
-        }
-    }
-
-    /**
-     * 设置AI加载状态
-     */
-    private setAILoading(loading: boolean) {
-        this.isAIProcessing = loading;
-        
-        if (loading) {
-            // 禁用输入框并显示加载状态
-            this.textarea.disabled = true;
-            this.textarea.style.opacity = '0.6';
-            
-            // 更新操作提示，只显示加载图标
-            if (this.actionHint) {
-                // 隐藏删除按钮（编辑模式下），使用 visibility 保持占位避免布局闪动
-                const deleteLink = this.actionHint.querySelector('.hi-note-delete-link') as HTMLElement;
-                if (deleteLink) {
-                    deleteLink.style.visibility = 'hidden';
-                }
-                
-                // 显示加载图标
-                const loadingHint = this.actionHint.querySelector('.ai-loading-hint');
-                if (!loadingHint) {
-                    const hintEl = this.actionHint.createEl('span', {
-                        cls: 'ai-loading-hint'
-                    });
-                    
-                    // 添加加载图标
-                    const loadingIcon = hintEl.createEl('span', {
-                        cls: 'ai-loading-icon'
-                    });
-                    setIcon(loadingIcon, 'loader');
-                }
-            }
-        } else {
-            // 恢复输入框状态
-            this.textarea.disabled = false;
-            this.textarea.style.opacity = '1';
-            
-            // 移除加载提示
-            if (this.actionHint) {
-                const loadingHint = this.actionHint.querySelector('.ai-loading-hint');
-                if (loadingHint) {
-                    loadingHint.remove();
-                }
-                
-                // 恢复显示删除按钮（编辑模式下）
-                const deleteLink = this.actionHint.querySelector('.hi-note-delete-link') as HTMLElement;
-                if (deleteLink) {
-                    deleteLink.style.visibility = '';
-                }
             }
         }
     }
@@ -435,7 +264,7 @@ export class CommentInput {
         
         // 清理事件监听器
         document.removeEventListener('click', this.boundHandleOutsideClick);
-        this.isProcessing = false;
+        this.saveController.reset();
         
         // 调用取消回调
         this.options.onCancel();
@@ -450,7 +279,7 @@ export class CommentInput {
         
         // 清理事件监听器
         document.removeEventListener('click', this.boundHandleOutsideClick);
-        this.isProcessing = false;
+        this.saveController.reset();
         
         // 移除 textarea
         if (this.textarea && this.textarea.parentElement) {
@@ -480,7 +309,7 @@ export class CommentInput {
             
             // 清理事件监听器
             document.removeEventListener('click', this.boundHandleOutsideClick);
-            this.isProcessing = false;
+            this.saveController.reset();
             
             // 检查 textarea 是否仍在 DOM 中
             if (this.textarea && this.textarea.isConnected && this.textarea.parentElement) {
@@ -504,47 +333,27 @@ export class CommentInput {
     }
     
     /**
-     * 设置操作提示区域（快捷键提示或保存按钮）
-     */
-    private setupActionHint() {
-        if (!Platform.isMobile) {
-            // 非移动端显示快捷键提示
-            this.actionHint.createEl('span', {
-                cls: 'hi-note-hint',
-                text: t('Tab AI, Shift + Enter Wrap, Enter Save')
-            });
-        } else {
-            // 移动端显示保存按钮
-            const saveButton = this.actionHint.createEl('button', {
-                cls: 'hi-note-save-button',
-                text: t('Submit')
-            });
-            
-            saveButton.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                await this.handleSave();
-            });
-        }
-    }
-    
-    /**
      * 处理保存逻辑
      */
     private async handleSave() {
-        if (this.isProcessing) return;
-        
-        const content = this.textarea.value.trim();
-        if (!content) return;
-        
-        this.isProcessing = true;
-        this.textarea.disabled = true;
-        
+        await this.saveController.saveCurrentContent();
+    }
+
+    private async handleDelete(): Promise<void> {
+        if (!this.saveController.startProcessing()) return;
+
+        document.removeEventListener('click', this.boundHandleOutsideClick);
+
         try {
-            await this.options.onSave(content);
-            this.destroy();
+            await this.options.onDelete?.();
+
+            setTimeout(() => {
+                this.destroySafe();
+            }, 0);
         } catch (error) {
-            this.isProcessing = false;
-            this.textarea.disabled = false;
+            console.error('删除评论失败:', error);
+            document.addEventListener('click', this.boundHandleOutsideClick);
+            this.saveController.reset();
         }
     }
     

@@ -1,16 +1,13 @@
 import { WidgetType } from "@codemirror/view";
 import type { Plugin } from "obsidian";
-import { HighlightInfo as HiNote, CommentItem } from "../../types";
-import { setIcon, MarkdownRenderer, Component, App } from "obsidian";
+import { HighlightInfo as HiNote } from "../../types/highlight";
+import { CommentWidgetHelper } from "./CommentWidgetHelper";
 
 export class CommentWidget extends WidgetType {
-    private app: App;
-    private comments: CommentItem[];
     private resizeListener: (() => void) | null = null;
     
     // 常量定义
     private static readonly POSITION_MATCH_THRESHOLD = 30;
-    private static readonly MAX_TOOLTIP_COMMENTS = 3;
     
     /**
      * 构造函数
@@ -24,8 +21,6 @@ export class CommentWidget extends WidgetType {
         private onClick: () => void
     ) {
         super();
-        this.app = this.plugin.app;
-        this.comments = this.highlight.comments || [];
     }
 
     /**
@@ -81,208 +76,37 @@ export class CommentWidget extends WidgetType {
             wrapper.setAttribute('data-highlight-id', this.highlight.id);
         }
         
-        this.createButton(wrapper);
+        this.setupButton(wrapper);
         return wrapper;
     }
 
     /**
-     * 创建评论按钮
+     * 创建评论按钮，并接入共享的提示与点击行为
      * @param wrapper 父容器元素
      */
-    private createButton(wrapper: HTMLElement) {
-        const hasComments = this.comments.length > 0;
-        
-        // 创建按钮，如果没有评论，添加隐藏类
-        // 添加 clickable-icon 类以避免在平板模式下被拉伸
-        const button = wrapper.createEl("button", {
-            cls: `hi-note-button clickable-icon ${!hasComments ? 'hi-note-button-hidden' : ''}`
-        });
+    private setupButton(wrapper: HTMLElement): void {
+        const comments = this.highlight.comments || [];
+        const hasComments = comments.length > 0;
+        const button = CommentWidgetHelper.createButton(wrapper, hasComments);
+        const iconContainer = button.querySelector('.hi-note-icon-container') as HTMLElement | null;
 
-        const iconContainer = this.createIconContainer(button);
-        
-        // 创建工具提示，无论是否有评论
-        const tooltipData = this.createTooltip(wrapper);
-        
-        // 设置事件监听器
-        this.setupEventListeners(wrapper, button, tooltipData);
-    }
-
-    /**
-     * 创建评论图标和评论数量标签
-     * @param button 评论按钮元素
-     * @returns 图标容器元素
-     */
-    private createIconContainer(button: HTMLElement) {
-        const iconContainer = button.createEl("span", {
-            cls: "hi-note-icon-container"
-        });
-
-        // 使用 setIcon API 替代内联 SVG
-        setIcon(iconContainer, "message-circle");
-
-        // 如果有评论，显示评论数量
-        if (this.comments.length > 0) {
-            iconContainer.createEl("span", {
-                cls: "hi-note-count",
-                text: this.comments.length.toString()
-            });
+        if (iconContainer) {
+            CommentWidgetHelper.addCommentCount(iconContainer, comments.length);
         }
 
-        return iconContainer;
-    }
+        const tooltip = CommentWidgetHelper.createTooltip(this.plugin.app, this.highlight);
 
-    /**
-     * 创建评论预览工具提示
-     * @param wrapper 父容器元素
-     * @returns 工具提示相关的数据和更新位置的函数
-     */
-    private createTooltip(wrapper: HTMLElement) {
-        const tooltip = document.createElement("div");
-        tooltip.addClass("hi-note-tooltip", "hi-note-tooltip-hidden");
-        
-        // 添加高亮 ID 作为工具提示的标识符
-        if (this.highlight.id) {
-            tooltip.setAttribute("data-highlight-id", this.highlight.id);
-        }
-
-        const commentsList = tooltip.createEl("div", {
-            cls: "hi-note-tooltip-list"
-        });
-
-        // 渲染评论到工具提示中
-        this.renderTooltipContent(commentsList, tooltip);
-
-        document.body.appendChild(tooltip);
-
-        // 创建更新工具提示位置的函数
-        const updateTooltipPosition = () => {
-            const buttonRect = wrapper.getBoundingClientRect();
-            tooltip.style.position = 'fixed';
-            tooltip.style.top = `${buttonRect.bottom + 4}px`;
-            tooltip.style.left = `${buttonRect.right - tooltip.offsetWidth}px`;
-        };
-
-        return { tooltip, updateTooltipPosition };
-    }
-
-    /**
-     * 渲染工具提示的内容
-     * @param commentsList 评论列表容器
-     * @param tooltip 工具提示容器
-     */
-    private renderTooltipContent(commentsList: HTMLElement, tooltip: HTMLElement) {
-        if (this.comments.length === 0) return;
-
-        // 最多显示指定数量的评论
-        this.comments.slice(0, CommentWidget.MAX_TOOLTIP_COMMENTS).forEach(comment => {
-            const commentItem = commentsList.createEl("div", {
-                cls: "hi-note-tooltip-item"
-            });
-            
-            // 显示评论内容 - 使用 Markdown 渲染
-            const contentEl = commentItem.createEl("div", {
-                cls: "hi-note-tooltip-content markdown-rendered"
-            });
-            
-            // 异步渲染 Markdown 内容
-            this.renderMarkdownContent(contentEl, comment.content);
-            
-            // 显示评论时间
-            commentItem.createEl("div", {
-                cls: "hi-note-tooltip-time",
-                text: new Date(comment.createdAt).toLocaleString()
-            });
-        });
-
-        // 如果评论数超过最大显示数量，显示剩余数量
-        if (this.comments.length > CommentWidget.MAX_TOOLTIP_COMMENTS) {
-            tooltip.createEl("div", {
-                cls: "hi-note-tooltip-more",
-                text: `还有 ${this.comments.length - CommentWidget.MAX_TOOLTIP_COMMENTS} 条评论...`
-            });
-        }
-    }
-
-    /**
-     * 设置事件监听器
-     * @param wrapper 父容器元素
-     * @param button 评论按钮元素
-     * @param tooltipData 工具提示相关的数据
-     */
-    private setupEventListeners(wrapper: HTMLElement, button: HTMLElement, tooltipData: { tooltip: HTMLElement, updateTooltipPosition: () => void }) {
-        const { tooltip, updateTooltipPosition } = tooltipData;
-
-        // 如果有评论，添加工具提示的显示/隐藏事件，并保持按钮始终可见
-        if (this.comments.length > 0) {
+        if (hasComments) {
             button.removeClass("hi-note-button-hidden");
-            
-            button.addEventListener("mouseenter", () => {
-                tooltip.removeClass("hi-note-tooltip-hidden");
-                updateTooltipPosition();
-            });
-
-            button.addEventListener("mouseleave", () => {
-                tooltip.addClass("hi-note-tooltip-hidden");
-            });
+            CommentWidgetHelper.setupTooltipEvents(button, wrapper, tooltip);
         } else {
-            // 如果没有评论，默认隐藏按钮
-            button.addClass("hi-note-button-hidden");
-            
-            // 鼠标悬停在高亮区域时显示按钮
-            wrapper.addEventListener("mouseenter", () => {
-                button.removeClass("hi-note-button-hidden");
-            });
-
-            wrapper.addEventListener("mouseleave", () => {
-                button.addClass("hi-note-button-hidden");
-            });
+            CommentWidgetHelper.setupEmptyCommentHover(wrapper, button);
         }
 
-        // 点击按钮时触发评论输入事件
-        button.addEventListener("click", async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            // 隐藏工具提示
-            tooltip.addClass("hi-note-tooltip-hidden");
-            
-            // 调用 onClick 回调，它会处理打开侧边栏和触发 open-comment-input 事件
-            await this.onClick();
-        });
+        CommentWidgetHelper.setupClickEvent(button, tooltip, () => this.onClick());
 
-        // 监听窗口大小改变事件，更新工具提示位置
-        // 保存监听器引用以便在销毁时清理
-        this.resizeListener = updateTooltipPosition;
-        window.addEventListener("resize", this.resizeListener);
-    }
-    
-    /**
-     * 渲染 Markdown 内容
-     * @param containerEl 容器元素
-     * @param content Markdown 文本内容
-     */
-    private async renderMarkdownContent(containerEl: HTMLElement, content: string) {
-        try {
-            // 使用 Obsidian 的 MarkdownRenderer.render 方法渲染 Markdown
-            await MarkdownRenderer.render(
-                this.app,
-                content,
-                containerEl,
-                '',  // 没有关联文件路径
-                new Component()
-            );
-            
-            // 添加自定义样式类以修复可能的样式问题
-            const lists = containerEl.querySelectorAll('ul, ol');
-            lists.forEach(list => {
-                list.addClass('tooltip-markdown-list');
-            });
-        } catch (error) {
-            console.error('Error rendering markdown in tooltip:', error);
-            
-            // 如果渲染失败，回退到纯文本渲染
-            containerEl.textContent = content;
-        }
+        // CodeMirror Widget 有独立 destroy 生命周期，这里保留监听器引用便于卸载。
+        this.resizeListener = CommentWidgetHelper.registerResizePositioning(wrapper, tooltip);
     }
 
     /**
@@ -296,13 +120,7 @@ export class CommentWidget extends WidgetType {
             this.resizeListener = null;
         }
         
-        // 查找并移除对应的工具提示
-        if (this.highlight.id) {
-            const tooltip = document.querySelector(`.hi-note-tooltip[data-highlight-id="${this.highlight.id}"]`);
-            if (tooltip) {
-                tooltip.remove();
-            }
-        }
+        CommentWidgetHelper.removeTooltipsForHighlight(this.highlight);
         
         // 移除 DOM 元素
         dom.remove();

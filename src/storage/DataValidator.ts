@@ -1,19 +1,32 @@
-import { HighlightInfo as HiNote, CommentItem } from '../types';
-import { FlashcardState, FSRSStorage } from '../flashcard/types/FSRSTypes';
+import { HighlightInfo as HiNote, CommentItem } from '../types/highlight';
+
+type JsonRecord = Record<string, unknown>;
+type SanitizedHighlight = Partial<HiNote> & {
+    created?: number;
+    updated?: number;
+};
+type SanitizedComment = Partial<CommentItem> & {
+    created?: number;
+    updated?: number;
+};
 
 /**
  * 数据验证器
  */
 export class DataValidator {
+    private static isRecord(value: unknown): value is JsonRecord {
+        return typeof value === 'object' && value !== null;
+    }
+
     /**
      * 验证高亮数据结构
      * @param data 高亮数据
      * @returns 验证结果
      */
-    static validateHighlightData(data: any): { valid: boolean; errors: string[] } {
+    static validateHighlightData(data: unknown): { valid: boolean; errors: string[] } {
         const errors: string[] = [];
 
-        if (!data || typeof data !== 'object') {
+        if (!this.isRecord(data)) {
             errors.push('数据必须是对象');
             return { valid: false, errors };
         }
@@ -29,14 +42,14 @@ export class DataValidator {
         }
 
         // 验证highlights对象
-        if (!data.highlights || typeof data.highlights !== 'object') {
+        if (!this.isRecord(data.highlights)) {
             errors.push('缺少highlights对象');
             return { valid: false, errors };
         }
 
         // 验证每个高亮
         for (const [id, highlight] of Object.entries(data.highlights)) {
-            const highlightErrors = this.validateHighlight(id, highlight as any);
+            const highlightErrors = this.validateHighlight(id, highlight);
             errors.push(...highlightErrors);
         }
 
@@ -49,10 +62,10 @@ export class DataValidator {
      * @param highlight 高亮数据
      * @returns 错误列表
      */
-    static validateHighlight(id: string, highlight: any): string[] {
+    static validateHighlight(id: string, highlight: unknown): string[] {
         const errors: string[] = [];
 
-        if (!highlight || typeof highlight !== 'object') {
+        if (!this.isRecord(highlight)) {
             errors.push(`高亮 ${id}: 数据必须是对象`);
             return errors;
         }
@@ -92,7 +105,7 @@ export class DataValidator {
             if (!Array.isArray(highlight.comments)) {
                 errors.push(`高亮 ${id}: comments必须是数组`);
             } else {
-                highlight.comments.forEach((comment: any, index: number) => {
+                highlight.comments.forEach((comment: unknown, index: number) => {
                     const commentErrors = this.validateComment(comment, `${id}.comments[${index}]`);
                     errors.push(...commentErrors);
                 });
@@ -108,10 +121,10 @@ export class DataValidator {
      * @param path 路径（用于错误信息）
      * @returns 错误列表
      */
-    static validateComment(comment: any, path: string): string[] {
+    static validateComment(comment: unknown, path: string): string[] {
         const errors: string[] = [];
 
-        if (!comment || typeof comment !== 'object') {
+        if (!this.isRecord(comment)) {
             errors.push(`${path}: 评论数据必须是对象`);
             return errors;
         }
@@ -140,10 +153,10 @@ export class DataValidator {
      * @param data 闪卡数据
      * @returns 验证结果
      */
-    static validateFlashcardData(data: any): { valid: boolean; errors: string[] } {
+    static validateFlashcardData(data: unknown): { valid: boolean; errors: string[] } {
         const errors: string[] = [];
 
-        if (!data || typeof data !== 'object') {
+        if (!this.isRecord(data)) {
             errors.push('闪卡数据必须是对象');
             return { valid: false, errors };
         }
@@ -176,10 +189,10 @@ export class DataValidator {
      * @param data 映射数据
      * @returns 验证结果
      */
-    static validateFileMappingData(data: any): { valid: boolean; errors: string[] } {
+    static validateFileMappingData(data: unknown): { valid: boolean; errors: string[] } {
         const errors: string[] = [];
 
-        if (!data || typeof data !== 'object') {
+        if (!this.isRecord(data)) {
             errors.push('映射数据必须是对象');
             return { valid: false, errors };
         }
@@ -204,8 +217,12 @@ export class DataValidator {
      * @param highlight 原始高亮数据
      * @returns 清理后的高亮数据
      */
-    static sanitizeHighlight(highlight: any): Partial<HiNote> {
-        const sanitized: any = {};
+    static sanitizeHighlight(highlight: unknown): SanitizedHighlight {
+        const sanitized: SanitizedHighlight = {};
+
+        if (!this.isRecord(highlight)) {
+            return sanitized;
+        }
 
         // 必需字段
         if (highlight.text && typeof highlight.text === 'string') {
@@ -248,9 +265,9 @@ export class DataValidator {
         // 处理评论数组
         if (Array.isArray(highlight.comments)) {
             sanitized.comments = highlight.comments
-                .filter((comment: any) => comment && typeof comment === 'object')
-                .map((comment: any) => this.sanitizeComment(comment))
-                .filter((comment: any) => comment.id && comment.content);
+                .filter((comment: unknown) => this.isRecord(comment))
+                .map((comment: unknown) => this.sanitizeComment(comment))
+                .filter((comment: SanitizedComment): comment is CommentItem => Boolean(comment.id && comment.content));
         }
 
         return sanitized;
@@ -261,8 +278,12 @@ export class DataValidator {
      * @param comment 原始评论数据
      * @returns 清理后的评论数据
      */
-    static sanitizeComment(comment: any): Partial<CommentItem> {
-        const sanitized: any = {};
+    static sanitizeComment(comment: unknown): SanitizedComment {
+        const sanitized: SanitizedComment = {};
+
+        if (!this.isRecord(comment)) {
+            return sanitized;
+        }
 
         if (comment.id && typeof comment.id === 'string') {
             sanitized.id = comment.id;

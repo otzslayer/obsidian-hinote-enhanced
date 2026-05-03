@@ -1,5 +1,5 @@
 import { TFile } from 'obsidian';
-import { HighlightInfo as HiNote } from '../types';
+import { HighlightInfo as HiNote } from '../types/highlight';
 
 /**
  * 高亮匹配工具类

@@ -1,16 +1,31 @@
-import { CardGroup, FlashcardState, FlashcardProgress } from '../types/FSRSTypes';
+import { CardGroup, FlashcardState, FlashcardProgress, FSRSStorage } from '../types/FSRSTypes';
 import { IdGenerator } from '../../utils/IdGenerator';
+
+interface CardGroupRepositoryOptions {
+    storage: FSRSStorage;
+    saveStorage: () => Promise<void>;
+    saveStorageDebounced: () => void;
+    emitFlashcardChanged: () => void;
+}
+
+interface LegacyHiCardState {
+    currentGroupId?: string;
+    currentGroupName: string;
+    currentIndex?: number;
+    isFlipped?: boolean;
+    completionMessage?: string | null;
+    groupCompletionMessages?: Record<string, string | null>;
+    groupProgress?: FSRSStorage['uiState']['groupProgress'];
+}
 
 /**
  * 闪卡分组仓库类，负责管理闪卡分组数据
  */
 export class CardGroupRepository {
-    private plugin: any;
-    private storage: any;
+    private storage: FSRSStorage;
     
-    constructor(plugin: any, storage: any) {
-        this.plugin = plugin;
-        this.storage = storage;
+    constructor(private options: CardGroupRepositoryOptions) {
+        this.storage = options.storage;
     }
     
     /**
@@ -69,13 +84,13 @@ export class CardGroupRepository {
         
         // 直接保存一次，确保分组数据被保存
         try {
-            await this.plugin.fsrsManager.saveStoragePublic();
+            await this.options.saveStorage();
         } catch (error) {
             console.error('保存分组数据时出错:', error);
         }
         
         // 触发事件
-        this.plugin.eventManager.emitFlashcardChanged();
+        this.options.emitFlashcardChanged();
         
         return newGroup;
     }
@@ -106,7 +121,7 @@ export class CardGroupRepository {
         }
         
         // 触发事件
-        this.plugin.eventManager.emitFlashcardChanged();
+        this.options.emitFlashcardChanged();
         
         return true;
     }
@@ -125,7 +140,7 @@ export class CardGroupRepository {
         const deletedGroup = this.storage.cardGroups[index];
         
         // 如果当前UI状态使用了这个分组，重置UI状态
-        const uiState = this.storage.uiState;
+        const uiState = this.storage.uiState as LegacyHiCardState;
         
         // 清理UI状态中的分组信息
         if (uiState.currentGroupId === groupId) {
@@ -158,7 +173,7 @@ export class CardGroupRepository {
         this.storage.cardGroups.splice(index, 1);
         
         // 触发事件
-        this.plugin.eventManager.emitFlashcardChanged();
+        this.options.emitFlashcardChanged();
         
         return true;
     }
@@ -229,6 +244,35 @@ export class CardGroupRepository {
         
         return true;
     }
+
+    public cleanupInvalidCardReferences(): number {
+        let cleanedCount = 0;
+
+        if (!this.storage.cardGroups) {
+            return cleanedCount;
+        }
+
+        for (const group of this.storage.cardGroups) {
+            if (!group.cardIds || group.cardIds.length === 0) {
+                continue;
+            }
+
+            const originalLength = group.cardIds.length;
+            group.cardIds = group.cardIds.filter((cardId: string) => Boolean(this.storage.cards?.[cardId]));
+
+            const removedCount = originalLength - group.cardIds.length;
+            if (removedCount > 0) {
+                cleanedCount += removedCount;
+                group.lastUpdated = Date.now();
+            }
+        }
+
+        if (cleanedCount > 0) {
+            this.options.saveStorageDebounced();
+        }
+
+        return cleanedCount;
+    }
     
     /**
      * 获取分组中的所有卡片
@@ -242,10 +286,6 @@ export class CardGroupRepository {
             console.error(`[getCardsByGroupId] 错误: 未找到分组: ${groupId}`);
             return [];
         }
-        
-        
-        // 检查存储中的卡片
-        const allCardIds = Object.keys(this.storage.cards || {});
         
         // 如果分组有 cardIds 数组，直接返回这些卡片
         if (group.cardIds && group.cardIds.length > 0) {
@@ -265,37 +305,8 @@ export class CardGroupRepository {
         
         // 如果没有卡片ID，但有筛选条件，则根据筛选条件获取卡片
         if (group.filter && group.filter.trim().length > 0) {
-            
             const allCards = Object.values(this.storage.cards) as FlashcardState[];
-            const filterConditions = group.filter.split(',').map(f => f.trim()).filter(f => f.length > 0);
-            const wikiLinkRegex = /\[\[([^\]]+)\]\]/;
-            
-            const filteredCards = allCards.filter((card: FlashcardState) => {
-                if (!card.filePath) return false;
-                
-                const filePath = card.filePath.toLowerCase();
-                const fileName = filePath.split('/').pop() || '';
-                const fileNameWithoutExt = fileName.replace(/\.md$/i, '');
-                
-                for (const condition of filterConditions) {
-                    const conditionLower = condition.toLowerCase();
-                    const wikiMatch = conditionLower.match(wikiLinkRegex);
-                    
-                    if (wikiMatch) {
-                        const linkText = wikiMatch[1].toLowerCase();
-                        if (fileNameWithoutExt === linkText || fileName === linkText) {
-                            return true;
-                        }
-                    } else if (filePath.includes(conditionLower) ||
-                              (card.text && card.text.toLowerCase().includes(conditionLower)) ||
-                              (card.answer && card.answer.toLowerCase().includes(conditionLower))) {
-                        return true;
-                    }
-                }
-                return false;
-            });
-            
-            return filteredCards;
+            return allCards.filter((card: FlashcardState) => this.matchesGroupFilter(card, group.filter));
         }
         
         return [];
@@ -334,19 +345,6 @@ export class CardGroupRepository {
     }
     
     /**
-     * 删除卡片引用（从所有分组中移除）
-     * @private
-     */
-    private deleteCardReference(cardId: string): void {
-        // 从所有分组中移除卡片引用
-        for (const group of this.storage.cardGroups) {
-            if (group.cardIds) {
-                group.cardIds = group.cardIds.filter((id: string) => id !== cardId);
-            }
-        }
-    }
-    
-    /**
      * 获取卡片所属的分组
      * @param cardId 卡片ID
      * @returns 卡片所属的分组列表
@@ -357,7 +355,7 @@ export class CardGroupRepository {
         
         return card.groupIds
             .map((id: string) => this.storage.cardGroups.find((g: CardGroup) => g.id === id))
-            .filter((group: CardGroup | undefined) => group !== undefined);
+            .filter((group): group is CardGroup => group !== undefined);
     }
     
     /**
@@ -371,36 +369,8 @@ export class CardGroupRepository {
             return false;
         }
         
-        // 根据筛选条件获取符合条件的卡片
         const allCards = Object.values(this.storage.cards || {}) as FlashcardState[];
-        const filterConditions = group.filter.split(',').map(f => f.trim()).filter(f => f.length > 0);
-        const wikiLinkRegex = /\[\[([^\]]+)\]\]/;
-        
-        // 筛选符合条件的卡片
-        const matchedCards = allCards.filter((card: FlashcardState) => {
-            if (!card.filePath) return false;
-            
-            const filePath = card.filePath.toLowerCase();
-            const fileName = filePath.split('/').pop() || '';
-            const fileNameWithoutExt = fileName.replace(/\.md$/i, '');
-            
-            for (const condition of filterConditions) {
-                const conditionLower = condition.toLowerCase();
-                const wikiMatch = conditionLower.match(wikiLinkRegex);
-                
-                if (wikiMatch) {
-                    const linkText = wikiMatch[1].toLowerCase();
-                    if (fileNameWithoutExt === linkText || fileName === linkText) {
-                        return true;
-                    }
-                } else if (filePath.includes(conditionLower) ||
-                          (card.text && card.text.toLowerCase().includes(conditionLower)) ||
-                          (card.answer && card.answer.toLowerCase().includes(conditionLower))) {
-                    return true;
-                }
-            }
-            return false;
-        });
+        const matchedCards = allCards.filter((card: FlashcardState) => this.matchesGroupFilter(card, group.filter));
         
         // 获取匹配卡片的ID列表
         const matchedCardIds = matchedCards.map(card => card.id);
@@ -421,9 +391,35 @@ export class CardGroupRepository {
         
         if (updated) {
             // 触发保存
-            this.plugin.fsrsManager.saveStorageDebounced();
+            this.options.saveStorageDebounced();
         }
         
         return updated;
+    }
+
+    private matchesGroupFilter(card: FlashcardState, filter: string): boolean {
+        if (!card.filePath) return false;
+
+        const filterConditions = filter.split(',').map(f => f.trim()).filter(f => f.length > 0);
+        const wikiLinkRegex = /\[\[([^\]]+)\]\]/;
+        const filePath = card.filePath.toLowerCase();
+        const fileName = filePath.split('/').pop() || '';
+        const fileNameWithoutExt = fileName.replace(/\.md$/i, '');
+        const cardText = card.text?.toLowerCase() || '';
+        const cardAnswer = card.answer?.toLowerCase() || '';
+
+        return filterConditions.some((condition: string) => {
+            const conditionLower = condition.toLowerCase();
+            const wikiMatch = conditionLower.match(wikiLinkRegex);
+
+            if (wikiMatch) {
+                const linkText = wikiMatch[1].toLowerCase();
+                return fileNameWithoutExt === linkText || fileName === linkText;
+            }
+
+            return filePath.includes(conditionLower)
+                || cardText.includes(conditionLower)
+                || cardAnswer.includes(conditionLower);
+        });
     }
 }

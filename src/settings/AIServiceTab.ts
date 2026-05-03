@@ -1,20 +1,15 @@
 import { Setting } from 'obsidian';
-import { AIProvider } from '../types';
+import type { AIProvider } from '../types/ai';
 import { t } from '../i18n';
-import { OpenAISettings } from './ai/OpenAISettings';
-import { AnthropicSettings } from './ai/AnthropicSettings';
-import { DeepseekSettings } from './ai/DeepseekSettings';
-import { GeminiSettings } from './ai/GeminiSettings';
-import { OllamaSettings } from './ai/OllamaSettings';
-import { SiliconFlowSettings } from './ai/SiliconFlowSettings';
-import { CustomAISettings } from './ai/CustomAISettings';
+import { AI_PROVIDER_LABELS, createAISettingsRenderer } from './ai';
 import { PromptSettingsTab } from './PromptSettingsTab';
+import type CommentPlugin from '../../main';
 
 export class AIServiceTab {
-    private plugin: any;
+    private plugin: CommentPlugin;
     private containerEl: HTMLElement;
 
-    constructor(plugin: any, containerEl: HTMLElement) {
+    constructor(plugin: CommentPlugin, containerEl: HTMLElement) {
         this.plugin = plugin;
         this.containerEl = containerEl;
     }
@@ -25,18 +20,8 @@ export class AIServiceTab {
             .setName('AI service')
             .setDesc(t('Select the AI service provider'))
             .addDropdown(dropdown => {
-                const options: Record<AIProvider, string> = {
-                    'openai': 'OpenAI',
-                    'gemini': 'Gemini',
-                    'anthropic': 'Anthropic',
-                    'deepseek': 'Deepseek',
-                    'siliconflow': 'SiliconFlow',
-                    'ollama': 'Ollama (Local)',
-                    'custom': t('Custom AI Service')
-                };
-
                 return dropdown
-                    .addOptions(options)
+                    .addOptions(this.getProviderOptions())
                     .setValue(this.plugin.settings.ai.provider)
                     .onChange(async (value: AIProvider) => {
                         this.plugin.settings.ai.provider = value;
@@ -47,32 +32,20 @@ export class AIServiceTab {
                     });
             });
 
-        // 根据选择的服务显示相应的设置
-        switch (this.plugin.settings.ai.provider) {
-            case 'openai':
-                new OpenAISettings(this.plugin, this.containerEl).display(this.containerEl);
-                break;
-            case 'gemini':
-                new GeminiSettings(this.plugin, this.containerEl).display(this.containerEl);
-                break;
-            case 'anthropic':
-                new AnthropicSettings(this.plugin, this.containerEl).display(this.containerEl);
-                break;
-            case 'ollama':
-                new OllamaSettings(this.plugin, this.containerEl).display(this.containerEl);
-                break;
-            case 'deepseek':
-                new DeepseekSettings(this.plugin, this.containerEl).display(this.containerEl);
-                break;
-            case 'siliconflow':
-                new SiliconFlowSettings(this.plugin, this.containerEl).display(this.containerEl);
-                break;
-            case 'custom':
-                new CustomAISettings(this.plugin, this.containerEl).display(this.containerEl);
-                break;
-        }
+        createAISettingsRenderer(
+            this.plugin.settings.ai.provider,
+            this.plugin,
+            this.containerEl
+        ).display(this.containerEl);
 
         // 显示 Prompt 设置
         new PromptSettingsTab(this.plugin, this.containerEl).display();
+    }
+
+    private getProviderOptions(): Record<AIProvider, string> {
+        return {
+            ...AI_PROVIDER_LABELS,
+            custom: t(AI_PROVIDER_LABELS.custom)
+        };
     }
 }

@@ -1,4 +1,4 @@
-import { HighlightInfo } from "../../types";
+import { HighlightInfo } from "../../types/highlight";
 import { t } from "../../i18n";
 
 /**

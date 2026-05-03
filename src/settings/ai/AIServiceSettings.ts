@@ -1,6 +1,7 @@
 import { Setting, Notice, setIcon } from 'obsidian';
 import { t } from '../../i18n';
-import { AITestHelper } from '../../services/ai';
+import type CommentPlugin from '../../../main';
+import type { AISettings } from '../../types/ai';
 
 export interface AIModel {
     id: string;
@@ -18,7 +19,7 @@ export interface AIServiceSettings {
  */
 export interface AIProviderConfig {
     /** 设置键名，如 'openai', 'anthropic' 等 */
-    settingsKey: string;
+    settingsKey: Exclude<keyof AISettings, 'provider' | 'prompts'>;
     /** 服务显示名称，如 'OpenAI service' */
     serviceName: string;
     /** 预设模型列表 */
@@ -30,7 +31,7 @@ export interface AIProviderConfig {
     /** Provider URL 的设置键名（有些用 apiAddress，有些用 baseUrl） */
     providerUrlKey?: string;
     /** 默认设置对象（用于初始化） */
-    defaultSettings: Record<string, any>;
+    defaultSettings: ProviderSettingsRecord;
 }
 
 /**
@@ -41,46 +42,40 @@ export interface StandardModelState {
     apiKey: string;
 }
 
+type ProviderSettingValue = string | number | boolean | undefined;
+type ProviderSettingsRecord = Record<string, ProviderSettingValue>;
+
 export abstract class BaseAIServiceSettings implements AIServiceSettings {
-    protected plugin: any;
+    protected plugin: CommentPlugin;
     protected containerEl: HTMLElement;
 
-    constructor(plugin: any, containerEl: HTMLElement) {
+    constructor(plugin: CommentPlugin, containerEl: HTMLElement) {
         this.plugin = plugin;
         this.containerEl = containerEl;
     }
 
     abstract display(containerEl: HTMLElement): void;
 
-    protected createModelDropdown(container: HTMLElement, models: AIModel[], defaultModel: AIModel) {
-        new Setting(container)
-            .setName(t('Model'))
-            .setDesc(t('Select the AI model to use'))
-            .addDropdown(dropdown => {
-                const options = Object.fromEntries(
-                    models.map(model => [model.id, model.name])
-                );
-
-                return dropdown
-                    .addOptions(options)
-                    .setValue(this.plugin.settings.ai.model || defaultModel.id)
-                    .onChange(async (value) => {
-                        this.plugin.settings.ai.model = value;
-                        await this.plugin.saveSettings();
-                    });
-            });
-    }
-
     // ==================== 标准 AI 设置公共方法 ====================
 
     /**
      * 获取指定提供商的设置对象，不存在则用默认值初始化
      */
-    protected getProviderSettings(config: AIProviderConfig): any {
-        if (!this.plugin.settings.ai[config.settingsKey]) {
-            this.plugin.settings.ai[config.settingsKey] = { ...config.defaultSettings };
+    protected getProviderSettings(config: AIProviderConfig): ProviderSettingsRecord {
+        const aiSettings = this.plugin.settings.ai as unknown as Record<string, ProviderSettingsRecord | undefined>;
+        if (!aiSettings[config.settingsKey]) {
+            aiSettings[config.settingsKey] = { ...config.defaultSettings };
         }
-        return this.plugin.settings.ai[config.settingsKey];
+        return aiSettings[config.settingsKey]!;
+    }
+
+    protected getProviderSettingString(
+        config: AIProviderConfig,
+        key: string,
+        fallback = ''
+    ): string {
+        const value = this.getProviderSettings(config)[key];
+        return typeof value === 'string' ? value : fallback;
     }
 
     /**
@@ -89,16 +84,17 @@ export abstract class BaseAIServiceSettings implements AIServiceSettings {
      */
     protected initializeStandardModelState(config: AIProviderConfig): StandardModelState {
         const settings = this.getProviderSettings(config);
+        const savedModelId = this.getProviderSettingString(config, 'model', config.defaultModels[0]?.id || '');
         let selectedModel: AIModel;
 
         if (settings.isCustomModel) {
             selectedModel = {
-                id: settings.model,
-                name: settings.model,
+                id: savedModelId,
+                name: savedModelId,
                 isCustom: true
             };
         } else {
-            const savedModel = config.defaultModels.find(m => m.id === settings.model);
+            const savedModel = config.defaultModels.find(m => m.id === savedModelId);
             selectedModel = savedModel || config.defaultModels[0];
             if (!savedModel) {
                 settings.model = selectedModel.id;
@@ -107,7 +103,7 @@ export abstract class BaseAIServiceSettings implements AIServiceSettings {
 
         return {
             selectedModel,
-            apiKey: settings.apiKey || ''
+            apiKey: this.getProviderSettingString(config, 'apiKey')
         };
     }
 
@@ -322,7 +318,7 @@ export abstract class BaseAIServiceSettings implements AIServiceSettings {
             const currentModel = modelState.selectedModel;
 
             if (!currentModel.isCustom) {
-                const modelId = settings.lastCustomModel || '';
+                const modelId = this.getProviderSettingString(config, 'lastCustomModel');
                 modelState.selectedModel = {
                     id: modelId,
                     name: modelId,
@@ -364,7 +360,7 @@ export abstract class BaseAIServiceSettings implements AIServiceSettings {
             .setDesc(t('Leave it blank, unless you are using a proxy.'))
             .addText(text => text
                 .setPlaceholder(config.providerUrlPlaceholder)
-                .setValue(this.getProviderSettings(config)[urlKey] || '')
+                .setValue(this.getProviderSettingString(config, urlKey))
                 .onChange(async (value) => {
                     const settings = this.getProviderSettings(config);
                     settings[urlKey] = value;

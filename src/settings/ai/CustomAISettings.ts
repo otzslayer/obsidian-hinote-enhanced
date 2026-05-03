@@ -1,12 +1,29 @@
 import { Setting, Notice } from 'obsidian';
 import { BaseAIServiceSettings } from './AIServiceSettings';
-import { AITestHelper } from '../../services/ai';
 import { t } from '../../i18n';
+import type CommentPlugin from '../../../main';
+import type { AISettings } from '../../types/ai';
+
+type CustomApiType = NonNullable<NonNullable<AISettings['custom']>['detectedApiType']>;
+type CustomAISettingsState = NonNullable<AISettings['custom']>;
+
+const DEFAULT_CUSTOM_SETTINGS: CustomAISettingsState = {
+    name: '',
+    apiKey: '',
+    baseUrl: '',
+    model: ''
+};
+
+const CUSTOM_API_TYPE_LABELS: Record<CustomApiType, string> = {
+    openai: 'OpenAI',
+    anthropic: 'Anthropic',
+    gemini: 'Gemini'
+};
 
 export class CustomAISettings extends BaseAIServiceSettings {
-    private detectedApiType: string | null = null;
+    private detectedApiType: CustomApiType | null = null;
 
-    constructor(plugin: any, containerEl: HTMLElement) {
+    constructor(plugin: CommentPlugin, containerEl: HTMLElement) {
         super(plugin, containerEl);
     }
 
@@ -14,6 +31,7 @@ export class CustomAISettings extends BaseAIServiceSettings {
         const settingsContainer = containerEl.createEl('div', {
             cls: 'ai-service-settings'
         });
+        const customSettings = this.getCustomSettings();
 
         // 添加标题和说明
         new Setting(settingsContainer)
@@ -37,19 +55,10 @@ export class CustomAISettings extends BaseAIServiceSettings {
             .setDesc(t('Give your custom AI service a name'))
             .addText(text => text
                 .setPlaceholder(t('e.g., My AI Service'))
-                .setValue(this.plugin.settings.ai.custom?.name || '')
-                .onChange(async (value) => {
-                    if (!this.plugin.settings.ai.custom) {
-                        this.plugin.settings.ai.custom = {
-                            name: '',
-                            apiKey: '',
-                            baseUrl: '',
-                            model: ''
-                        };
-                    }
-                    this.plugin.settings.ai.custom.name = value;
-                    await this.plugin.saveSettings();
-                }));
+                .setValue(customSettings.name)
+                .onChange((value) => this.updateCustomSettings(settings => {
+                    settings.name = value;
+                })));
 
         // API 端点 URL
         new Setting(settingsContainer)
@@ -57,21 +66,14 @@ export class CustomAISettings extends BaseAIServiceSettings {
             .setDesc(t('The base URL of your AI service API'))
             .addText(text => text
                 .setPlaceholder('https://api.example.com/v1')
-                .setValue(this.plugin.settings.ai.custom?.baseUrl || '')
+                .setValue(customSettings.baseUrl)
                 .onChange(async (value) => {
-                    if (!this.plugin.settings.ai.custom) {
-                        this.plugin.settings.ai.custom = {
-                            name: '',
-                            apiKey: '',
-                            baseUrl: '',
-                            model: ''
-                        };
-                    }
-                    this.plugin.settings.ai.custom.baseUrl = value;
-                    // 清除之前检测到的 API 类型，以便重新检测
-                    this.plugin.settings.ai.custom.detectedApiType = undefined;
+                    await this.updateCustomSettings(settings => {
+                        settings.baseUrl = value;
+                        settings.detectedApiType = undefined;
+                    });
                     this.detectedApiType = null;
-                    await this.plugin.saveSettings();
+                    this.renderDetectedApiType(settingsContainer);
                 }));
 
         // API Key
@@ -81,19 +83,10 @@ export class CustomAISettings extends BaseAIServiceSettings {
             .addText(text => {
                 text
                     .setPlaceholder('sk-...')
-                    .setValue(this.plugin.settings.ai.custom?.apiKey || '')
-                    .onChange(async (value) => {
-                        if (!this.plugin.settings.ai.custom) {
-                            this.plugin.settings.ai.custom = {
-                                name: '',
-                                apiKey: '',
-                                baseUrl: '',
-                                model: ''
-                            };
-                        }
-                        this.plugin.settings.ai.custom.apiKey = value;
-                        await this.plugin.saveSettings();
-                    });
+                    .setValue(customSettings.apiKey)
+                    .onChange((value) => this.updateCustomSettings(settings => {
+                        settings.apiKey = value;
+                    }));
                 // 设置为密码输入框
                 text.inputEl.type = 'password';
                 return text;
@@ -118,25 +111,7 @@ export class CustomAISettings extends BaseAIServiceSettings {
                             const apiType = this.plugin.settings.ai.custom?.detectedApiType;
                             if (apiType) {
                                 this.detectedApiType = apiType;
-                                const typeNames: Record<string, string> = {
-                                    'openai': 'OpenAI',
-                                    'anthropic': 'Anthropic',
-                                    'gemini': 'Gemini'
-                                };
-                                
-                                let infoEl = settingsContainer.querySelector('.custom-ai-info');
-                                if (!infoEl) {
-                                    infoEl = settingsContainer.createEl('div', {
-                                        cls: 'setting-item-description custom-ai-info'
-                                    });
-                                    infoEl.createEl('strong', { text: t('Detected API Type: ') });
-                                    infoEl.createEl('span', { text: typeNames[apiType] || apiType });
-                                } else {
-                                    const span = infoEl.querySelector('span');
-                                    if (span) {
-                                        span.textContent = typeNames[apiType] || apiType;
-                                    }
-                                }
+                                this.renderDetectedApiType(settingsContainer);
                             }
                         }
                     } catch (error) {
@@ -151,35 +126,13 @@ export class CustomAISettings extends BaseAIServiceSettings {
             .setDesc(t('The model identifier to use'))
             .addText(text => text
                 .setPlaceholder('gpt-4, claude-3-opus, gemini-pro, etc.')
-                .setValue(this.plugin.settings.ai.custom?.model || '')
-                .onChange(async (value) => {
-                    if (!this.plugin.settings.ai.custom) {
-                        this.plugin.settings.ai.custom = {
-                            name: '',
-                            apiKey: '',
-                            baseUrl: '',
-                            model: ''
-                        };
-                    }
-                    this.plugin.settings.ai.custom.model = value;
-                    await this.plugin.saveSettings();
-                }));
+                .setValue(customSettings.model)
+                .onChange((value) => this.updateCustomSettings(settings => {
+                    settings.model = value;
+                })));
 
         // 显示检测到的 API 类型（如果有）
-        if (this.plugin.settings.ai.custom?.detectedApiType || this.detectedApiType) {
-            const apiType = this.plugin.settings.ai.custom?.detectedApiType || this.detectedApiType;
-            const typeNames: Record<string, string> = {
-                'openai': 'OpenAI',
-                'anthropic': 'Anthropic',
-                'gemini': 'Gemini'
-            };
-            
-            const infoEl = settingsContainer.createEl('div', {
-                cls: 'setting-item-description custom-ai-info'
-            });
-            infoEl.createEl('strong', { text: t('Detected API Type: ') });
-            infoEl.createEl('span', { text: typeNames[apiType] || apiType });
-        }
+        this.renderDetectedApiType(settingsContainer);
 
         // 高级选项（可选的自定义请求头）
         const advancedSetting = new Setting(settingsContainer)
@@ -194,35 +147,27 @@ export class CustomAISettings extends BaseAIServiceSettings {
         advancedSetting.addTextArea(text => {
             text
                 .setPlaceholder('{}')
-                .setValue(this.plugin.settings.ai.custom?.headers 
-                    ? JSON.stringify(this.plugin.settings.ai.custom.headers, null, 2) 
+                .setValue(customSettings.headers
+                    ? JSON.stringify(customSettings.headers, null, 2)
                     : '')
                 .onChange(async (value) => {
                     if (!value.trim()) {
-                        if (this.plugin.settings.ai.custom) {
-                            this.plugin.settings.ai.custom.headers = undefined;
-                            await this.plugin.saveSettings();
-                        }
+                        await this.updateCustomSettings(settings => {
+                            settings.headers = undefined;
+                        });
                         return;
                     }
 
                     try {
-                        const headers = JSON.parse(value);
-                        if (typeof headers !== 'object' || Array.isArray(headers)) {
+                        const headers = JSON.parse(value) as unknown;
+                        if (!headers || typeof headers !== 'object' || Array.isArray(headers)) {
                             new Notice(t('Invalid JSON format. Headers must be an object.'));
                             return;
                         }
-                        
-                        if (!this.plugin.settings.ai.custom) {
-                            this.plugin.settings.ai.custom = {
-                                name: '',
-                                apiKey: '',
-                                baseUrl: '',
-                                model: ''
-                            };
-                        }
-                        this.plugin.settings.ai.custom.headers = headers;
-                        await this.plugin.saveSettings();
+
+                        await this.updateCustomSettings(settings => {
+                            settings.headers = headers as Record<string, string>;
+                        });
                     } catch (error) {
                         new Notice(t('Invalid JSON format'));
                     }
@@ -234,16 +179,53 @@ export class CustomAISettings extends BaseAIServiceSettings {
         });
     }
 
+    private getCustomSettings(): CustomAISettingsState {
+        if (!this.plugin.settings.ai.custom) {
+            this.plugin.settings.ai.custom = { ...DEFAULT_CUSTOM_SETTINGS };
+        }
+
+        return this.plugin.settings.ai.custom;
+    }
+
+    private async updateCustomSettings(
+        update: (settings: CustomAISettingsState) => void
+    ): Promise<void> {
+        update(this.getCustomSettings());
+        await this.plugin.saveSettings();
+    }
+
+    private renderDetectedApiType(container: HTMLElement): void {
+        const infoEl = container.querySelector('.custom-ai-info');
+        const apiType = this.getCustomSettings().detectedApiType || this.detectedApiType;
+
+        if (!apiType) {
+            infoEl?.remove();
+            return;
+        }
+
+        const label = CUSTOM_API_TYPE_LABELS[apiType] || apiType;
+        if (infoEl) {
+            const span = infoEl.querySelector('span');
+            if (span) {
+                span.textContent = label;
+            }
+            return;
+        }
+
+        const newInfoEl = container.createEl('div', {
+            cls: 'setting-item-description custom-ai-info'
+        });
+        newInfoEl.createEl('strong', { text: t('Detected API Type: ') });
+        newInfoEl.createEl('span', { text: label });
+    }
+
     private async testConnection(): Promise<boolean> {
         try {
             // 动态导入 CustomAIService
             const { CustomAIService } = await import('../../services/ai/CustomAIService');
             
             // 创建临时的服务实例进行测试
-            const customSettings = this.plugin.settings.ai.custom;
-            if (!customSettings) {
-                return false;
-            }
+            const customSettings = this.getCustomSettings();
             
             const tempService = new CustomAIService(
                 customSettings.apiKey,

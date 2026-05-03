@@ -1,6 +1,6 @@
-import { App, TFile, Component } from "obsidian";
-import { HighlightCard } from "../../components/highlight/HighlightCard";
-import { HighlightInfo as HiNote } from "../../types";
+import { App, TFile, Component, EventRef } from "obsidian";
+import { HighlightCard } from "../../components/highlight";
+import { HighlightInfo as HiNote } from "../../types/highlight";
 
 /**
  * 事件回调接口
@@ -24,7 +24,7 @@ export interface EventCallbacks {
  */
 export class EventCoordinator {
     private callbacks: EventCallbacks = {};
-    private eventRefs: any[] = [];
+    private eventRefs: EventRef[] = [];
     private customEventHandlers: Map<string, EventListener> = new Map();
 
     constructor(

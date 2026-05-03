@@ -15,6 +15,7 @@ export class SearchUIHelper {
         blur: (e: FocusEvent) => void;
         click: (e: MouseEvent) => void;
     } | null = null;
+    private documentClickTimer: number | null = null;
     
     constructor(searchInput: HTMLInputElement, searchContainer: HTMLElement) {
         this.searchInput = searchInput;
@@ -25,11 +26,7 @@ export class SearchUIHelper {
      * 显示搜索前缀提示
      */
     showSearchPrefixHints() {
-        // 移除可能已存在的提示元素
-        const existingHints = document.querySelector('.search-prefix-hints');
-        if (existingHints) {
-            existingHints.remove();
-        }
+        this.destroy();
         
         // 创建提示容器
         const hintsContainer = document.body.createDiv({
@@ -116,8 +113,9 @@ export class SearchUIHelper {
         this.searchInput.addEventListener('blur', handleBlur);
         
         // 添加点击事件监听器
-        setTimeout(() => {
+        this.documentClickTimer = window.setTimeout(() => {
             document.addEventListener('click', hideHintsOnClickOutside);
+            this.documentClickTimer = null;
         }, 10);
         
         // 存储事件监听器引用
@@ -144,6 +142,11 @@ export class SearchUIHelper {
      * 清理资源
      */
     destroy() {
+        if (this.documentClickTimer !== null) {
+            window.clearTimeout(this.documentClickTimer);
+            this.documentClickTimer = null;
+        }
+
         // 移除提示框
         const existingHints = document.querySelector('.search-prefix-hints');
         if (existingHints) {

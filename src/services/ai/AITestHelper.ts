@@ -82,8 +82,8 @@ export class AITestHelper {
     /**
      * 获取友好的错误消息
      */
-    private static getErrorMessage(error: any): string {
-        const message = error?.message || String(error);
+    private static getErrorMessage(error: unknown): string {
+        const message = error instanceof Error ? error.message : String(error);
 
         // 根据错误类型返回友好的消息
         if (message.includes('401') || message.includes('Unauthorized')) {

@@ -42,7 +42,7 @@ export class AnthropicService extends BaseAIService {
         };
     }
 
-    protected formatRequestBody(messages: AIMessage[]): any {
+    protected formatRequestBody(messages: AIMessage[]): Record<string, unknown> {
         return {
             model: this.model,
             max_tokens: this.maxTokens,
@@ -50,11 +50,12 @@ export class AnthropicService extends BaseAIService {
         };
     }
 
-    protected parseResponse(response: AnthropicResponse): string {
-        if (!response.content?.[0]?.text) {
+    protected parseResponse(response: unknown): string {
+        const data = response as AnthropicResponse;
+        if (!data.content?.[0]?.text) {
             throw new Error('Invalid response format from Anthropic API');
         }
-        return response.content[0].text;
+        return data.content[0].text;
     }
 
     getProviderType(): AIProviderType {

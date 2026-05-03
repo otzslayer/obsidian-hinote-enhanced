@@ -4,7 +4,8 @@
  */
 
 import { IAIService, IAIServiceFactory, AIProviderType, AIServiceError } from './BaseAIService';
-import { AISettings } from '../../types';
+import type { AIMessage, AIModel } from './BaseAIService';
+import type { AISettings } from '../../types/ai';
 import { OpenAIService } from './OpenAIService';
 import { AnthropicService } from './AnthropicService';
 import { GeminiService } from './GeminiService';
@@ -202,7 +203,7 @@ class OllamaServiceAdapter implements IAIService {
         this.model = model;
     }
 
-    async chat(messages: any[]): Promise<string> {
+    async chat(messages: AIMessage[]): Promise<string> {
         if (!this.model) {
             throw AIServiceError.notConfigured(AIProviderType.OLLAMA, 'Model not configured');
         }
@@ -224,7 +225,7 @@ class OllamaServiceAdapter implements IAIService {
         this.model = model;
     }
 
-    async listModels(): Promise<any[]> {
+    async listModels(): Promise<AIModel[]> {
         const models = await this.service.listModels();
         return models.map(name => ({ id: name, name }));
     }

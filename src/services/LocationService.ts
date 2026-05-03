@@ -1,9 +1,8 @@
-import { MarkdownView, Notice, WorkspaceLeaf, EditorSelection } from "obsidian";
-import { HighlightInfo } from "../types";
+import { App, MarkdownView, Notice, TFile, WorkspaceLeaf } from "obsidian";
+import { HighlightInfo } from "../types/highlight";
 
 export class LocationService {
-    constructor(private app: any) {
-    }
+    constructor(private app: App) {}
 
     /**
      * 跳转到指定的高亮位置
@@ -32,7 +31,7 @@ export class LocationService {
         if (!targetLeaf) {
             try {
                 const file = this.app.vault.getAbstractFileByPath(filePath);
-                if (!file) {
+                if (!(file instanceof TFile)) {
                     new Notice("未找到文件");
                     return null;
                 }

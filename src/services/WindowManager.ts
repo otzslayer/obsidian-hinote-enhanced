@@ -24,7 +24,7 @@ export class WindowManager {
             const view = existingLeaf.view;
             
             // 如果在主视图区域，则移动到右侧侧边栏
-            if (view && view instanceof HiNoteView && (view as any).isDraggedToMainView) {
+            if (view && view instanceof HiNoteView && view.isInMainWindowMode()) {
                 // 先分离当前叶子
                 workspace.detachLeavesOfType(VIEW_TYPE_HINOTE);
                 
@@ -39,9 +39,7 @@ export class WindowManager {
                     // 将视图标记为侧边栏模式
                     const newView = newLeaf.view;
                     if (newView && newView instanceof HiNoteView) {
-                        (newView as any).isDraggedToMainView = false;
-                        (newView as any).updateViewLayout();
-                        (newView as any).updateHighlights();
+                        await newView.setMainWindowMode(false, true);
                     }
                 }
             } else {
@@ -62,8 +60,7 @@ export class WindowManager {
             // 确保视图标记为侧边栏模式
             const view = leaf.view;
             if (view && view instanceof HiNoteView) {
-                (view as any).isDraggedToMainView = false;
-                (view as any).updateViewLayout();
+                await view.setMainWindowMode(false);
             }
         }
     }
@@ -98,7 +95,7 @@ export class WindowManager {
             // 将视图标记为主窗口模式
             const view = newLeaf.view;
             if (view && view instanceof HiNoteView) {
-                this.updateViewToMainMode(view as any);
+                await this.updateViewToMainMode(view);
             }
             return;
         }
@@ -115,7 +112,7 @@ export class WindowManager {
             setTimeout(() => {
                 const view = leaf.view;
                 if (view && view instanceof HiNoteView) {
-                    this.updateViewToMainMode(view as any);
+                    void this.updateViewToMainMode(view);
                 }
             }, 100);
         }
@@ -125,13 +122,7 @@ export class WindowManager {
      * 更新视图为主窗口模式
      * @param view 评论视图
      */
-    private updateViewToMainMode(view: any): void {
-        view.isDraggedToMainView = true;
-        // 强制刷新文件列表，确保显示最新的文件和高亮
-        if (view.fileListManager) {
-            view.fileListManager.invalidateCache();
-        }
-        view.updateViewLayout();
-        view.updateHighlights();
+    private async updateViewToMainMode(view: HiNoteView): Promise<void> {
+        await view.setMainWindowMode(true, true);
     }
 }

@@ -11,6 +11,10 @@ export interface HTTPRequestConfig {
     timeout?: number;
 }
 
+interface HTTPErrorBody {
+    error?: string | { message?: string };
+}
+
 /**
  * 基础 HTTP 客户端
  * 为所有 AI 服务提供统一的 HTTP 请求处理
@@ -19,7 +23,7 @@ export class BaseHTTPClient {
     /**
      * 发送 HTTP 请求
      */
-    async request<T = any>(config: HTTPRequestConfig): Promise<T> {
+    async request<T = unknown>(config: HTTPRequestConfig): Promise<T> {
         try {
             const requestConfig: RequestUrlParam = {
                 url: config.url,
@@ -70,7 +74,7 @@ export class BaseHTTPClient {
         
         try {
             // 尝试解析错误响应
-            const errorData = response.json;
+            const errorData = response.json as HTTPErrorBody | undefined;
             if (errorData?.error) {
                 if (typeof errorData.error === 'string') {
                     errorMessage = errorData.error;
@@ -80,7 +84,7 @@ export class BaseHTTPClient {
             } else if (response.text) {
                 errorMessage = response.text;
             }
-        } catch (e) {
+        } catch {
             // 如果无法解析 JSON，使用原始文本
             if (response.text) {
                 errorMessage = response.text;
@@ -93,7 +97,7 @@ export class BaseHTTPClient {
     /**
      * 统一的错误处理
      */
-    private handleError(error: any): Error {
+    private handleError(error: unknown): Error {
         if (error instanceof Error) {
             return error;
         }

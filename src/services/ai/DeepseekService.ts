@@ -1,18 +1,11 @@
-import { BaseAIService, AIMessage, AIServiceConfig, AIProviderType, AIModel } from './BaseAIService';
-
-interface DeepseekResponse {
-    choices: Array<{
-        message: {
-            content: string;
-        };
-    }>;
-}
+import { AIServiceConfig, AIProviderType, AIModel } from './BaseAIService';
+import { OpenAICompatibleService } from './OpenAICompatibleService';
 
 /**
  * Deepseek AI 服务
  * 使用 OpenAI 兼容的 API 格式
  */
-export class DeepseekService extends BaseAIService {
+export class DeepseekService extends OpenAICompatibleService {
     constructor(
         apiKey: string,
         model: string = 'deepseek-chat',
@@ -32,26 +25,13 @@ export class DeepseekService extends BaseAIService {
         return 'https://api.deepseek.com/v1';
     }
 
-    protected getEndpoint(): string {
-        return '/chat/completions';
-    }
-
-    protected formatRequestBody(messages: AIMessage[]): any {
+    protected getChatOptions(): Record<string, unknown> {
         return {
-            model: this.model,
-            messages: messages,
             temperature: this.temperature,
             max_tokens: this.maxTokens,
             frequency_penalty: 0,
             presence_penalty: 0
         };
-    }
-
-    protected parseResponse(response: DeepseekResponse): string {
-        if (!response.choices?.[0]?.message?.content) {
-            throw new Error('Invalid response format from Deepseek API');
-        }
-        return response.choices[0].message.content;
     }
 
     getProviderType(): AIProviderType {

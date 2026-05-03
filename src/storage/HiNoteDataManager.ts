@@ -1,6 +1,6 @@
 import { App, TFile } from 'obsidian';
-import { HighlightInfo as HiNote, CommentItem } from '../types';
-import { FlashcardState, FSRSStorage, FSRSGlobalStats } from '../flashcard/types/FSRSTypes';
+import { HighlightInfo as HiNote, CommentItem } from '../types/highlight';
+import { FlashcardState, FSRSStorage, FSRSGlobalStats } from '../flashcard';
 import { FilePathUtils } from './FilePathUtils';
 import { DataValidator } from './DataValidator';
 
@@ -347,7 +347,7 @@ export class HiNoteDataManager {
         }
 
         if (highlight.comments && highlight.comments.length > 0) {
-            optimized.comments = highlight.comments.map((comment: any) => ({
+            optimized.comments = highlight.comments.map((comment: CommentItem) => ({
                 id: comment.id,
                 content: comment.content,
                 created: comment.createdAt,

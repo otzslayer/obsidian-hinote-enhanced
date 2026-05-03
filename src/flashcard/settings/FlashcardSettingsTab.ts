@@ -1,14 +1,14 @@
 import { Setting, Notice } from 'obsidian';
 import { t } from '../../i18n';
-import { FSRSService } from '../services/FSRSService';
-import { DailyStats } from '../types/FSRSTypes';
+import { FSRSService } from '../services';
+import type CommentPlugin from '../../../main';
 
 export class FlashcardSettingsTab {
-    private plugin: any;
+    private plugin: CommentPlugin;
     private containerEl: HTMLElement;
     private fsrsService: FSRSService;
 
-    constructor(plugin: any, containerEl: HTMLElement) {
+    constructor(plugin: CommentPlugin, containerEl: HTMLElement) {
         this.plugin = plugin;
         this.containerEl = containerEl;
         this.fsrsService = plugin.fsrsManager.fsrsService;
@@ -154,19 +154,8 @@ export class FlashcardSettingsTab {
             .addButton(button => button
                 .setButtonText(t('Reset'))
                 .onClick(async () => {
-                    // 重置今天的学习统计
-                    const todayTimestamp = new Date();
-                    todayTimestamp.setHours(0, 0, 0, 0);
-                    
-                    // 找到并移除今天的统计数据
-                    const dailyStats = this.plugin.fsrsManager.storage.dailyStats;
-                    const todayStatsIndex = dailyStats.findIndex(
-                        (stats: DailyStats) => stats.date === todayTimestamp.getTime()
-                    );
-                    
-                    if (todayStatsIndex >= 0) {
-                        dailyStats.splice(todayStatsIndex, 1);
-                        await this.plugin.fsrsManager.saveStorage();
+                    const wasReset = await this.plugin.fsrsManager.resetTodayStats();
+                    if (wasReset) {
                         new Notice(t('Daily statistics have been reset'));
                     } else {
                         new Notice(t('No statistics to reset for today'));

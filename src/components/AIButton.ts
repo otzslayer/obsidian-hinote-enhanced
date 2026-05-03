@@ -1,7 +1,5 @@
-import { setIcon, Notice, ItemView, Menu, MenuItem, App, MarkdownView, TFile, View } from "obsidian";
+import { setIcon, Notice, Menu, MenuItem } from "obsidian";
 import { AIServiceManager } from "../services/ai";
-import { HiNoteView } from "../core/HiNoteView";
-import { HighlightInfo } from "../types";
 import { t } from "../i18n";
 import CommentPlugin from "../../main";
 
@@ -34,10 +32,9 @@ export interface AIButtonOptions {
  */
 export class AIButton {
     private container: HTMLElement;
-    // 移除dropdown属性
+    private aiContainer: HTMLElement;
     private aiButton: HTMLElement;
     private plugin: CommentPlugin;
-    private boundClickHandler: (e: MouseEvent) => void;
     private contentProvider: ContentProvider;
     private options: AIButtonOptions;
 
@@ -63,29 +60,13 @@ export class AIButton {
         };
 
         this.initButton();
-
-
-        // 注册到 HiNoteView
-        const view = this.plugin.app.workspace.getLeavesOfType('hinote-view')[0]?.view;
-        const commentView = view instanceof HiNoteView ? view : null;
-        if (commentView?.registerAIButton) {
-            commentView.registerAIButton(this);
-        }
     }
 
     /**
      * 销毁组件，清理资源
      */
     destroy() {
-        // 移除事件监听器
-        document.removeEventListener('click', this.boundClickHandler);
-
-        // 从 HiNoteView 注销
-        const view = this.plugin.app.workspace.getLeavesOfType('hinote-view')[0]?.view;
-        const commentView = view instanceof HiNoteView ? view : null;
-        if (commentView?.unregisterAIButton) {
-            commentView.unregisterAIButton(this);
-        }
+        this.aiContainer.detach();
     }
 
     /**
@@ -96,6 +77,7 @@ export class AIButton {
         const aiContainer = this.container.createEl("div", {
             cls: "highlight-ai-container"
         });
+        this.aiContainer = aiContainer;
 
         // 根据位置设置容器类名
         if (this.options.position) {
@@ -108,9 +90,6 @@ export class AIButton {
             attr: { 'aria-label': this.options.buttonLabel }
         });
         setIcon(aiButton, this.options.buttonIcon);
-
-        // 创建下拉菜单，添加到 document.body
-        // 移除自定义dropdown创建代码
 
         // 添加按钮点击事件
         aiButton.addEventListener("click", (e) => {
@@ -148,11 +127,6 @@ export class AIButton {
         const rect = this.aiButton.getBoundingClientRect();
         menu.showAtPosition({ x: rect.left - 92, y: rect.bottom + 8 });
     }
-
-    /**
-     * 更新下拉菜单内容
-     */
-    // 移除updateDropdownContent方法
 
     /**
      * 处理 AI 分析

@@ -1,5 +1,23 @@
 import { Notice, Plugin, requestUrl } from 'obsidian';
 
+interface VaultAdapterWithBasePath {
+    basePath: string;
+}
+
+interface LicenseData {
+    key: string;
+    token: string;
+    features?: string[];
+    vaultId?: string;
+    lastVerified?: number;
+}
+
+interface LicenseVerificationResponse {
+    valid?: boolean;
+    token?: string;
+    features?: string[];
+}
+
 export class LicenseManager {
     private plugin: Plugin;
     private readonly STORAGE_KEY = 'flashcard-license';
@@ -29,8 +47,8 @@ export class LicenseManager {
             // 使用更安全的方式获取路径信息
             let vaultPath = this.plugin.app.vault.getName();
             // 尝试使用 adapter 的其他属性或方法获取更多信息
-            if (adapter && 'basePath' in adapter) {
-                vaultPath = (adapter as any).basePath + '/' + vaultPath;
+            if (this.hasBasePath(adapter)) {
+                vaultPath = adapter.basePath + '/' + vaultPath;
             }
             const platform = navigator.platform || '';
             
@@ -95,9 +113,9 @@ export class LicenseManager {
                 body: JSON.stringify(requestBody)
             });
 
-            const data = response.json;
+            const data = response.json as LicenseVerificationResponse;
 
-            if (data.valid) {
+            if (data.valid && data.token) {
                 // 保存许可证信息
                 const currentData = await this.plugin.loadData() || {};
                 await this.plugin.saveData({
@@ -127,7 +145,7 @@ export class LicenseManager {
     // 检查特定功能是否已激活
     async isFeatureEnabled(feature: string): Promise<boolean> {
         const data = await this.plugin.loadData();
-        const licenseData = data?.[this.STORAGE_KEY];
+        const licenseData = data?.[this.STORAGE_KEY] as LicenseData | undefined;
         return licenseData?.features?.includes(feature) || false;
     }
 
@@ -135,7 +153,7 @@ export class LicenseManager {
     async isActivated(): Promise<boolean> {
         try {
             const data = await this.plugin.loadData();
-            const licenseData = data?.[this.STORAGE_KEY];
+            const licenseData = data?.[this.STORAGE_KEY] as LicenseData | undefined;
             
             // 如果本地没有许可证信息，直接返回 false
             if (!licenseData?.token) {
@@ -175,7 +193,7 @@ export class LicenseManager {
     }
 
     // 向服务器验证许可证
-    private async verifyWithServer(licenseData: any): Promise<boolean> {
+    private async verifyWithServer(licenseData: LicenseData): Promise<boolean> {
         try {
             const vaultId = await this.generateVaultId();
             
@@ -198,7 +216,7 @@ export class LicenseManager {
                 })
             });
 
-            const result = response.json;
+            const result = response.json as LicenseVerificationResponse | null;
             
             if (!result) {
                 // 如果服务器返回错误，但我们有本地令牌，仍然允许使用
@@ -232,5 +250,12 @@ export class LicenseManager {
             // 这样可以确保在网络问题时用户仍能使用插件
             return !!this.licenseToken;
         }
+    }
+
+    private hasBasePath(adapter: unknown): adapter is VaultAdapterWithBasePath {
+        return typeof adapter === 'object'
+            && adapter !== null
+            && 'basePath' in adapter
+            && typeof (adapter as VaultAdapterWithBasePath).basePath === 'string';
     }
 }

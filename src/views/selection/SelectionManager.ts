@@ -1,5 +1,5 @@
-import { HighlightInfo } from "../../types";
-import { HighlightCard } from "../../components/highlight/HighlightCard";
+import { HighlightInfo } from "../../types/highlight";
+import { SelectionBoxController } from "./SelectionBoxController";
 
 /**
  * 选择管理器
@@ -8,33 +8,23 @@ import { HighlightCard } from "../../components/highlight/HighlightCard";
  * - 选择状态管理
  * - 选择框绘制
  */
-/**
- * 选中卡片的数据结构
- */
-interface SelectedCardData {
-    element: HTMLElement;
-    highlight: HighlightInfo;
-}
-
 export class SelectionManager {
     private highlightContainer: HTMLElement;
+    private selectionBoxController: SelectionBoxController;
     // 使用 Map 存储选中的卡片，key 为 DOM 元素，value 为高亮数据
     // 这样不依赖 highlight.id，即使高亮没有 ID 也能正常工作
     private selectedCards: Map<HTMLElement, HighlightInfo> = new Map();
-    
-    // 选择模式相关
-    private isSelectionMode: boolean = false;
-    private selectionBox: HTMLElement | null = null;
-    private selectionStartX: number = 0;
-    private selectionStartY: number = 0;
-    private mouseMoveThreshold = 5;
-    private mouseMoved = false;
     
     // 回调函数
     private onSelectionChangeCallback: ((selectedCount: number) => void) | null = null;
     
     constructor(highlightContainer: HTMLElement) {
         this.highlightContainer = highlightContainer;
+        this.selectionBoxController = new SelectionBoxController({
+            highlightContainer,
+            clearSelection: () => this.clearSelection(),
+            updateSelectedHighlights: () => this.updateSelectedHighlights()
+        });
     }
     
     /**
@@ -48,7 +38,7 @@ export class SelectionManager {
      * 初始化选择功能
      */
     initialize() {
-        this.setupSelectionBox();
+        this.selectionBoxController.initialize();
     }
     
     /**
@@ -62,9 +52,6 @@ export class SelectionManager {
         
         // 清空选中的卡片集合
         this.selectedCards.clear();
-        
-        // 重置选择模式
-        this.isSelectionMode = false;
         
         // 通知选择变化
         this.notifySelectionChange();
@@ -159,174 +146,7 @@ export class SelectionManager {
      * 是否处于选择模式
      */
     isInSelectionMode(): boolean {
-        return this.isSelectionMode;
-    }
-    
-    /**
-     * 设置框选功能
-     */
-    private setupSelectionBox() {
-        // 移除现有的事件监听器，避免重复添加
-        this.highlightContainer.removeEventListener('mousedown', this.handleSelectionStart);
-        
-        // 清理可能残留的其他事件监听器
-        this.cleanupMouseEvents();
-        this.cleanupSelectionEvents();
-        
-        // 添加新的事件监听器
-        this.highlightContainer.addEventListener('mousedown', this.handleSelectionStart);
-    }
-    
-    /**
-     * 处理选择开始
-     */
-    private handleSelectionStart = (e: MouseEvent) => {
-        // 如果点击的是卡片内部元素或闪卡页面元素，不启动框选
-        if ((e.target as HTMLElement).closest('.highlight-card') ||
-            (e.target as HTMLElement).closest('.flashcard-mode') ||
-            (e.target as HTMLElement).closest('.flashcard-add-group') ||
-            (e.target as HTMLElement).closest('.flashcard-group-action')) {
-            return;
-        }
-    
-        // 记录起始位置
-        this.selectionStartX = e.clientX;
-        this.selectionStartY = e.clientY;
-        this.mouseMoved = false;
-    
-        // 添加移动和结束事件监听器
-        document.addEventListener('mousemove', this.handleMouseMove);
-        document.addEventListener('mouseup', this.handleMouseUp);
-    }
-    
-    /**
-     * 处理鼠标移动（检测是否超过阈值）
-     */
-    private handleMouseMove = (e: MouseEvent) => {
-        const dx = e.clientX - this.selectionStartX;
-        const dy = e.clientY - this.selectionStartY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance >= this.mouseMoveThreshold) {
-            this.mouseMoved = true;
-            document.removeEventListener('mousemove', this.handleMouseMove);
-            this.startSelection(e);
-        }
-    }
-    
-    /**
-     * 处理鼠标释放（未移动时）
-     */
-    private handleMouseUp = (e: MouseEvent) => {
-        // 清理事件监听器
-        this.cleanupMouseEvents();
-        
-        if (!this.mouseMoved) {
-            this.clearSelection();
-        }
-    }
-    
-    /**
-     * 开始框选
-     */
-    private startSelection(e: MouseEvent) {
-        // 清理可能残留的鼠标事件监听器
-        this.cleanupMouseEvents();
-        
-        // 检查是否已有选中的卡片，如果有则清除
-        if (this.selectedCards.size > 0) {
-            this.clearSelection();
-        }
-        
-        // 创建选择框
-        this.selectionBox = document.createElement('div');
-        this.selectionBox.className = 'selection-box';
-        this.selectionBox.style.left = `${this.selectionStartX}px`;
-        this.selectionBox.style.top = `${this.selectionStartY}px`;
-        document.body.appendChild(this.selectionBox);
-        
-        // 启动选择模式
-        this.isSelectionMode = true;
-        
-        // 添加移动和结束事件监听器
-        document.addEventListener('mousemove', this.handleSelectionMove);
-        document.addEventListener('mouseup', this.handleSelectionEnd);
-    }
-    
-    /**
-     * 处理框选移动
-     */
-    private handleSelectionMove = (e: MouseEvent) => {
-        if (!this.isSelectionMode || !this.selectionBox) return;
-        
-        const width = e.clientX - this.selectionStartX;
-        const height = e.clientY - this.selectionStartY;
-        
-        // 根据拖动方向设置选择框位置和大小
-        if (width < 0) {
-            this.selectionBox.style.left = `${e.clientX}px`;
-            this.selectionBox.style.width = `${-width}px`;
-        } else {
-            this.selectionBox.style.width = `${width}px`;
-        }
-        
-        if (height < 0) {
-            this.selectionBox.style.top = `${e.clientY}px`;
-            this.selectionBox.style.height = `${-height}px`;
-        } else {
-            this.selectionBox.style.height = `${height}px`;
-        }
-        
-        // 实时选中框内的卡片
-        this.selectCardsInBox();
-    }
-    
-    /**
-     * 处理框选结束
-     */
-    private handleSelectionEnd = (e: MouseEvent) => {
-        if (!this.isSelectionMode) return;
-        
-        // 移除选择框
-        if (this.selectionBox) {
-            this.selectionBox.remove();
-            this.selectionBox = null;
-        }
-        
-        // 结束选择模式
-        this.isSelectionMode = false;
-        
-        // 清理事件监听器
-        this.cleanupSelectionEvents();
-        
-        // 更新选中的高亮列表
-        this.updateSelectedHighlights();
-    }
-    
-    /**
-     * 选中框内的卡片
-     */
-    private selectCardsInBox() {
-        if (!this.selectionBox) return;
-        
-        const boxRect = this.selectionBox.getBoundingClientRect();
-        const cards = this.highlightContainer.querySelectorAll('.highlight-card');
-        
-        cards.forEach(card => {
-            const cardRect = card.getBoundingClientRect();
-            
-            // 检查卡片是否与选择框重叠
-            const overlap = !(boxRect.right < cardRect.left || 
-                            boxRect.left > cardRect.right || 
-                            boxRect.bottom < cardRect.top || 
-                            boxRect.top > cardRect.bottom);
-            
-            if (overlap) {
-                card.addClass('selected');
-            } else if (!document.querySelector('.multi-select-mode')) {
-                card.removeClass('selected');
-            }
-        });
+        return this.selectionBoxController.isInSelectionMode();
     }
     
     /**
@@ -339,37 +159,11 @@ export class SelectionManager {
     }
     
     /**
-     * 清理鼠标事件监听器
-     */
-    private cleanupMouseEvents() {
-        document.removeEventListener('mousemove', this.handleMouseMove);
-        document.removeEventListener('mouseup', this.handleMouseUp);
-    }
-    
-    /**
-     * 清理框选事件监听器
-     */
-    private cleanupSelectionEvents() {
-        document.removeEventListener('mousemove', this.handleSelectionMove);
-        document.removeEventListener('mouseup', this.handleSelectionEnd);
-    }
-    
-    /**
      * 清理资源
      */
     destroy() {
-        // 移除选择框
-        if (this.selectionBox) {
-            this.selectionBox.remove();
-            this.selectionBox = null;
-        }
-        
+        this.selectionBoxController.destroy();
         // 清除选择状态
         this.clearSelection();
-        
-        // 移除所有事件监听器
-        this.highlightContainer.removeEventListener('mousedown', this.handleSelectionStart);
-        this.cleanupMouseEvents();
-        this.cleanupSelectionEvents();
     }
 }

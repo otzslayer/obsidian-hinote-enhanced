@@ -1,0 +1,61 @@
+import CommentPlugin from "../../../main";
+import { HighlightService } from "../../services/HighlightService";
+import { LicenseManager } from "../../services/LicenseManager";
+import { FlashcardViewManager, HighlightListController } from "../../views/highlight";
+import { FileListController, FileListManager } from "../../views/managers";
+import { ViewState } from "../ViewState";
+
+interface FileListSetupOptions {
+    plugin: CommentPlugin;
+    highlightService: HighlightService;
+    licenseManager: LicenseManager;
+    state: ViewState;
+    fileListContainer: HTMLElement;
+    highlightContainer: HTMLElement;
+    searchContainer: HTMLElement;
+    flashcardViewManager: FlashcardViewManager;
+    highlightListController: HighlightListController;
+    updateViewLayout: () => Promise<void>;
+}
+
+export function setupFileList(options: FileListSetupOptions): {
+    fileListManager: FileListManager;
+    fileListController: FileListController;
+} {
+    const {
+        plugin,
+        highlightService,
+        licenseManager,
+        state,
+        fileListContainer,
+        highlightContainer,
+        searchContainer,
+        flashcardViewManager,
+        highlightListController,
+        updateViewLayout
+    } = options;
+
+    const fileListManager = new FileListManager(
+        fileListContainer,
+        plugin,
+        highlightService,
+        licenseManager
+    );
+    const fileListController = new FileListController({
+        state,
+        fileListManager,
+        flashcardViewManager,
+        highlightContainer,
+        searchContainer,
+        licenseManager,
+        updateViewLayout,
+        updateHighlights: async () => await highlightListController.updateHighlights(),
+        updateAllHighlights: async () => await highlightListController.updateAllHighlights()
+    });
+    fileListManager.setCallbacks(fileListController.getCallbacks());
+
+    return {
+        fileListManager,
+        fileListController
+    };
+}

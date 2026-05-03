@@ -1,6 +1,6 @@
 import { TFile, App, Notice } from 'obsidian';
-import { HighlightInfo, CommentItem } from '../../types';
-import { HighlightInfo as HiNote } from '../../types';
+import { HighlightInfo, CommentItem } from '../../types/highlight';
+import { HighlightInfo as HiNote } from '../../types/highlight';
 import { HighlightManager } from '../HighlightManager';
 import { IdGenerator } from '../../utils/IdGenerator';
 import CommentPlugin from '../../../main';

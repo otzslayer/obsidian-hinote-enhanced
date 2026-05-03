@@ -1,5 +1,9 @@
 import { WorkspaceLeaf, TFile, App } from 'obsidian';
 
+interface WorkspaceSplitLike {
+    children: Array<WorkspaceSplitLike | WorkspaceLeaf>;
+}
+
 /**
  * 视图位置检测器
  * 负责检测视图是否在主区域，并处理位置变化
@@ -66,10 +70,10 @@ export class ViewPositionDetector {
     /**
      * 递归检查视图是否在主区域
      */
-    private isViewInMainArea(leaf: WorkspaceLeaf, parent: any): boolean {
+    private isViewInMainArea(leaf: WorkspaceLeaf, parent: unknown): boolean {
         if (!parent) return false;
-        if (parent.children) {
-            return parent.children.some((child: any) => {
+        if (this.hasChildren(parent)) {
+            return parent.children.some((child: WorkspaceSplitLike | WorkspaceLeaf) => {
                 if (child === leaf) {
                     return true;
                 }
@@ -77,6 +81,13 @@ export class ViewPositionDetector {
             });
         }
         return false;
+    }
+
+    private hasChildren(value: unknown): value is WorkspaceSplitLike {
+        return typeof value === 'object'
+            && value !== null
+            && 'children' in value
+            && Array.isArray((value as WorkspaceSplitLike).children);
     }
     
     /**

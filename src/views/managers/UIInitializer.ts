@@ -166,15 +166,4 @@ export class UIInitializer {
         return loadingIndicator;
     }
 
-    /**
-     * 设置多选事件监听
-     */
-    setupMultiSelectListener(
-        container: HTMLElement,
-        onMultiSelect: () => void
-    ): void {
-        container.addEventListener('highlight-multi-select', (e: CustomEvent) => {
-            onMultiSelect();
-        });
-    }
 }

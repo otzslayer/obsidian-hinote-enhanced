@@ -1,6 +1,5 @@
-import { FlashcardState, CardGroup } from '../types/FSRSTypes';
+import { FlashcardState, FSRSStorage } from '../types/FSRSTypes';
 import { FSRSService } from './FSRSService';
-import { HighlightInfo as HiNote } from '../../types';
 
 /**
  * 闪卡工厂类，负责闪卡的创建、更新和管理
@@ -8,10 +7,12 @@ import { HighlightInfo as HiNote } from '../../types';
  */
 export class FlashcardFactory {
     private fsrsService: FSRSService;
-    private plugin: any;
 
-    constructor(plugin: any, fsrsService: FSRSService) {
-        this.plugin = plugin;
+    constructor(
+        private getStorage: () => FSRSStorage,
+        private emitFlashcardChanged: () => void,
+        fsrsService: FSRSService
+    ) {
         this.fsrsService = fsrsService;
     }
     
@@ -19,8 +20,8 @@ export class FlashcardFactory {
      * 获取存储对象
      * @private
      */
-    private get storage(): any {
-        return this.plugin.fsrsManager.storage;
+    private get storage(): FSRSStorage {
+        return this.getStorage();
     }
 
     /**
@@ -72,7 +73,7 @@ export class FlashcardFactory {
         
         // 触发事件，让FSRSManager来处理保存
         try {
-            this.plugin.eventManager.emitFlashcardChanged();
+            this.emitFlashcardChanged();
         } catch (err) {
             console.error('保存卡片时出错:', err);
         }
@@ -108,7 +109,7 @@ export class FlashcardFactory {
             delete this.storage.cards[cardId];
             
             // 触发事件，让FSRSManager来处理保存
-            this.plugin.eventManager.emitFlashcardChanged();
+            this.emitFlashcardChanged();
             
             return true;
         } catch (err) {

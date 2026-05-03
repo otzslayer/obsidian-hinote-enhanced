@@ -1,5 +1,5 @@
 import { setIcon, MarkdownRenderer, Component, App, TFile } from "obsidian";
-import { HighlightInfo } from "../../types";
+import { HighlightInfo } from "../../types/highlight";
 import { t } from "../../i18n";
 import { DragPreview } from './DragPreview';
 
@@ -14,7 +14,7 @@ export class HighlightContent extends Component {
         parentEl: HTMLElement,
         private highlight: HighlightInfo,
         private onHighlightClick: (highlight: HighlightInfo) => Promise<void>,
-        private app: App = (window as any).app,
+        private app: App,
         private isInMainView: boolean = false
     ) {
         super();

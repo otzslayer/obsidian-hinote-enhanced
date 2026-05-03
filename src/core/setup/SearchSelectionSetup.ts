@@ -1,0 +1,82 @@
+import CommentPlugin from "../../../main";
+import { ExportService } from "../../services/ExportService";
+import { HighlightService } from "../../services/HighlightService";
+import { LicenseManager } from "../../services/LicenseManager";
+import { HighlightListController } from "../../views/highlight";
+import { BatchOperationsHandler, SelectionManager } from "../../views/selection";
+import { SearchUIManager } from "../../views/managers";
+import { ViewState } from "../ViewState";
+
+interface SearchAndSelectionOptions {
+    plugin: CommentPlugin;
+    exportService: ExportService;
+    licenseManager: LicenseManager;
+    highlightService: HighlightService;
+    containerEl: HTMLElement;
+    state: ViewState;
+    searchInput: HTMLInputElement;
+    searchLoadingIndicator: HTMLElement;
+    searchContainer: HTMLElement;
+    highlightContainer: HTMLElement;
+    highlightListController: HighlightListController;
+}
+
+export function setupSearchAndSelection(options: SearchAndSelectionOptions): {
+    searchUIManager: SearchUIManager;
+    selectionManager: SelectionManager;
+    batchOperationsHandler: BatchOperationsHandler;
+} {
+    const {
+        plugin,
+        exportService,
+        licenseManager,
+        highlightService,
+        containerEl,
+        state,
+        searchInput,
+        searchLoadingIndicator,
+        searchContainer,
+        highlightContainer,
+        highlightListController
+    } = options;
+
+    const searchUIManager = new SearchUIManager(
+        plugin,
+        searchInput,
+        searchLoadingIndicator,
+        searchContainer
+    );
+    searchUIManager.setCallbacks(
+        async (searchTerm: string, searchType: string) => {
+            await highlightListController.handleSearch(searchTerm, searchType);
+        },
+        () => state.highlights,
+        () => state.currentFile
+    );
+    searchUIManager.initialize();
+
+    const selectionManager = new SelectionManager(highlightContainer);
+    selectionManager.initialize();
+
+    const batchOperationsHandler = new BatchOperationsHandler(
+        plugin,
+        exportService,
+        licenseManager,
+        highlightService,
+        containerEl
+    );
+    selectionManager.setOnSelectionChange((selectedCount) => {
+        batchOperationsHandler.showMultiSelectActions(selectedCount);
+    });
+    batchOperationsHandler.setCallbacks(
+        () => selectionManager.getSelectedHighlights(),
+        () => selectionManager.clearSelection(),
+        async () => await highlightListController.refreshView()
+    );
+
+    return {
+        searchUIManager,
+        selectionManager,
+        batchOperationsHandler
+    };
+}
