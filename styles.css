@@ -95,7 +95,7 @@ settings:
 
 /* 只针对 HiNote 视图移除内边距 */
 .workspace-leaf-content[data-type="hinote-view"] .view-content {
-    padding: 0 !important;
+    padding: 0;
 }
 
 /* Markdown 渲染样式修复 - 移除段落上下边距 */
@@ -104,8 +104,8 @@ settings:
 .flashcard-content.markdown-rendered p,
 .flashcard-paragraph.markdown-rendered p,
 .hi-note-tooltip-content.markdown-rendered p {
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 /* Markdown 渲染样式修复 - 移除 callout 上下边距 */
@@ -114,8 +114,8 @@ settings:
 .flashcard-content.markdown-rendered .callout,
 .flashcard-paragraph.markdown-rendered .callout,
 .hi-note-tooltip-content.markdown-rendered .callout {
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 /* Markdown 渲染样式修复 - 设置分割线的上下边距 */
@@ -124,8 +124,8 @@ settings:
 .flashcard-content.markdown-rendered hr,
 .flashcard-paragraph.markdown-rendered hr,
 .hi-note-tooltip-content.markdown-rendered hr {
-    margin-top: 12px !important;
-    margin-bottom: 12px !important;
+    margin-top: 12px;
+    margin-bottom: 12px;
 }
 
 /* Markdown 渲染样式修复 - 移除引用块的边距 */
@@ -134,7 +134,7 @@ settings:
 .flashcard-content.markdown-rendered blockquote,
 .flashcard-paragraph.markdown-rendered blockquote,
 .hi-note-tooltip-content.markdown-rendered blockquote {
-    margin: 0 !important;
+    margin: 0;
 }
 
 /* Markdown 渲染样式修复 - 移除代码块的边距 */
@@ -143,7 +143,7 @@ settings:
 .flashcard-content.markdown-rendered pre,
 .flashcard-paragraph.markdown-rendered pre,
 .hi-note-tooltip-content.markdown-rendered pre {
-    margin: 0 !important;
+    margin: 0;
 }
 
 /* Markdown 渲染样式修复 - 移除表格相关元素的边距 */
@@ -157,7 +157,7 @@ settings:
 .flashcard-content.markdown-rendered table,
 .flashcard-paragraph.markdown-rendered table,
 .hi-note-tooltip-content.markdown-rendered table {
-    margin: 0 !important;
+    margin: 0;
 }
 
 /* Markdown 渲染样式修复 - 移除标题上下边距 */
@@ -191,9 +191,9 @@ settings:
 .hi-note-tooltip-content.markdown-rendered h4,
 .hi-note-tooltip-content.markdown-rendered h5,
 .hi-note-tooltip-content.markdown-rendered h6 {
-    margin-top: 0.2em !important;
-    margin-bottom: 0.2em !important;
-    line-height: 1.3 !important;
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
+    line-height: 1.3;
 }
 
 /* 修复有序和无序列表的边距问题 */
@@ -205,11 +205,11 @@ settings:
 .flashcard-content.markdown-rendered ol,
 .flashcard-paragraph.markdown-rendered ul,
 .flashcard-paragraph.markdown-rendered ol {
-    margin-top: -1.4em !important; /* 使用负值减小上边距 */
-    margin-bottom: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    padding-left: 1.5em !important; /* 保留左侧缩进以显示列表标记 */
+    margin-top: -1.4em; /* 使用负值减小上边距 */
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 1.5em; /* 保留左侧缩进以显示列表标记 */
 }
 
 /* 减小列表项之间的间距 */
@@ -217,11 +217,11 @@ settings:
 .hi-note-content.markdown-rendered li,
 .flashcard-content.markdown-rendered li,
 .flashcard-paragraph.markdown-rendered li {
-    margin: 0 !important;
-    margin-bottom: -1em !important; /* 使用负值边距使列表项更紧凑 */
-    padding: 0 !important;
-    line-height: 1.5 !important; /* 减小行高 */
-    min-height: 0 !important;
+    margin: 0;
+    margin-bottom: -1em; /* 使用负值边距使列表项更紧凑 */
+    padding: 0;
+    line-height: 1.5; /* 减小行高 */
+    min-height: 0;
 }
 
 /* 处理列表项内的段落 */
@@ -230,8 +230,8 @@ settings:
 .flashcard-content.markdown-rendered li > p,
 .flashcard-paragraph.markdown-rendered li > p,
 .hi-note-tooltip-content.markdown-rendered li > p {
-    margin: 0 !important;
-    padding: 0 !important;
+    margin: 0;
+    padding: 0;
     display: inline; /* 使段落内容与列表标记在同一行 */
 }
 
@@ -433,9 +433,9 @@ settings:
 }
 
 .highlight-list {
-    column-count: auto;
-    column-width: 250px;
-    column-gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 12px;
 }
 
 /* ===================================
@@ -450,10 +450,7 @@ settings:
     border-radius: 8px;
     background-color: var(--highlight-card-bg-color, var(--background-primary));
     transition: all 0.2s ease;
-    break-inside: avoid;
-    page-break-inside: avoid;
     margin-bottom: 12px;
-    display: inline-block;
     width: 100%;
     animation: fadeIn 0.3s ease;
 }
@@ -552,8 +549,8 @@ settings:
     opacity: 0.7;
 }
 
-/* 当鼠标悬停在内容区域时显示编辑提示 */
-.hi-note:has(.hi-note-content:hover) .hi-note-edit-hint {
+/* 当鼠标悬停在批注区域时显示编辑提示 */
+.hi-note:hover .hi-note-edit-hint {
     display: inline-block;
 }
 
@@ -612,7 +609,7 @@ settings:
 /* 编辑模式下隐藏展开/收起功能 */
 .hi-note.editing .toggle-content-btn,
 .hi-note.editing .content-fade-out {
-    display: none !important;
+    display: none;
 }
 
 /* 编辑模式下移除高度限制 */
@@ -872,8 +869,8 @@ settings:
 /* 只处理 tooltip 中列表的上下边距 */
 .hi-note-tooltip-content.markdown-rendered ul,
 .hi-note-tooltip-content.markdown-rendered ol {
-    margin-top: 4px !important;
-    margin-bottom: 4px !important;
+    margin-top: 4px;
+    margin-bottom: 4px;
 }
 
 
@@ -893,7 +890,7 @@ settings:
 }
 
 .hi-note-tooltip.hi-note-tooltip-hidden {
-    display: none !important;
+    display: none;
 }
 
 /* === 阅读模式下的批注小部件样式 === */
@@ -986,7 +983,7 @@ settings:
 /* 热力图颜色级别 - 使用固定颜色而不是变量 */
 .flashcard-heatmap-level-0 {
     background-color: var(--background-primary, #f0f0f0);
-    border: 1px solid var(--background-modifier-border, #ddd);
+    border: 1px solid var(--background-modifier-border, #dddddd);
 }
 
 .flashcard-heatmap-level-1 {
@@ -1161,8 +1158,10 @@ settings:
     border: none;
     border-radius: 50%;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     font-weight: 600;
+    transform: translateY(20px);
+    opacity: 0;
 }
 
 .flashcard-rating-button[data-rating='again'] {
@@ -1555,13 +1554,6 @@ settings:
     opacity: 1;
 }
 
-/* Rating buttons - 初始隐藏状态和动画效果 */
-.flashcard-rating-button {
-    transform: translateY(20px);
-    opacity: 0;
-    transition: all 0.3s ease;
-}
-
 /* 当卡片翻转时，评分按钮显示动画 */
 .flashcard.is-flipped ~ .flashcard-rating .flashcard-rating-button {
     opacity: 1;
@@ -1885,6 +1877,8 @@ settings:
     background-color: var(--background-primary);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: box-shadow 0.2s ease-in-out;
+    opacity: 1;
+    color: var(--text-accent);
 }
 
 .highlight-card.in-main-view .highlight-text-content {
@@ -1900,9 +1894,10 @@ settings:
 
 /* 调整提示文本样式 */
 .hi-note-hint {
-    font-size: 11px;
-    color: var(--text-faint);
+    font-size: 10px;
+    color: var(--text-muted);
     margin-right: auto;
+    font-style: italic;
 }
 
 /* 主容布局 */
@@ -1956,11 +1951,6 @@ settings:
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 1px;
-}
-
-/* 件列表样式优化 */
-.highlight-file-list {
-    padding: 8px;
 }
 
 /* 文件项样式优化 */
@@ -2115,7 +2105,7 @@ settings:
 
 /* 浮动按钮隐藏状态 */
 .highlight-floating-button-hidden {
-    display: none !important;
+    display: none;
 }
 
 /* === 拖拽预览样式 === */
@@ -2124,7 +2114,8 @@ settings:
 }
 
 .highlight-dragging {
-    position: fixed;
+    position: absolute;
+    z-index: 9999;
     pointer-events: none;
     background-color: var(--background-primary);
     border: 1px solid var(--background-modifier-border);
@@ -2316,13 +2307,6 @@ settings:
 .hi-note-input[disabled] {
     cursor: not-allowed;
     background-color: var(--background-modifier-form-field-highlighted);
-}
-
-/* 增强快捷键提示的可读性 */
-.hi-note-hint {
-    font-size: 10px;
-    color: var(--text-muted);
-    font-style: italic;
 }
 
 /* 特定样式 */
@@ -2560,10 +2544,10 @@ settings:
 
 /* 插件作用域内的隐藏类 */
 .hi-note-plugin .hi-note-hidden {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
+    display: none;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
 }
 
 /* 设置标签页样式 */
@@ -2624,13 +2608,6 @@ settings:
     margin-left: 0;
 }
 
-/* DragPreview positioning */
-.highlight-dragging {
-    position: absolute;
-    z-index: 9999;
-    pointer-events: none;
-}
-
 /* CommentView display states */
 .highlight-display-block {
     display: block;
@@ -2673,10 +2650,10 @@ settings:
 .hi-note-hidden,
 .hi-note-footer.hi-note-hidden,
 .prompt-display-mode.hi-note-hidden {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
+    display: none;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
 }
 
 /* Flashcard Activation Styles */
@@ -2827,12 +2804,12 @@ settings:
 }
 
 .flashcard-empty-tip {
-    font-size: 14px !important;
-    color: var(--text-accent) !important;
+    font-size: 14px;
+    color: var(--text-accent);
     background-color: var(--background-secondary-alt);
-    padding: 8px 12px !important;
+    padding: 8px 12px;
     border-radius: 6px;
-    margin-top: 8px !important;
+    margin-top: 8px;
 }
 
 .flashcard-return-button {
@@ -2859,7 +2836,7 @@ settings:
 }
 
 .use-global-option {
-    margin-bottom: 0 !important;
+    margin-bottom: 0;
 }
 
 .slider-option {
@@ -3057,10 +3034,6 @@ textarea.flashcard-modal-input {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 16px;
-}
-
-.use-global-option {
-    margin-bottom: 0 !important;
 }
 
 .flashcard-modal-option {
@@ -3318,11 +3291,6 @@ textarea.flashcard-modal-input {
     line-height: 1;
 }
 
-.highlight-card:hover {
-    opacity: 1;
-    color: var(--text-accent);
-}
-
 .highlight-card-title-right {
     display: flex;
     align-items: center;
@@ -3410,12 +3378,6 @@ textarea.flashcard-modal-input {
 .highlight-title-btn.loading svg {
     animation: spin 1s linear infinite;
 }
-
-/* AI 下拉菜单容器 */
-.highlight-ai-container {
-    position: relative;
-}
-
 
 /* 当鼠标悬停在标题栏上时显示按钮 */
 .highlight-card-title-bar:not(:hover) .highlight-title-btn {
@@ -3575,8 +3537,8 @@ textarea.flashcard-modal-input {
 
 /* 小屏幕移动端主视图中的全宽文件列表 */
 .is-mobile .is-small-screen .highlight-file-list-container.highlight-full-width {
-    width: 100% !important;
-    flex: 1 !important;
+    width: 100%;
+    flex: 1;
 }
 
 /* 小屏幕移动端主视图中调整主容器布局 */
@@ -3588,7 +3550,7 @@ textarea.flashcard-modal-input {
 /* 大屏幕设备（如iPad）保持原来的布局 */
 @media (min-width: 768px) {
     .is-mobile .highlight-file-list-container {
-        width: 250px !important;
+        width: 250px;
         min-width: 200px;
         max-width: 300px;
     }
