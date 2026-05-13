@@ -1,4 +1,4 @@
-import { HighlightCard } from "../../../components/highlight";
+import { defaultHighlightCardRegistry } from "../../../components/highlight";
 import { CommentService } from "../../../services/comment";
 import { CommentItem, HighlightInfo } from "../../../types/highlight";
 import { ViewState } from "../../../core/ViewState";
@@ -70,7 +70,7 @@ export class CommentController {
             this.options.state.highlights[index] = highlight;
         }
 
-        const cardInstance = HighlightCard.findCardInstanceByHighlightId(highlight.id || '');
+        const cardInstance = defaultHighlightCardRegistry.findByHighlightId(highlight.id || '');
         if (cardInstance) {
             cardInstance.updateComments(highlight);
         }

@@ -71,7 +71,7 @@ function createCommentWidget(plugin: HiNotePluginContext, highlight: HiNote): De
         widget: new CommentWidget(
             plugin,
             highlight,
-            () => CommentWidgetHelper.openCommentPanel(plugin.app, highlight)
+            () => CommentWidgetHelper.openCommentPanel(plugin.app, highlight, plugin.eventManager)
         ),
         side: 2,
         stopEvent: (event: Event) => event.type === 'mousedown' || event.type === 'mouseup'

@@ -1,5 +1,6 @@
 import { MarkdownRenderer, Component, App, setIcon } from "obsidian";
 import { HighlightInfo as HiNote, CommentItem } from "../../types/highlight";
+import type { EventManager } from "../../services/EventManager";
 
 /**
  * 批注小部件辅助类
@@ -171,7 +172,7 @@ export class CommentWidgetHelper {
     /**
      * 打开评论面板
      */
-    static async openCommentPanel(app: App, highlight: HiNote): Promise<void> {
+    static async openCommentPanel(app: App, highlight: HiNote, eventManager: EventManager): Promise<void> {
         const workspace = app.workspace;
         const existing = workspace.getLeavesOfType("hinote-view");
 
@@ -189,13 +190,7 @@ export class CommentWidgetHelper {
             }
         }
         
-        const event = new CustomEvent("open-comment-input", {
-            detail: {
-                highlightId: highlight.id,
-                text: highlight.text
-            }
-        });
-        window.dispatchEvent(event);
+        eventManager.emitCommentInputOpen(highlight.id || '', highlight.text);
     }
 
     /**

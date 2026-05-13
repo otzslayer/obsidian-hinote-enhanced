@@ -1,5 +1,6 @@
 import { HighlightInfo, CommentItem } from '../../../types/highlight';
 import { CommentInput } from '../../../components/comment';
+import { defaultHighlightCardRegistry } from '../../../components/highlight';
 import CommentPlugin from '../../../../main';
 
 /**
@@ -73,6 +74,12 @@ export class CommentInputManager {
                 if (this.onCommentCancel) {
                     await this.onCommentCancel(highlight);
                 }
+            },
+            onShown: () => {
+                defaultHighlightCardRegistry.findByElement(card)?.handleInputShown();
+            },
+            onClosed: () => {
+                defaultHighlightCardRegistry.findByElement(card)?.handleInputClosed();
             }
         }).show();
     }

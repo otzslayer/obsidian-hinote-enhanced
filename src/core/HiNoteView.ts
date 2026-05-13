@@ -68,7 +68,7 @@ export class HiNoteView extends ItemView {
         // === 初始化新 Manager（需要在事件注册前初始化）===
         this.deviceManager = new DeviceManager();
         this.uiInitializer = new UIInitializer();
-        this.eventCoordinator = new EventCoordinator(this.app, this);
+        this.eventCoordinator = new EventCoordinator(this.app, this, services.eventManager);
         this.exportManager = new ExportManager(this.app, this.exportService);
         this.virtualHighlightManager = new VirtualHighlightManager(this.highlightManager);
         this.flashcardViewManager = new FlashcardViewManager(this.app, this.plugin);

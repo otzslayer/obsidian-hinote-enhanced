@@ -1,5 +1,5 @@
 import { Menu, Modal, Notice } from "obsidian";
-import { HighlightCard } from "../../components/highlight";
+import { HighlightCard, defaultHighlightCardRegistry } from "../../components/highlight";
 import CommentPlugin from "../../../main";
 import { LicenseManager } from "../../services/LicenseManager";
 import { HighlightInfo } from "../../types/highlight";
@@ -165,7 +165,7 @@ export class BatchFlashcardOperations {
     ): Promise<boolean> {
         if (!highlight.id) return false;
 
-        const existingCard = HighlightCard.findCardInstanceByHighlightId(highlight.id);
+        const existingCard = defaultHighlightCardRegistry.findByHighlightId(highlight.id);
         if (existingCard) {
             return await action(existingCard);
         }
@@ -182,7 +182,10 @@ export class BatchFlashcardOperations {
                 onCommentEdit: () => {},
                 onAIResponse: async () => {}
             },
-            false
+            false,
+            undefined,
+            undefined,
+            defaultHighlightCardRegistry
         );
 
         try {

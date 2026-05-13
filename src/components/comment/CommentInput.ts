@@ -23,6 +23,8 @@ export class CommentInput {
             onSave: (content: string) => Promise<void>;
             onDelete?: () => Promise<void>;
             onCancel: () => void;
+            onShown?: () => void;
+            onClosed?: () => void;
         }
     ) {
         this.boundHandleOutsideClick = this.handleOutsideClick.bind(this);
@@ -42,7 +44,7 @@ export class CommentInput {
         document.addEventListener('click', this.boundHandleOutsideClick);
         
         // 通知 HighlightCard 当前正在显示输入框
-        this.notifyInputShown();
+        this.options.onShown?.();
     }
 
     public show() {
@@ -242,7 +244,7 @@ export class CommentInput {
      */
     private cancel(editContext?: { contentEl?: HTMLElement, footer?: Element } | null) {
         // 立即通知 HighlightCard 输入框已关闭，确保状态同步
-        this.notifyInputClosed();
+        this.options.onClosed?.();
         
         if (this.existingComment && editContext?.contentEl && editContext?.footer) {
             // 编辑模式：恢复原始内容
@@ -275,7 +277,7 @@ export class CommentInput {
      */
     public destroy() {
         // 立即通知 HighlightCard 输入框已关闭
-        this.notifyInputClosed();
+        this.options.onClosed?.();
         
         // 清理事件监听器
         document.removeEventListener('click', this.boundHandleOutsideClick);
@@ -305,7 +307,7 @@ export class CommentInput {
     public destroySafe() {
         try {
             // 立即通知 HighlightCard 输入框已关闭
-            this.notifyInputClosed();
+            this.options.onClosed?.();
             
             // 清理事件监听器
             document.removeEventListener('click', this.boundHandleOutsideClick);
@@ -357,23 +359,4 @@ export class CommentInput {
         }
     }
     
-    /**
-     * 通知 HighlightCard 输入框已显示
-     */
-    private notifyInputShown() {
-        const event = new CustomEvent('comment-input-shown', {
-            detail: { highlightId: this.highlight.id }
-        });
-        document.dispatchEvent(event);
-    }
-    
-    /**
-     * 通知 HighlightCard 输入框已关闭
-     */
-    private notifyInputClosed() {
-        const event = new CustomEvent('comment-input-closed', {
-            detail: { highlightId: this.highlight.id }
-        });
-        document.dispatchEvent(event);
-    }
 } 

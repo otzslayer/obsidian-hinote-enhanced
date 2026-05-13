@@ -1,5 +1,5 @@
 import { Modal, Notice, TFile } from "obsidian";
-import { HighlightCard } from "../../components/highlight";
+import { defaultHighlightCardRegistry } from "../../components/highlight";
 import CommentPlugin from "../../../main";
 import { HighlightService } from "../../services/HighlightService";
 import { HighlightInfo } from "../../types/highlight";
@@ -156,7 +156,7 @@ export class BatchHighlightDeletionOperations {
             if (!highlight.id) continue;
 
             try {
-                const highlightCard = HighlightCard.findCardInstanceByHighlightId(highlight.id);
+                const highlightCard = defaultHighlightCardRegistry.findByHighlightId(highlight.id);
                 if (!highlightCard) continue;
 
                 const cardElement = highlightCard.getElement();

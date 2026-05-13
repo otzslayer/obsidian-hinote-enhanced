@@ -15,65 +15,10 @@ import {
     HighlightCardSelectionController,
     HighlightCardTitleBarRenderer
 } from "./card";
-
-declare global {
-    interface Window {
-        HighlightCard?: {
-            findCardInstanceByHighlightId: (highlightId: string) => HighlightCard | null;
-        };
-    }
-}
+import { defaultHighlightCardRegistry, HighlightCardRegistry } from "./HighlightCardRegistry";
 
 export class HighlightCard {
-    // 为了让 CommentInput 能够访问到 findCardInstanceByHighlightId 方法
-    static {
-        window.HighlightCard = {
-            findCardInstanceByHighlightId: HighlightCard.findCardInstanceByHighlightId
-        };
-    }
-    
-    // 静态方法：清理所有卡片实例
-    public static clearAllInstances(): void {
-        // 清理所有实例
-        HighlightCard.cardInstances.forEach(instance => {
-            // 如果有销毁方法，调用它
-            if (typeof instance.destroy === 'function') {
-                instance.destroy();
-            }
-        });
-        
-        // 清空实例集合
-        HighlightCard.cardInstances.clear();
-    }
-    
-    // 静态方法：根据高亮ID查找HighlightCard实例
-    public static findCardInstanceByHighlightId(highlightId: string): HighlightCard | null {
-        for (const instance of HighlightCard.cardInstances) {
-            // 确保 highlight.id 存在再进行比较
-            if (instance.highlight.id && instance.highlight.id === highlightId) {
-                return instance;
-            }
-        }
-        return null;
-    }
-    
-    // 静态方法：更新指定高亮的UI状态
-    public static updateCardUIByHighlightId(highlightId: string): void {
-        const cardInstance = HighlightCard.findCardInstanceByHighlightId(highlightId);
-        if (cardInstance) {
-            cardInstance.updateIconsAfterCardCreation();
-        }
-    }
-    
-    // 静态方法：清除所有卡片上的不聚焦输入框
-    public static clearAllUnfocusedInputs(): void {
-        HighlightCard.cardInstances.forEach(instance => {
-            instance.selectionController.removeUnfocusedInput();
-        });
-    }
-    
     private card: HTMLElement;
-    private static cardInstances = new Set<HighlightCard>();
     private fileName: string | undefined;
     private hasFlashcard: boolean = false; // 保存闪卡状态
     private dragController: HighlightCardDragController;
@@ -99,7 +44,8 @@ export class HighlightCard {
         },
         private isInMainView: boolean = false,
         fileName?: string,
-        private selectionManager?: SelectionManager  // SelectionManager 实例
+        private selectionManager?: SelectionManager,  // SelectionManager 实例
+        private registry: HighlightCardRegistry = defaultHighlightCardRegistry
     ) {
         this.fileName = fileName;
         this.highlight = highlight;
@@ -151,41 +97,9 @@ export class HighlightCard {
             }
         );
         
-        // 注册卡片实例
-        HighlightCard.cardInstances.add(this);
-        
-        // 监听 CommentInput 组件发出的自定义事件
-        this.setupCommentInputEventListeners();
+        this.registry.register(this);
         
         this.render();
-    }
-    
-    // 设置 CommentInput 相关的事件监听
-    private setupCommentInputEventListeners() {
-        // 监听输入框显示事件
-        const handleInputShown = (e: CustomEvent) => {
-            if (e.detail?.highlightId === this.highlight.id) {
-                this.selectionController.handleInputShown();
-            }
-        };
-        
-        // 监听输入框关闭事件
-        const handleInputClosed = (e: CustomEvent) => {
-            if (e.detail?.highlightId === this.highlight.id) {
-                this.selectionController.handleInputClosed();
-            }
-        };
-        
-        // 添加自定义事件监听
-        document.addEventListener('comment-input-shown', handleInputShown as EventListener);
-        document.addEventListener('comment-input-closed', handleInputClosed as EventListener);
-        
-        // 确保在插件卸载时移除事件监听
-        // 使用 addEventListener 而不是 registerDomEvent，因为自定义事件不在 DocumentEventMap 中
-        this.plugin.register(() => {
-            document.removeEventListener('comment-input-shown', handleInputShown as EventListener);
-            document.removeEventListener('comment-input-closed', handleInputClosed as EventListener);
-        });
     }
 
     private render() {
@@ -225,36 +139,41 @@ export class HighlightCard {
         this.renderComments();
     }
     
-    // 根据 DOM 元素查找对应的 HighlightCard 实例
-    public static findCardInstanceByElement(element: HTMLElement): HighlightCard | null {
-        // 遍历所有卡片实例，查找卡片元素匹配的实例
-        for (const instance of HighlightCard.cardInstances) {
-            if (instance.card === element || instance.card.contains(element)) {
-                return instance;
-            }
-        }
-        return null;
-    }
-    
     /**
      * 显示评论输入框
      * 用于外部调用，直接触发评论输入框的显示
      */
     public showCommentInput(): void {
         // 清除所有卡片的不聚焦输入框
-        HighlightCard.clearAllUnfocusedInputs();
+        this.registry.clearAllUnfocusedInputs();
         this.selectionController.showCommentInput();
     }
 
     // 添加选中卡片的方法，支持多选和取消选择
     private selectCard(event?: MouseEvent) {
         // 先清除所有卡片上的不聚焦输入框
-        HighlightCard.clearAllUnfocusedInputs();
+        this.registry.clearAllUnfocusedInputs();
         this.selectionController.selectCard(event);
     }
     
     public getElement(): HTMLElement {
         return this.card;
+    }
+
+    public getHighlightId(): string | undefined {
+        return this.highlight.id;
+    }
+
+    public clearUnfocusedInput(): void {
+        this.selectionController.removeUnfocusedInput();
+    }
+
+    public handleInputShown(): void {
+        this.selectionController.handleInputShown();
+    }
+
+    public handleInputClosed(): void {
+        this.selectionController.handleInputClosed();
     }
 
     public update(highlight: HighlightInfo) {
@@ -339,7 +258,7 @@ export class HighlightCard {
     /**
      * 更新创建闪卡后的图标显示
      */
-    private updateIconsAfterCardCreation() {
+    public updateIconsAfterCardCreation() {
         HighlightIconManager.updateCardIcons(this.card, true);
     }
 
@@ -367,8 +286,7 @@ export class HighlightCard {
                 // 移除卡片
                 this.card.remove();
                 
-                // 从卡片实例集合中移除
-                HighlightCard.cardInstances.delete(this);
+                this.registry.unregister(this);
             }
         } catch (error) {
             console.error('删除高亮时出错:', error);
@@ -420,7 +338,6 @@ export class HighlightCard {
         // 移除事件监听器
         this.selectionController.destroy();
         
-        // 从静态集合中移除
-        HighlightCard.cardInstances.delete(this);
+        this.registry.unregister(this);
     }
 }

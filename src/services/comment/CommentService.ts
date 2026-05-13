@@ -109,9 +109,6 @@ export class CommentService {
 
         await this.highlightManager.addHighlight(file, highlight as HiNote);
 
-        // 触发更新评论按钮
-        this.dispatchCommentUpdateEvent(highlight);
-
         // 只更新单个卡片，而不是刷新整个视图
         if (this.onCardUpdate) {
             this.onCardUpdate(highlight);
@@ -137,9 +134,6 @@ export class CommentService {
             highlight.updatedAt = Date.now();
             await this.highlightManager.addHighlight(file, highlight as HiNote);
 
-            // 触发更新评论按钮
-            this.dispatchCommentUpdateEvent(highlight);
-            
             // 通过 EventManager 触发批注更新事件，用于闪卡同步
             if (highlight.id) {
                 this.plugin.eventManager.emitCommentUpdate(file.path, oldContent, content, highlight.id);
@@ -198,9 +192,6 @@ export class CommentService {
             // 还有其他评论，只更新评论
             await this.highlightManager.addHighlight(file, highlight as HiNote);
         }
-
-        // 触发更新评论按钮
-        this.dispatchCommentUpdateEvent(highlight);
 
         // 只更新单个卡片，而不是刷新整个视图
         if (this.onCardUpdate) {
@@ -280,17 +271,5 @@ export class CommentService {
         
         const cards = fsrsManager.findCardsBySourceId(highlightId, 'highlight');
         return cards && cards.length > 0;
-    }
-    
-    /**
-     * 触发评论更新事件
-     */
-    private dispatchCommentUpdateEvent(highlight: HighlightInfo) {
-        window.dispatchEvent(new CustomEvent("comment-updated", {
-            detail: {
-                text: highlight.text,
-                comments: highlight.comments
-            }
-        }));
     }
 }

@@ -5,6 +5,7 @@ export interface HighlightEvents {
     'highlight:delete': [filePath: string, text: string, sourceId: string];
     'comment:update': [filePath: string, oldComment: string, newComment: string, sourceId: string];
     'comment:delete': [filePath: string, comment: string, sourceId: string];
+    'comment-input:open': [highlightId: string, text: string];
     'flashcard:changed': [];
 }
 
@@ -41,6 +42,13 @@ export class EventManager {
      */
     public emitCommentDelete(filePath: string, comment: string, sourceId: string) {
         this.events.trigger('comment:delete', filePath, comment, sourceId);
+    }
+
+    /**
+     * 触发打开评论输入框事件
+     */
+    public emitCommentInputOpen(highlightId: string, text: string) {
+        this.events.trigger('comment-input:open', highlightId, text);
     }
 
     /**

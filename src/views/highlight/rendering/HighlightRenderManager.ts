@@ -1,5 +1,5 @@
 import { HighlightInfo, CommentItem } from '../../../types/highlight';
-import { HighlightCard } from '../../../components/highlight';
+import { HighlightCard, defaultHighlightCardRegistry } from '../../../components/highlight';
 import { SelectionManager } from '../../selection';
 import { TFile } from 'obsidian';
 import CommentPlugin from '../../../../main';
@@ -102,10 +102,7 @@ export class HighlightRenderManager {
         }
         
         if (!append) {
-            // 在清空容器前清理静态实例集合
-            if (typeof HighlightCard.clearAllInstances === 'function') {
-                HighlightCard.clearAllInstances();
-            }
+            defaultHighlightCardRegistry.clearAll();
             
             this.container.empty();
             this.currentBatch = 0;
@@ -181,14 +178,15 @@ export class HighlightRenderManager {
             this.isDraggedToMainView,
             // 当显示全部高亮时（currentFile 为 null），使用高亮的 fileName，否则使用当前文件名
             this.currentFile === null ? highlight.fileName : this.currentFile.basename,
-            this.selectionManager ?? undefined  // 传入 SelectionManager 实例，null 转为 undefined
+            this.selectionManager ?? undefined,  // 传入 SelectionManager 实例，null 转为 undefined
+            defaultHighlightCardRegistry
         );
         
         // 如果高亮已经创建了闪卡，立即更新UI状态
         if (highlight.id && this.highlightsWithFlashcards.has(highlight.id)) {
             setTimeout(() => {
                 if (highlight.id) {
-                    HighlightCard.updateCardUIByHighlightId(highlight.id);
+                    defaultHighlightCardRegistry.updateCardUIByHighlightId(highlight.id);
                 }
             }, 0);
         }
@@ -226,9 +224,7 @@ export class HighlightRenderManager {
      * 清空容器
      */
     clear() {
-        if (typeof HighlightCard.clearAllInstances === 'function') {
-            HighlightCard.clearAllInstances();
-        }
+        defaultHighlightCardRegistry.clearAll();
         this.container.empty();
     }
     

@@ -1,9 +1,10 @@
-import { Plugin, TFile, MarkdownPostProcessorContext } from "obsidian";
+import { TFile, MarkdownPostProcessorContext } from "obsidian";
 import { HighlightInfo as HiNote } from "../../../types/highlight";
 import { HighlightRepository } from "../../../repositories/HighlightRepository";
 import { HighlightService } from '../../../services/HighlightService';
 import { CommentWidgetHelper } from '../../../components/comment';
 import { PreviewHighlightResolver } from "./PreviewHighlightResolver";
+import type { HiNotePluginContext } from "../../../types/plugin";
 
 /**
  * 阅读模式下的批注小部件渲染器
@@ -13,7 +14,7 @@ export class PreviewWidgetRenderer {
     private highlightResolver: PreviewHighlightResolver;
 
     constructor(
-        private plugin: Plugin,
+        private plugin: HiNotePluginContext,
         private highlightRepository: HighlightRepository,
         private highlightService: HighlightService
     ) {
@@ -92,7 +93,7 @@ export class PreviewWidgetRenderer {
             
             // 设置点击事件
             CommentWidgetHelper.setupClickEvent(button, tooltip, () => 
-                CommentWidgetHelper.openCommentPanel(this.plugin.app, highlight)
+                CommentWidgetHelper.openCommentPanel(this.plugin.app, highlight, this.plugin.eventManager)
             );
             
             // 创建清理观察器

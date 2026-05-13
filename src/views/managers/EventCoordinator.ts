@@ -1,6 +1,7 @@
 import { App, TFile, Component, EventRef } from "obsidian";
-import { HighlightCard } from "../../components/highlight";
+import { defaultHighlightCardRegistry } from "../../components/highlight";
 import { HighlightInfo as HiNote } from "../../types/highlight";
+import type { EventManager } from "../../services/EventManager";
 
 /**
  * 事件回调接口
@@ -25,11 +26,10 @@ export interface EventCallbacks {
 export class EventCoordinator {
     private callbacks: EventCallbacks = {};
     private eventRefs: EventRef[] = [];
-    private customEventHandlers: Map<string, EventListener> = new Map();
-
     constructor(
         private app: App,
-        private component: Component
+        private component: Component,
+        private eventManager: EventManager
     ) {}
 
     /**
@@ -159,20 +159,14 @@ export class EventCoordinator {
      * 注册评论输入事件
      */
     private registerCommentInputEvent(): void {
-        const handleCommentInput = (e: CustomEvent) => {
-            const { highlightId, text } = e.detail;
-            
+        const ref = this.eventManager.on('comment-input:open', (highlightId, text) => {
             if (this.callbacks.onCommentInput) {
                 this.callbacks.onCommentInput(highlightId, text);
             }
-        };
-
-        window.addEventListener("open-comment-input", handleCommentInput as EventListener);
-        this.customEventHandlers.set("open-comment-input", handleCommentInput as EventListener);
-        
-        this.component.register(() => {
-            window.removeEventListener("open-comment-input", handleCommentInput as EventListener);
         });
+
+        this.component.registerEvent(ref);
+        this.eventRefs.push(ref);
     }
 
     /**
@@ -213,7 +207,7 @@ export class EventCoordinator {
             });
 
             // 首先尝试直接通过高亮 ID 查找卡片实例
-            let cardInstance = HighlightCard.findCardInstanceByHighlightId(highlightId);
+            let cardInstance = defaultHighlightCardRegistry.findByHighlightId(highlightId);
             
             // 如果没找到，尝试通过文本内容查找
             if (!cardInstance) {
@@ -228,7 +222,7 @@ export class EventCoordinator {
                     highlightCard.addClass('selected');
                     
                     // 查找 HighlightCard 实例
-                    cardInstance = HighlightCard.findCardInstanceByElement(highlightCard as HTMLElement);
+                    cardInstance = defaultHighlightCardRegistry.findByElement(highlightCard as HTMLElement);
                     
                     // 滚动到评论区域
                     highlightCard.scrollIntoView({ behavior: "smooth" });
@@ -246,12 +240,6 @@ export class EventCoordinator {
      * 销毁事件协调器
      */
     destroy(): void {
-        // 清理自定义事件监听器
-        this.customEventHandlers.forEach((handler, eventName) => {
-            window.removeEventListener(eventName, handler);
-        });
-        this.customEventHandlers.clear();
-        
         // 清理事件引用
         this.eventRefs = [];
         this.callbacks = {};
