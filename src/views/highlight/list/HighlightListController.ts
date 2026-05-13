@@ -1,7 +1,7 @@
 import { App, Notice, TFile } from "obsidian";
 import { t } from "../../../i18n";
 import { HighlightInfo } from "../../../types/highlight";
-import { ViewState } from "../../../core/ViewState";
+import { ViewState } from "../../hinote/ViewState";
 import { HighlightRenderManager } from "../rendering";
 import { FlashcardViewManager } from "../flashcards";
 import { InfiniteScrollManager } from "./InfiniteScrollManager";

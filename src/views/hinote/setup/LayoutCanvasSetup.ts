@@ -1,11 +1,11 @@
 import { App, WorkspaceLeaf } from "obsidian";
-import { CanvasService } from "../../services/CanvasService";
-import { HighlightRepository } from "../../repositories/HighlightRepository";
-import { HighlightService } from "../../services/HighlightService";
-import { GlobalHighlightService, HighlightDataService } from "../../services/highlight";
-import { CanvasHighlightProcessor, FlashcardViewManager, HighlightListController } from "../../views/highlight";
-import { LayoutManager, ViewPositionController, ViewPositionDetector } from "../../views/layout";
-import { DeviceManager, FileListManager } from "../../views/managers";
+import { CanvasService } from "../../../services/CanvasService";
+import { HighlightRepository } from "../../../repositories/HighlightRepository";
+import { HighlightService } from "../../../services/HighlightService";
+import { GlobalHighlightService, HighlightDataService } from "../../../services/highlight";
+import { CanvasHighlightProcessor, FlashcardViewManager, HighlightListController } from "../../highlight";
+import { LayoutManager, ViewPositionController, ViewPositionDetector } from "../../layout";
+import { DeviceManager, FileListManager } from "../../managers";
 import { ViewState } from "../ViewState";
 
 interface LayoutAndCanvasSetupOptions {

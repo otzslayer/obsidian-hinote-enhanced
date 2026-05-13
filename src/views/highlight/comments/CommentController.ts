@@ -1,7 +1,7 @@
 import { defaultHighlightCardRegistry } from "../../../components/highlight";
 import { CommentService } from "../../../services/comment";
 import { CommentItem, HighlightInfo } from "../../../types/highlight";
-import { ViewState } from "../../../core/ViewState";
+import { ViewState } from "../../hinote/ViewState";
 import { CommentInputManager } from "./CommentInputManager";
 
 interface CommentControllerOptions {

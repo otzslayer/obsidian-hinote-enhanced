@@ -1,5 +1,5 @@
 import { App } from "obsidian";
-import type { ViewState } from "../../core/ViewState";
+import type { ViewState } from "../hinote/ViewState";
 import { DeviceManager, FileListManager } from "../managers";
 import { FlashcardViewManager } from "../highlight";
 import { LayoutManager } from "./LayoutManager";

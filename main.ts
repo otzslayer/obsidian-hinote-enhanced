@@ -1,9 +1,9 @@
 import { Plugin } from 'obsidian';
-import { AISettingTab } from './src/settings/SettingTab';
+import { AISettingTab } from './src/settings/SettingsTab';
 import { PluginSettings } from './src/types/settings';
 import { InitializationManager } from './src/services/InitializationManager';
 import { WindowManager } from './src/services/WindowManager';
-import type { PluginServices } from './src/services/PluginServices';
+import type { PluginServices } from './src/plugin/PluginServices';
 import { migrateSettings, normalizeSettings } from './src/settings/SettingsMigration';
 import {
 	createPluginWindowManager,
@@ -11,7 +11,7 @@ import {
 	registerPluginRibbon,
 	registerPluginVaultEvents,
 	registerPluginViews
-} from './src/core/PluginBootstrap';
+} from './src/plugin/PluginBootstrap';
 
 export default class CommentPlugin extends Plugin {
 	settings: PluginSettings;

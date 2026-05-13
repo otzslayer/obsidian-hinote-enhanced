@@ -1,7 +1,7 @@
-import { HighlightDataService } from "../services/highlight";
-import { HighlightListController, HighlightRenderManager, InfiniteScrollManager } from "../views/highlight";
-import { SelectionManager } from "../views/selection";
-import { FileListManager, SearchUIManager } from "../views/managers";
+import { HighlightDataService } from "../../services/highlight";
+import { HighlightListController, HighlightRenderManager, InfiniteScrollManager } from "../highlight";
+import { SelectionManager } from "../selection";
+import { FileListManager, SearchUIManager } from "../managers";
 import { setupSearchAndSelection } from "./setup/SearchSelectionSetup";
 import { setupFileList } from "./setup/FileListSetup";
 import { setupHighlightRendering } from "./setup/HighlightRenderingSetup";

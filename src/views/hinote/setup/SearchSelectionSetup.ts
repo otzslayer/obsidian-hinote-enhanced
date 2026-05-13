@@ -1,10 +1,10 @@
-import CommentPlugin from "../../../main";
-import { ExportService } from "../../services/ExportService";
-import { HighlightService } from "../../services/HighlightService";
-import { LicenseManager } from "../../services/LicenseManager";
-import { HighlightListController } from "../../views/highlight";
-import { BatchOperationsHandler, SelectionManager } from "../../views/selection";
-import { SearchUIManager } from "../../views/managers";
+import CommentPlugin from "../../../../main";
+import { ExportService } from "../../../services/ExportService";
+import { HighlightService } from "../../../services/HighlightService";
+import { LicenseManager } from "../../../services/LicenseManager";
+import { HighlightListController } from "../../highlight";
+import { BatchOperationsHandler, SelectionManager } from "../../selection";
+import { SearchUIManager } from "../../managers";
 import { ViewState } from "../ViewState";
 
 interface SearchAndSelectionOptions {

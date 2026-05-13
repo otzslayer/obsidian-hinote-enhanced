@@ -1,8 +1,8 @@
-import CommentPlugin from "../../../main";
-import { HighlightService } from "../../services/HighlightService";
-import { LicenseManager } from "../../services/LicenseManager";
-import { FlashcardViewManager, HighlightListController } from "../../views/highlight";
-import { FileListController, FileListManager } from "../../views/managers";
+import CommentPlugin from "../../../../main";
+import { HighlightService } from "../../../services/HighlightService";
+import { LicenseManager } from "../../../services/LicenseManager";
+import { FlashcardViewManager, HighlightListController } from "../../highlight";
+import { FileListController, FileListManager } from "../../managers";
 import { ViewState } from "../ViewState";
 
 interface FileListSetupOptions {

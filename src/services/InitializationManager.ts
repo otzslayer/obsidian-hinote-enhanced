@@ -7,7 +7,7 @@ import { EventManager } from './EventManager';
 import { HighlightManager } from './HighlightManager';
 import { HighlightRepository } from '../repositories/HighlightRepository';
 import type CommentPlugin from '../../main';
-import type { PluginServices } from './PluginServices';
+import type { PluginServices } from '../plugin/PluginServices';
 
 /**
  * 初始化管理器

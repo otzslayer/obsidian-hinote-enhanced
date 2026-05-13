@@ -1,6 +1,6 @@
 import { App, WorkspaceLeaf } from 'obsidian';
-import { VIEW_TYPE_HINOTE } from '../core/HiNoteView';
-import { HiNoteView } from '../core/HiNoteView';
+import { VIEW_TYPE_HINOTE } from '../views/hinote/HiNoteView';
+import { HiNoteView } from '../views/hinote/HiNoteView';
 
 /**
  * 窗口管理服务

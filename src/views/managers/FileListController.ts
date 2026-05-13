@@ -2,7 +2,7 @@ import { TFile } from "obsidian";
 import { LicenseManager } from "../../services/LicenseManager";
 import { FlashcardViewManager } from "../highlight";
 import { FileListManager } from "./FileListManager";
-import type { ViewState } from "../../core/ViewState";
+import type { ViewState } from "../hinote/ViewState";
 
 interface FileListControllerOptions {
     state: ViewState;

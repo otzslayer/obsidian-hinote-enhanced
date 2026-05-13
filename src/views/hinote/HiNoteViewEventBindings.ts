@@ -1,7 +1,7 @@
 import { Component } from "obsidian";
-import { CommentController, HighlightListController } from "../views/highlight";
-import { EventCoordinator, FileListManager } from "../views/managers";
-import { SelectionManager } from "../views/selection";
+import { CommentController, HighlightListController } from "../highlight";
+import { EventCoordinator, FileListManager } from "../managers";
+import { SelectionManager } from "../selection";
 import { ViewState } from "./ViewState";
 
 interface HiNoteViewEventBindingOptions {

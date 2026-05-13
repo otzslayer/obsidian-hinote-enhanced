@@ -1,20 +1,20 @@
 import { ItemView, Notice, WorkspaceLeaf } from "obsidian";
-import { CanvasService } from '../services/CanvasService';
-import { HighlightInfo } from '../types/highlight';
-import { HighlightManager } from '../services/HighlightManager';
-import { HighlightRepository } from '../repositories/HighlightRepository';
-import CommentPlugin from '../../main';
-import { HighlightService } from '../services/HighlightService';
-import { LocationService } from '../services/LocationService';
-import { ExportService } from '../services/ExportService';
-import {t} from "../i18n";
-import { LicenseManager } from '../services/LicenseManager';
-import { ExportManager, FlashcardViewManager, VirtualHighlightManager } from '../views/highlight';
-import { DeviceManager, EventCoordinator, UIInitializer } from '../views/managers';
+import { CanvasService } from '../../services/CanvasService';
+import { HighlightInfo } from '../../types/highlight';
+import { HighlightManager } from '../../services/HighlightManager';
+import { HighlightRepository } from '../../repositories/HighlightRepository';
+import CommentPlugin from '../../../main';
+import { HighlightService } from '../../services/HighlightService';
+import { LocationService } from '../../services/LocationService';
+import { ExportService } from '../../services/ExportService';
+import {t} from "../../i18n";
+import { LicenseManager } from '../../services/LicenseManager';
+import { ExportManager, FlashcardViewManager, VirtualHighlightManager } from '../highlight';
+import { DeviceManager, EventCoordinator, UIInitializer } from '../managers';
 import { ViewState } from './ViewState';
 import { setupHiNoteView } from './HiNoteViewSetup';
 import { HiNoteViewSetupResult } from './HiNoteViewSetupTypes';
-import type { PluginServices } from '../services/PluginServices';
+import type { PluginServices } from '../../plugin/PluginServices';
 
 export const VIEW_TYPE_HINOTE = "hinote-view";
 

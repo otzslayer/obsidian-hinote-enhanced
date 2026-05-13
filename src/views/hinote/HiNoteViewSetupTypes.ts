@@ -1,14 +1,14 @@
 import { App, Component, WorkspaceLeaf } from "obsidian";
-import CommentPlugin from "../../main";
-import { CanvasService } from "../services/CanvasService";
-import { ExportService } from "../services/ExportService";
-import { HighlightManager } from "../services/HighlightManager";
-import { HighlightRepository } from "../repositories/HighlightRepository";
-import { HighlightService } from "../services/HighlightService";
-import { LicenseManager } from "../services/LicenseManager";
-import { CommentService } from "../services/comment";
-import { GlobalHighlightService, HighlightDataService } from "../services/highlight";
-import { HighlightInfo } from "../types/highlight";
+import CommentPlugin from "../../../main";
+import { CanvasService } from "../../services/CanvasService";
+import { ExportService } from "../../services/ExportService";
+import { HighlightManager } from "../../services/HighlightManager";
+import { HighlightRepository } from "../../repositories/HighlightRepository";
+import { HighlightService } from "../../services/HighlightService";
+import { LicenseManager } from "../../services/LicenseManager";
+import { CommentService } from "../../services/comment";
+import { GlobalHighlightService, HighlightDataService } from "../../services/highlight";
+import { HighlightInfo } from "../../types/highlight";
 import {
     CanvasHighlightProcessor,
     CommentController,
@@ -20,9 +20,9 @@ import {
     HighlightRenderManager,
     InfiniteScrollManager,
     VirtualHighlightManager
-} from "../views/highlight";
-import { LayoutManager, ViewPositionController, ViewPositionDetector } from "../views/layout";
-import { BatchOperationsHandler, SelectionManager } from "../views/selection";
+} from "../highlight";
+import { LayoutManager, ViewPositionController, ViewPositionDetector } from "../layout";
+import { BatchOperationsHandler, SelectionManager } from "../selection";
 import {
     DeviceManager,
     EventCoordinator,
@@ -30,7 +30,7 @@ import {
     FileListManager,
     SearchUIManager,
     UIInitializer
-} from "../views/managers";
+} from "../managers";
 import { ViewState } from "./ViewState";
 
 export interface HiNoteViewSetupOptions {

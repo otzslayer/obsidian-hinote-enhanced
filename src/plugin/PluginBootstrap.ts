@@ -2,7 +2,7 @@ import type { WorkspaceLeaf } from 'obsidian';
 import type CommentPlugin from '../../main';
 import { createWindowManager, registerCommands } from '../commands';
 import { WindowManager } from '../services/WindowManager';
-import { HiNoteView, VIEW_TYPE_HINOTE } from './HiNoteView';
+import { HiNoteView, VIEW_TYPE_HINOTE } from '../views/hinote/HiNoteView';
 
 export function createPluginWindowManager(plugin: CommentPlugin): WindowManager {
     return createWindowManager(plugin);

@@ -1,8 +1,8 @@
 import { App } from "obsidian";
-import CommentPlugin from "../../../main";
-import { HighlightManager } from "../../services/HighlightManager";
-import { CommentService } from "../../services/comment";
-import { HighlightInfo } from "../../types/highlight";
+import CommentPlugin from "../../../../main";
+import { HighlightManager } from "../../../services/HighlightManager";
+import { CommentService } from "../../../services/comment";
+import { HighlightInfo } from "../../../types/highlight";
 import {
     CommentController,
     CommentInputManager,
@@ -10,7 +10,7 @@ import {
     HighlightListController,
     HighlightRenderController,
     HighlightRenderManager
-} from "../../views/highlight";
+} from "../../highlight";
 import { ViewState } from "../ViewState";
 
 interface HighlightRenderingSetupOptions {
