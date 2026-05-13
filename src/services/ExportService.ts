@@ -1,13 +1,17 @@
 import { App, TFile } from "obsidian";
-import { HighlightInfo, CommentItem } from "../types/highlight";
+import { HighlightInfo } from "../types/highlight";
 import { HighlightRepository } from "../repositories/HighlightRepository";
 import { t } from "../i18n";
 import { HighlightService } from "./HighlightService";
 import { IdGenerator } from '../utils/IdGenerator';
 import type { PluginSettings } from "../types/settings";
+import { ExportContentRenderer } from "./export/ExportContentRenderer";
+import { ExportFileWriter } from "./export/ExportFileWriter";
 
 export class ExportService {
     private highlightService: HighlightService;
+    private contentRenderer: ExportContentRenderer;
+    private fileWriter: ExportFileWriter;
 
     constructor(
         private app: App,
@@ -16,6 +20,8 @@ export class ExportService {
         private getSettings?: () => PluginSettings
     ) {
         this.highlightService = highlightService ?? new HighlightService(app);
+        this.contentRenderer = new ExportContentRenderer(this.highlightService);
+        this.fileWriter = new ExportFileWriter(app);
     }
     
     /**
@@ -32,32 +38,7 @@ export class ExportService {
      * @param exportPath 导出路径
      */
     private async createExportFile(fileName: string, content: string, exportPath: string): Promise<TFile> {
-        // 如果设置了导出路径，确保目录存在
-        let fullPath = fileName;
-        if (exportPath) {
-            // 确保目录存在
-            const folderPath = this.app.vault.getAbstractFileByPath(exportPath);
-            if (!folderPath) {
-                await this.app.vault.createFolder(exportPath);
-            }
-            fullPath = `${exportPath}/${fileName}`;
-        }
-
-        // 创建新文件
-        try {
-            const newFile = await this.app.vault.create(
-                `${fullPath}.md`,
-                content
-            );
-            return newFile;
-        } catch (error) {
-            // 处理文件已存在的情况
-            if (error.message && error.message.includes("already exists")) {
-                throw new Error(t("Export file already exists. Please try again in a moment."));
-            }
-            // 处理其他文件创建错误
-            throw new Error(t("Failed to create export file: ") + error.message);
-        }
+        return this.fileWriter.createMarkdownFile(fileName, content, exportPath);
     }
     
     /**
@@ -103,13 +84,13 @@ export class ExportService {
             
             // 如果有自定义模板且不为空，使用模板解析方式
             if (customTemplate && customTemplate.trim() !== '') {
-                const templateContent = await this.generateContentFromTemplate(file, fileHighlights, customTemplate);
+                const templateContent = await this.contentRenderer.generateContentFromTemplate(file, fileHighlights, customTemplate);
                 if (templateContent.trim() !== '') {
                     contentParts.push(templateContent);
                 }
             } else {
                 // 如果没有自定义模板或模板为空，使用原来的方式
-                const defaultContent = await this.generateDefaultContent(file, fileHighlights);
+                const defaultContent = await this.contentRenderer.generateDefaultContent(file, fileHighlights);
                 contentParts.push(defaultContent);
             }
         }
@@ -203,166 +184,7 @@ export class ExportService {
      */
     private async generateExportContent(file: TFile, highlights: HighlightInfo[]): Promise<string> {
         const settings = this.getPluginSettings();
-        
-        // 检查是否有自定义模板
         const customTemplate = settings?.export?.exportTemplate;
-        
-        // 如果有自定义模板且不为空，使用模板解析方式
-        if (customTemplate && customTemplate.trim() !== '') {
-            return this.generateContentFromTemplate(file, highlights, customTemplate);
-        }
-        
-        // 如果没有自定义模板或模板为空，使用原来的方式
-        return this.generateDefaultContent(file, highlights);
-    }
-    
-    /**
-     * 使用模板生成导出内容
-     */
-    private async generateContentFromTemplate(file: TFile, highlights: HighlightInfo[], template: string): Promise<string> {
-        const content: string[] = [];
-        
-        // 使用新的结构化方法处理每个高亮
-        for (const highlight of highlights) {
-            // 为每个高亮生成结构化内容
-            const structuredLines = await this.generateStructuredContent(highlight, file, template);
-            content.push(...structuredLines);
-            content.push(""); // 添加空行分隔
-        }
-        
-        return content.join("\n");
-    }
-    
-    /**
-     * 替换模板中的变量
-     */
-    private replaceVariables(template: string, variables: Record<string, string>): string {
-        let result = template;
-        for (const [key, value] of Object.entries(variables)) {
-            result = result.replace(new RegExp(`{{${key}}}`, 'g'), value || '');
-        }
-        return result;
-    }
-    
-    /**
-     * 格式化批注内容 - 借鉴 DragContentGenerator 的优秀设计
-     */
-    private formatComment(comment: CommentItem, isVirtual: boolean = false): string[] {
-        const lines: string[] = [];
-        const indentation = isVirtual ? '>' : '>>';
-
-        if (!isVirtual) {
-            // 使用新的模板格式：时间戳在标题中
-            const date = comment.updatedAt ? window.moment(comment.updatedAt).format("YYYY-MM-DD HH:mm:ss") : '';
-            lines.push(`>> [!note]+ ${date}`);
-        }
-
-        // 处理多行内容，确保每行都有正确的缩进
-        const commentLines = comment.content
-            .split('\n')
-            .map(line => {
-                line = line.trim();
-                return line ? `${indentation} ${line}` : indentation;
-            })
-            .join('\n');
-        lines.push(commentLines);
-        lines.push(isVirtual ? ">" : ">");
-
-        return lines;
-    }
-
-    /**
-     * 为单个高亮生成结构化内容 - 借鉴 DragContentGenerator 的设计
-     */
-    private async generateStructuredContent(highlight: HighlightInfo, file: TFile, template?: string): Promise<string[]> {
-        const lines: string[] = [];
-
-        // 处理主体内容（高亮部分）
-        if (highlight.isVirtual) {
-            // 虚拟高亮（文件评论）
-            lines.push(`> [!note] [[${file.basename}]]`);
-            lines.push("> ");
-        } else {
-            // 普通高亮
-            if (template && (template.includes('{{highlightText}}') || template.includes('{{highlightBlockRef}}'))) {
-                // 使用模板处理高亮部分
-                const highlightTemplate = this.extractHighlightTemplate(template);
-                
-                // 获取 BlockID 引用（如果需要）
-                let blockIdRef = '';
-                if (typeof highlight.position === 'number' && template.includes('{{highlightBlockRef}}')) {
-                    try {
-                        const highlightLength = highlight.originalLength || highlight.text.length;
-                        blockIdRef = await this.highlightService.createBlockIdForHighlight(
-                            file, 
-                            highlight.position, 
-                            highlightLength
-                        ) || '';
-                    } catch (error) {
-                        console.error('[ExportService] Error creating block ID:', error);
-                    }
-                }
-                
-                const processedTemplate = this.replaceVariables(highlightTemplate, {
-                    sourceFile: file.basename,
-                    highlightText: highlight.text || '',
-                    highlightBlockRef: blockIdRef,
-                    highlightType: 'HiNote',
-                    commentContent: '',
-                    commentDate: ''
-                });
-                lines.push(...processedTemplate.split('\n'));
-            } else {
-                // 使用默认格式
-                lines.push("> [!quote] HiNote");
-                lines.push(`> ${highlight.text || ''}`);
-                lines.push("> ");
-            }
-        }
-
-        // 统一处理所有批注
-        if (highlight.comments && highlight.comments.length > 0) {
-            for (const comment of highlight.comments) {
-                lines.push(...this.formatComment(comment, highlight.isVirtual));
-            }
-        }
-
-        return lines;
-    }
-
-    /**
-     * 从模板中提取高亮部分（移除批注相关内容）
-     */
-    private extractHighlightTemplate(template: string): string {
-        let highlightTemplate = template;
-        
-        // 移除批注块（>> [!note]+ 时间戳 及其后续内容）
-        const commentBlockRegex = /\n>>\s*\[!note\]\+[\s\S]*?(?=\n>\s*$|\n\s*$|$)/g;
-        highlightTemplate = highlightTemplate.replace(commentBlockRegex, '');
-        
-        // 移除批注变量
-        highlightTemplate = highlightTemplate.replace(/\{\{commentContent\}\}/g, '');
-        highlightTemplate = highlightTemplate.replace(/\{\{commentDate\}\}/g, '');
-        
-        // 清理多余的空行
-        highlightTemplate = highlightTemplate.replace(/\n{3,}/g, '\n\n');
-        highlightTemplate = highlightTemplate.replace(/\n>\s*\n\s*$/g, '\n');
-        
-        return highlightTemplate.trim();
-    }
-    
-    /**
-     * 使用默认方式生成导出内容
-     */
-    private async generateDefaultContent(file: TFile, highlights: HighlightInfo[]): Promise<string> {
-        // 使用用户提供的模板作为默认模板
-        const defaultTemplate = `> [!quote] HiNote
-> {{highlightText}}
-> 
->> [!note]+ {{commentDate}}
->> {{commentContent}}`;
-        
-        // 调用模板生成方法
-        return this.generateContentFromTemplate(file, highlights, defaultTemplate);
+        return this.contentRenderer.generateExportContent(file, highlights, customTemplate);
     }
 }
