@@ -1,4 +1,5 @@
 import type { App } from "obsidian";
+import type CommentPlugin from "../../../main";
 import type { FSRSManager } from "../services/FSRSManager";
 import type { FSRSRating, FlashcardState, GroupProgressState } from "../types/FSRSTypes";
 import type { LicenseManager } from "../../services/LicenseManager";
@@ -6,6 +7,7 @@ import type { FlashcardRenderer } from "./FlashcardRenderer";
 import type { FlashcardGroupManager, FlashcardUtils } from "./controllers";
 
 export interface FlashcardComponentContext {
+    getPlugin(): CommentPlugin;
     getApp(): App;
     getContainer(): HTMLElement;
     getIsActive(): boolean;

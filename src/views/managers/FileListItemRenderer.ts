@@ -93,6 +93,13 @@ export class FileListItemRenderer {
         });
     }
 
+    updateAllHighlightsCount(container: HTMLElement): void {
+        const countEl = container.querySelector(".highlight-file-item-all .highlight-file-item-count");
+        if (countEl) {
+            countEl.textContent = `${this.options.dataSource.getTotalHighlightsCount()}`;
+        }
+    }
+
     async createFileItem(fileList: HTMLElement, file: TFile): Promise<void> {
         const state = this.options.getState();
         const fileItem = fileList.createEl("div", {

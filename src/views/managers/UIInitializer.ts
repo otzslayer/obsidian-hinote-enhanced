@@ -35,6 +35,7 @@ export class UIInitializer {
         // 清空容器并添加类
         container.empty();
         container.addClass("comment-view-container");
+        container.addClass("hinote-view-container");
 
         // 创建主容器
         const mainContainer = container.createEl("div", {

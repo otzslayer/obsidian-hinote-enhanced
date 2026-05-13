@@ -43,6 +43,7 @@ export class FlashcardComponent extends Component {
     private currentGroupName: string = '';
     private currentGroupId: string = '';
     private app: App;
+    private plugin: CommentPlugin;
     private completionMessage: string | null = null;
     
     // 存储每个分组的学习进度和完成状态
@@ -66,6 +67,7 @@ export class FlashcardComponent extends Component {
     constructor(container: HTMLElement, plugin: CommentPlugin) {
         super();
         this.container = container;
+        this.plugin = plugin;
         this.app = plugin.app;
         this.fsrsManager = plugin.fsrsManager;
         
@@ -164,6 +166,10 @@ export class FlashcardComponent extends Component {
     
     public getContainer(): HTMLElement {
         return this.container;
+    }
+
+    public getPlugin(): CommentPlugin {
+        return this.plugin;
     }
     
     public getIsActive(): boolean {

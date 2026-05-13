@@ -112,6 +112,8 @@ export class LayoutManager {
             // 立即应用布局,不阻塞UI
             if (this.isMobileView && this.isSmallScreen) {
                 this.applySmallScreenLayout();
+            } else if (this.isSmallScreen) {
+                this.applyCompactLayout();
             } else {
                 this.applyLargeScreenLayout();
             }
@@ -121,11 +123,11 @@ export class LayoutManager {
                 this.onCreateFloatingButton();
             }
             
-            // 延迟加载文件列表,不阻塞UI渲染
-            // 拖拽到主视图时强制刷新，确保显示最新的文件和高亮
+            // 延迟同步文件列表状态,不阻塞UI渲染。
+            // 不在拖拽进主视图时强制刷新,避免清空缓存后触发全库高亮扫描。
             if (this.onUpdateFileList) {
                 window.setTimeout(() => {
-                    void this.onUpdateFileList?.(true); // 强制刷新
+                    void this.onUpdateFileList?.();
                 }, 50);
             }
         } else {
@@ -157,6 +159,15 @@ export class LayoutManager {
     private applyLargeScreenLayout(): void {
         // 同时显示文件列表和内容
         this.fileListContainer.addClass('highlight-display-block');
+        this.mainContentContainer.removeClass('highlight-display-none');
+        this.fileListContainer.removeClass('highlight-full-width');
+    }
+
+    /**
+     * 应用窄窗格布局（桌面端 Obsidian pane 被缩小时）
+     */
+    private applyCompactLayout(): void {
+        this.fileListContainer.addClass('highlight-display-none');
         this.mainContentContainer.removeClass('highlight-display-none');
         this.fileListContainer.removeClass('highlight-full-width');
     }
@@ -194,7 +205,8 @@ export class LayoutManager {
      * 检测是否为小屏幕设备（宽度小于768px）
      */
     checkIfSmallScreen(): boolean {
-        return window.innerWidth < 768;
+        const containerWidth = this.containerEl.getBoundingClientRect().width;
+        return (containerWidth || window.innerWidth) < 768;
     }
     
     /**

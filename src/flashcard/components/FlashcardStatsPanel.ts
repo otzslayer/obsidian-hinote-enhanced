@@ -136,8 +136,8 @@ export class FlashcardStatsPanel {
         // 设置网格样式
         grid.setCssProps({
             display: 'grid',
-            gridTemplateRows: `repeat(${rows}, 1fr)`,
-            gridTemplateColumns: `repeat(${cols}, 1fr)`
+            'grid-template-rows': `repeat(${rows}, 1fr)`,
+            'grid-template-columns': `repeat(${cols}, 1fr)`
         });
         
         // 重新设计热力图布局，确保当天在正确位置

@@ -132,7 +132,7 @@ export class CommentWidgetHelper {
 
         tooltip.setCssProps({
             position: 'fixed',
-            maxWidth: `${Math.min(360, maxTooltipWidth)}px`
+            'max-width': `${Math.min(360, maxTooltipWidth)}px`
         });
 
         const tooltipRect = tooltip.getBoundingClientRect();

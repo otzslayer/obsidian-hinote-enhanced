@@ -115,29 +115,6 @@ export class FlashcardProgressManager {
         // 设置进度条宽度
         progressBar.setCssProps({ width: `${percent}%` });
         
-        // 如果有选择分组，添加分组信息
-        if (this.component.getCurrentGroupName()) {
-            
-            const group = findGroupByName(
-                this.component.getFsrsManager(),
-                this.component.getCurrentGroupName()
-            );
-            
-            if (group) {
-                // 添加分组名称
-                const groupNameContainer = progressContainer.createEl('div', { cls: 'flashcard-group-name-container' });
-                groupNameContainer.createEl('div', { cls: 'flashcard-group-name', text: group.name });
-                
-                // 添加分组过滤条件
-                if (group.filter) {
-                    groupNameContainer.createEl('div', { 
-                        cls: 'flashcard-group-filter', 
-                        text: t('Filter') + ': ' + group.filter 
-                    });
-                }
-            }
-        }
-        
         // 添加当前卡片索引信息
         const indexContainer = progressContainer.createEl('div', { cls: 'flashcard-index-container' });
         

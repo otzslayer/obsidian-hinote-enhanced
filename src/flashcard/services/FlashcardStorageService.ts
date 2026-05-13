@@ -34,7 +34,9 @@ export class FlashcardStorageService {
         try {
             if (this.dataManager) {
                 const data = await this.dataManager.getFlashcardData();
-                return data || defaultStorage;
+                const storage = data || defaultStorage;
+                this.normalize(storage);
+                return storage;
             }
 
             const data = await this.plugin.loadData();
@@ -42,7 +44,7 @@ export class FlashcardStorageService {
                 return defaultStorage;
             }
 
-            return {
+            const storage = {
                 version: data.fsrs.version || defaultStorage.version,
                 cards: data.fsrs.cards || {},
                 globalStats: data.fsrs.globalStats || defaultStorage.globalStats,
@@ -50,6 +52,8 @@ export class FlashcardStorageService {
                 uiState: data.fsrs.uiState || defaultStorage.uiState,
                 dailyStats: data.fsrs.dailyStats || []
             };
+            this.normalize(storage);
+            return storage;
         } catch (error) {
             console.error('Loading storage data failed:', error);
             return defaultStorage;
@@ -84,5 +88,30 @@ export class FlashcardStorageService {
         if (!storage.cards) {
             storage.cards = {};
         }
+
+        for (const card of Object.values(storage.cards)) {
+            card.answer = this.normalizeLegacyAnswerPlaceholder(card.answer);
+        }
+    }
+
+    private normalizeLegacyAnswerPlaceholder(answer: string | undefined): string {
+        if (!answer) {
+            return "";
+        }
+
+        const legacyPlaceholders = ["Add answer", "添加答案"];
+        for (const placeholder of legacyPlaceholders) {
+            if (answer === placeholder) {
+                return "";
+            }
+            if (answer.startsWith(`${placeholder}\n\n`)) {
+                return answer.slice(placeholder.length + 2);
+            }
+            if (answer.startsWith(`${placeholder}\n`)) {
+                return answer.slice(placeholder.length + 1);
+            }
+        }
+
+        return answer;
     }
 }

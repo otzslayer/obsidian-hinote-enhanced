@@ -96,7 +96,9 @@ export class HiNoteView extends ItemView {
         await this.updateViewLayout();
 
         if (refreshHighlights) {
-            await this.setupResult?.highlightListController.updateHighlights();
+            void this.setupResult?.highlightListController.updateHighlights().catch(error => {
+                console.error('[HiNoteView] Failed to refresh highlights after mode switch:', error);
+            });
         }
     }
 
@@ -177,8 +179,9 @@ export class HiNoteView extends ItemView {
         this.setupResult?.selectionManager.destroy();
         this.setupResult?.batchOperationsHandler.destroy();
         this.setupResult?.fileListManager.destroy();
-        this.setupResult?.highlightRenderManager.clear();
+        this.setupResult?.highlightRenderManager.destroy();
         this.setupResult?.commentInputManager.clearEditingState();
+        this.deviceManager?.destroy();
         
         this.setupResult = null;
     }

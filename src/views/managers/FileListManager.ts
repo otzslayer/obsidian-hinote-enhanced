@@ -161,6 +161,8 @@ export class FileListManager {
 
         // 获取所有包含高亮的文件并创建列表项
         const files = await this.dataSource.getFilesWithHighlights();
+        this.itemRenderer.updateAllHighlightsCount(fileList);
+
         for (const file of files) {
             await this.itemRenderer.createFileItem(fileList, file);
         }

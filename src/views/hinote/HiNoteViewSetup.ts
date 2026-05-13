@@ -187,13 +187,17 @@ export async function setupHiNoteView(options: HiNoteViewSetupOptions): Promise<
         checkViewPosition
     });
 
+    deviceManager.setOnDeviceChange(() => {
+        void updateViewLayout();
+    });
+    deviceManager.startWatching(container);
+
     infiniteScrollManager = new InfiniteScrollManager(highlightContainer);
     infiniteScrollManager.setLoadingIndicator(loadingIndicator);
 
     const activeFile = app.workspace.getActiveFile();
     if (activeFile) {
         state.currentFile = activeFile;
-        await highlightListController.updateHighlights();
     }
 
     layoutAndCanvas.layoutManager.updateState({
@@ -206,8 +210,14 @@ export async function setupHiNoteView(options: HiNoteViewSetupOptions): Promise<
     state.isMobileView = deviceInfo.isMobile;
     state.isSmallScreen = deviceInfo.isSmallScreen;
 
-    highlightContainer.empty();
-    highlightListController.renderWithCurrentSearch();
+    if (activeFile) {
+        void highlightListController.updateHighlights().catch(error => {
+            console.error('[HiNoteViewSetup] Failed to load initial highlights:', error);
+        });
+    } else {
+        highlightContainer.empty();
+        highlightListController.renderWithCurrentSearch();
+    }
 
     return {
         highlightContainer,

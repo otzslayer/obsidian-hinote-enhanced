@@ -1,4 +1,5 @@
 import { Component, MarkdownRenderer } from "obsidian";
+import { t } from "../../../i18n";
 import type { FlashcardComponentContext } from "../FlashcardComponentContext";
 
 export class FlashcardMarkdownRenderer {
@@ -9,7 +10,7 @@ export class FlashcardMarkdownRenderer {
 
         if (!content) {
             console.warn("renderMarkdownContent: content is empty or undefined");
-            containerEl.textContent = "Add answer";
+            containerEl.textContent = t("Add answer");
             return;
         }
 

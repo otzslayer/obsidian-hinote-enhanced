@@ -1,5 +1,11 @@
-import { TFile } from "obsidian";
+import { Notice, TFile } from "obsidian";
+import { CommentInputActionBar, CommentInputSaveController } from "../../../components/comment";
+import {
+    autoResizeCommentTextarea,
+    setupCommentInputKeyboard
+} from "../../../components/comment/CommentInputKeyboard";
 import { t } from "../../../i18n";
+import { IdGenerator } from "../../../utils/IdGenerator";
 import { CardGroup, FlashcardState, FSRS_RATING, FSRSRating } from "../../types/FSRSTypes";
 import type { FlashcardComponentContext, FlashcardRatingButton } from "../FlashcardComponentContext";
 import { FlashcardMarkdownRenderer } from "./FlashcardMarkdownRenderer";
@@ -55,7 +61,12 @@ export class FlashcardCardRenderer {
         }).createEl("div", {
             cls: "flashcard-content markdown-rendered"
         });
-        void this.markdownRenderer.render(backEl, backContent, currentCard.filePath);
+
+        if (this.shouldRenderAnswerEmptyState(currentCard, isReversed, backContent)) {
+            this.renderAnswerEmptyState(backEl, currentCard);
+        } else {
+            void this.markdownRenderer.render(backEl, backContent, currentCard.filePath);
+        }
     }
 
     private isCardReversed(currentCard: FlashcardState): boolean {
@@ -141,6 +152,166 @@ export class FlashcardCardRenderer {
                 void this.component.getApp().workspace.getLeaf().openFile(file);
             }
         });
+    }
+
+    private shouldRenderAnswerEmptyState(currentCard: FlashcardState, isReversed: boolean, backContent: string): boolean {
+        return !isReversed
+            && backContent.trim() === ""
+            && currentCard.sourceType === "highlight"
+            && Boolean(currentCard.sourceId)
+            && Boolean(currentCard.filePath);
+    }
+
+    private renderAnswerEmptyState(container: HTMLElement, currentCard: FlashcardState): void {
+        container.empty();
+        container.removeClass("markdown-rendered");
+        container.addClass("flashcard-answer-empty-state");
+
+        const emptyPrompt = container.createEl("div", {
+            cls: "flashcard-answer-empty-prompt",
+            attr: {
+                role: "button",
+                tabindex: "0"
+            }
+        });
+        emptyPrompt.setText(t("Add answer..."));
+
+        const openEditor = (event: Event) => {
+            event.stopPropagation();
+            this.renderAnswerEditor(container, currentCard);
+        };
+
+        emptyPrompt.addEventListener("click", openEditor);
+        emptyPrompt.addEventListener("keydown", event => {
+            if (event.key !== "Enter" && event.key !== " ") {
+                return;
+            }
+
+            event.preventDefault();
+            openEditor(event);
+        });
+    }
+
+    private renderAnswerEditor(container: HTMLElement, currentCard: FlashcardState): void {
+        container.empty();
+        container.removeClass("flashcard-answer-empty-state");
+        container.removeClass("markdown-rendered");
+        container.addClass("flashcard-answer-editor");
+        container.addClass("hi-note-input");
+
+        const textarea = container.createEl("textarea", {
+            attr: {
+                placeholder: t("Add answer")
+            }
+        });
+        textarea.addEventListener("input", () => autoResizeCommentTextarea(textarea));
+        textarea.addEventListener("click", event => event.stopPropagation());
+
+        const saveController = new CommentInputSaveController({
+            getTextarea: () => textarea,
+            onSave: async content => await this.saveAnswerFromEditor(currentCard, content),
+            onSaved: () => {}
+        });
+
+        container.addEventListener("click", event => event.stopPropagation());
+        setupCommentInputKeyboard(textarea, {
+            onInlineAI: async () => {},
+            onSave: async () => {
+                await saveController.saveCurrentContent();
+            }
+        });
+
+        const actionHint = new CommentInputActionBar(container, {
+            onSave: async () => {
+                await saveController.saveCurrentContent();
+            },
+            saveHintText: t("Shift + Enter Wrap, Enter Save")
+        }).render();
+
+        const cancelLink = actionHint.createEl("div", {
+            cls: "hi-note-delete-link",
+            text: t("Cancel")
+        });
+        cancelLink.addEventListener("click", event => {
+            event.stopPropagation();
+            saveController.reset();
+            this.component.getRenderer().render();
+        });
+
+        textarea.focus();
+    }
+
+    private async saveAnswerFromEditor(currentCard: FlashcardState, answer: string): Promise<void> {
+        const content = answer.trim();
+        if (!content) {
+            new Notice(t("Please enter an answer."));
+            return;
+        }
+
+        const sourceId = currentCard.sourceId;
+        const filePath = currentCard.filePath;
+        if (!sourceId || !filePath) {
+            new Notice(t("No corresponding highlight found."));
+            return;
+        }
+
+        const plugin = this.component.getPlugin();
+        const file = plugin.app.vault.getAbstractFileByPath(filePath);
+        if (!(file instanceof TFile)) {
+            new Notice(t("No corresponding file found."));
+            return;
+        }
+
+        const fileHighlights = await plugin.highlightRepository.getFileHighlights(file.path);
+        const highlight = fileHighlights.find(item => item.id === sourceId);
+        if (!highlight) {
+            new Notice(t("No corresponding highlight found."));
+            return;
+        }
+
+        if (!highlight.comments) {
+            highlight.comments = [];
+        }
+
+        highlight.comments.push({
+            id: IdGenerator.generateCommentId(),
+            content,
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+        });
+
+        await plugin.highlightManager.addHighlight(file, highlight);
+        currentCard.answer = this.buildAnswerFromCardAndComments(currentCard.text, highlight.comments.map(comment => comment.content));
+        this.component.getRenderer().render();
+        new Notice(t("Answer saved."));
+    }
+
+    private buildAnswerFromCardAndComments(cardText: string, commentContents: string[]): string {
+        const answerParts: string[] = [];
+        const clozeAnswers = this.extractClozeAnswers(cardText);
+        const cleanComments = commentContents.filter(content => content.trim() !== "");
+
+        if (clozeAnswers.length > 0) {
+            answerParts.push(clozeAnswers.join("\n"));
+        }
+
+        if (cleanComments.length > 0) {
+            answerParts.push(cleanComments.join("\n\n"));
+        }
+
+        return answerParts.join("\n\n");
+    }
+
+    private extractClozeAnswers(text: string): string[] {
+        const answers: string[] = [];
+        const clozeRegex = /\{\{([^{}]+)\}\}/g;
+        let match: RegExpExecArray | null;
+
+        while ((match = clozeRegex.exec(text)) !== null) {
+            answers.push(match[1]);
+        }
+
+        return answers;
     }
 
     private formatDiffFromNow(timestamp: number): string {

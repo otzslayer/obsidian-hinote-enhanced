@@ -28,16 +28,17 @@ export class ViewPositionController {
         this.options.state.isDraggedToMainView = isInMainView;
 
         if (isInMainView) {
-            await this.enterMainView();
+            this.prepareMainViewState();
+            await this.updateLayout();
+            void this.loadMainViewHighlights();
         } else {
             this.enterSidebarView(wasInAllHighlightsView);
+            await this.updateLayout();
+            this.refreshActiveSearch();
         }
-
-        await this.updateLayout();
-        this.refreshActiveSearch();
     }
 
-    private async enterMainView(): Promise<void> {
+    private prepareMainViewState(): void {
         const { state } = this.options;
         const deviceInfo = this.options.getDeviceManager()?.getDeviceInfo();
         if (deviceInfo?.isMobile && deviceInfo.isSmallScreen) {
@@ -47,13 +48,26 @@ export class ViewPositionController {
         const activeFile = this.options.app.workspace.getActiveFile();
         if (activeFile) {
             state.currentFile = activeFile;
-            await this.options.updateHighlights();
-        } else {
-            state.currentFile = null;
-            await this.options.updateAllHighlights();
         }
 
         this.syncFileListSelection();
+    }
+
+    private async loadMainViewHighlights(): Promise<void> {
+        const { state } = this.options;
+        if (!state.isDraggedToMainView) {
+            return;
+        }
+
+        if (state.currentFile) {
+            await this.options.updateHighlights();
+        } else {
+            await this.options.updateAllHighlights();
+        }
+
+        if (state.isDraggedToMainView) {
+            this.refreshActiveSearch();
+        }
     }
 
     private enterSidebarView(wasInAllHighlightsView: boolean): void {

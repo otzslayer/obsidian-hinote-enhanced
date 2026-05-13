@@ -12,6 +12,7 @@ export class DeviceManager {
     private isMobileView: boolean = false;
     private isSmallScreen: boolean = false;
     private resizeObserver: ResizeObserver | null = null;
+    private observedElement: HTMLElement | null = null;
     private onDeviceChangeCallback: ((deviceInfo: DeviceInfo) => void) | null = null;
 
     constructor() {
@@ -29,6 +30,9 @@ export class DeviceManager {
      * 开始监听屏幕尺寸变化
      */
     startWatching(element: HTMLElement): void {
+        this.observedElement = element;
+        this.updateDeviceInfo();
+
         // 使用 ResizeObserver 监听元素尺寸变化
         this.resizeObserver = new ResizeObserver(() => {
             const oldIsMobile = this.isMobileView;
@@ -76,7 +80,8 @@ export class DeviceManager {
      * 检测是否为小屏幕设备（宽度小于768px）
      */
     private checkIfSmallScreen(): boolean {
-        return window.innerWidth < 768;
+        const elementWidth = this.observedElement?.getBoundingClientRect().width;
+        return (elementWidth || window.innerWidth) < 768;
     }
 
     /**
@@ -124,6 +129,7 @@ export class DeviceManager {
      */
     destroy(): void {
         this.stopWatching();
+        this.observedElement = null;
         this.onDeviceChangeCallback = null;
     }
 }

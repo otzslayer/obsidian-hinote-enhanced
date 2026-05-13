@@ -4,6 +4,7 @@ import { t } from "../../i18n";
 interface CommentInputActionBarOptions {
     onSave: () => Promise<void>;
     onDelete?: () => Promise<void>;
+    saveHintText?: string;
 }
 
 export class CommentInputActionBar {
@@ -31,7 +32,7 @@ export class CommentInputActionBar {
         if (!Platform.isMobile) {
             actionHint.createEl("span", {
                 cls: "hi-note-hint",
-                text: t("Tab AI, Shift + Enter Wrap, Enter Save")
+                text: this.options.saveHintText || t("Tab AI, Shift + Enter Wrap, Enter Save")
             });
             return;
         }

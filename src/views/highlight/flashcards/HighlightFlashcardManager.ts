@@ -36,7 +36,7 @@ export class HighlightFlashcardManager {
      */
     async createFlashcard(
         highlight: HighlightInfo,
-        fileName?: string,
+        _fileName?: string,
         silent: boolean = false
     ): Promise<boolean> {
         try {
@@ -88,28 +88,13 @@ export class HighlightFlashcardManager {
             
             // 构建闪卡内容
             const text = highlight.text;
-            let answer = '';
-            const answerParts: string[] = [];
-            
-            // 如果有文件路径，添加到答案部分
-            if (highlight.filePath) {
-                const displayFileName = fileName || highlight.filePath.split('/').pop() || highlight.filePath;
-                answerParts.push(`From: [[${displayFileName}]]`);
-            }
-            
-            // 如果有批注内容，添加到答案部分
-            if (highlight.comments && highlight.comments.length > 0) {
-                answerParts.push(highlight.comments.map(c => c.content || '').join('\n'));
-            }
-            
-            // 合并所有答案部分，如果没有内容则使用默认文本
-            answer = answerParts.length > 0 ? answerParts.join('\n\n') : t('Add answer');
+            const answer = this.buildFlashcardAnswer(highlight);
             
             // 创建闪卡
             const card = fsrsManager.addCard(
                 text, 
                 answer, 
-                highlight.filePath || fileName, 
+                highlight.filePath || _fileName,
                 highlight.id, 
                 'highlight'
             );
@@ -133,6 +118,36 @@ export class HighlightFlashcardManager {
             if (!silent) new Notice(t(`Failed to create flashcard: ${error.message}`));
             return false;
         }
+    }
+
+    private buildFlashcardAnswer(highlight: HighlightInfo): string {
+        const answerParts: string[] = [];
+        const clozeAnswers = this.extractClozeAnswers(highlight.text);
+        const commentContents = (highlight.comments || [])
+            .map(comment => comment.content || '')
+            .filter(content => content.trim() !== '');
+
+        if (clozeAnswers.length > 0) {
+            answerParts.push(clozeAnswers.join('\n'));
+        }
+
+        if (commentContents.length > 0) {
+            answerParts.push(commentContents.join('\n\n'));
+        }
+
+        return answerParts.join('\n\n');
+    }
+
+    private extractClozeAnswers(text: string): string[] {
+        const answers: string[] = [];
+        const clozeRegex = /\{\{([^{}]+)\}\}/g;
+        let match: RegExpExecArray | null;
+
+        while ((match = clozeRegex.exec(text)) !== null) {
+            answers.push(match[1]);
+        }
+
+        return answers;
     }
     
     /**

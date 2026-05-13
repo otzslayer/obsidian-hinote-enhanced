@@ -31,6 +31,9 @@ export class HighlightRenderManager {
     private highlightsWithFlashcards: Set<string> = new Set();
     private currentBatch: number = 0;
     private renderSequence = 0;
+    private resizeObserver: ResizeObserver | null = null;
+    private resizeTimer: number | null = null;
+    private lastMasonryColumnCount = 0;
     
     constructor(
         container: HTMLElement,
@@ -40,6 +43,7 @@ export class HighlightRenderManager {
         this.container = container;
         this.plugin = plugin;
         this.searchInput = searchInput;
+        this.startResizeObserver();
     }
     
     /**
@@ -148,6 +152,7 @@ export class HighlightRenderManager {
 
     private syncMasonryColumns(highlightList: HTMLElement): void {
         const expectedColumnCount = this.getMasonryColumnCount(highlightList);
+        this.lastMasonryColumnCount = expectedColumnCount;
         const columns = this.getMasonryColumns(highlightList);
         if (columns.length === expectedColumnCount) {
             return;
@@ -190,6 +195,36 @@ export class HighlightRenderManager {
         return columns.reduce((shortest, column) => {
             return column.scrollHeight < shortest.scrollHeight ? column : shortest;
         }, columns[0]);
+    }
+
+    private startResizeObserver(): void {
+        this.resizeObserver = new ResizeObserver(() => {
+            this.scheduleMasonryReflow();
+        });
+        this.resizeObserver.observe(this.container);
+    }
+
+    private scheduleMasonryReflow(): void {
+        if (this.resizeTimer !== null) {
+            window.clearTimeout(this.resizeTimer);
+        }
+
+        this.resizeTimer = window.setTimeout(() => {
+            this.resizeTimer = null;
+            this.reflowMasonryIfColumnCountChanged();
+        }, 120);
+    }
+
+    private reflowMasonryIfColumnCountChanged(): void {
+        const highlightList = this.container.querySelector<HTMLElement>('.highlight-list');
+        if (!highlightList) return;
+
+        const nextColumnCount = this.getMasonryColumnCount(highlightList);
+        if (nextColumnCount === this.lastMasonryColumnCount) {
+            return;
+        }
+
+        this.syncMasonryColumns(highlightList);
     }
     
     /**
@@ -282,8 +317,19 @@ export class HighlightRenderManager {
      * 清空容器
      */
     clear() {
+        if (this.resizeTimer !== null) {
+            window.clearTimeout(this.resizeTimer);
+            this.resizeTimer = null;
+        }
         defaultHighlightCardRegistry.clearAll();
         this.container.empty();
+        this.lastMasonryColumnCount = 0;
+    }
+
+    destroy(): void {
+        this.resizeObserver?.disconnect();
+        this.resizeObserver = null;
+        this.clear();
     }
     
     /**
