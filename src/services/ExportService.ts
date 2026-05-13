@@ -4,12 +4,7 @@ import { HighlightRepository } from "../repositories/HighlightRepository";
 import { t } from "../i18n";
 import { HighlightService } from "./HighlightService";
 import { IdGenerator } from '../utils/IdGenerator';
-import { ObsidianInternals } from "../utils/ObsidianInternals";
 import type { PluginSettings } from "../types/settings";
-
-interface PluginWithSettings {
-    settings?: PluginSettings;
-}
 
 export class ExportService {
     private highlightService: HighlightService;
@@ -17,7 +12,8 @@ export class ExportService {
     constructor(
         private app: App,
         private highlightRepository: HighlightRepository,
-        highlightService?: HighlightService
+        highlightService?: HighlightService,
+        private getSettings?: () => PluginSettings
     ) {
         this.highlightService = highlightService ?? new HighlightService(app);
     }
@@ -26,7 +22,7 @@ export class ExportService {
      * 获取插件实例
      */
     private getPluginSettings(): PluginSettings | undefined {
-        return ObsidianInternals.getPluginById<PluginWithSettings>(this.app, 'hi-note')?.settings;
+        return this.getSettings?.();
     }
     
     /**

@@ -6,6 +6,7 @@ import html2canvas from 'html2canvas';
 import { registerCommands, createWindowManager } from './src/commands';
 import { InitializationManager } from './src/services/InitializationManager';
 import { WindowManager } from './src/services/WindowManager';
+import type { PluginServices } from './src/services/PluginServices';
 
 export default class CommentPlugin extends Plugin {
 	settings: PluginSettings;
@@ -13,16 +14,29 @@ export default class CommentPlugin extends Plugin {
 	private windowManager: WindowManager;
 
 	// 公开服务实例供外部访问
-	get highlightDecorator() { return this.initManager.highlightDecorator; }
-	get fsrsManager() { return this.initManager.fsrsManager; }
-	get eventManager() { return this.initManager.eventManager; }
-	get highlightService() { return this.initManager.highlightService; }
-	get dataManager() { return this.initManager.dataManager; }
-	get canvasService() { return this.initManager.canvasService; }
+	get services(): PluginServices | null { return this.initManager.currentServices; }
+	get highlightDecorator() { return this.requireServices().highlightDecorator; }
+	get fsrsManager() { return this.requireServices().fsrsManager; }
+	get eventManager() { return this.requireServices().eventManager; }
+	get highlightService() { return this.requireServices().highlightService; }
+	get dataManager() { return this.requireServices().dataManager; }
+	get canvasService() { return this.requireServices().canvasService; }
 	
 	// 架构层实例
-	get highlightRepository() { return this.initManager.highlightRepository; }
-	get highlightManager() { return this.initManager.highlightManager; }
+	get highlightRepository() { return this.requireServices().highlightRepository; }
+	get highlightManager() { return this.requireServices().highlightManager; }
+
+	private requireServices(): PluginServices {
+		const services = this.initManager.currentServices;
+		if (!services) {
+			throw new Error('HiNote services have not been initialized.');
+		}
+		return services;
+	}
+
+	async ensureServicesInitialized(): Promise<PluginServices> {
+		return this.initManager.ensureInitialized();
+	}
 
 	async onload() {
 		// 加载设置
@@ -40,8 +54,9 @@ export default class CommentPlugin extends Plugin {
 		this.registerView(
 			VIEW_TYPE_HINOTE,
 			(leaf) => {
-				this.initManager.ensureInitialized();
-				return new HiNoteView(leaf, this.initManager.highlightManager, this.initManager.highlightRepository);
+				this.ensureServicesInitialized();
+				const services = this.requireServices();
+				return new HiNoteView(leaf, this, services);
 			}
 		);
 
@@ -56,7 +71,9 @@ export default class CommentPlugin extends Plugin {
 		);
 
 		// 注册所有命令
-		registerCommands(this, this.windowManager, () => this.initManager.ensureInitialized());
+		registerCommands(this, this.windowManager, async () => {
+			await this.ensureServicesInitialized();
+		});
 
 		// 添加设置标签页
 		this.addSettingTab(new AISettingTab(this.app, this));

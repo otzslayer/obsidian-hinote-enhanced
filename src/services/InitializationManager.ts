@@ -7,6 +7,7 @@ import { EventManager } from './EventManager';
 import { HighlightManager } from './HighlightManager';
 import { HighlightRepository } from '../repositories/HighlightRepository';
 import type CommentPlugin from '../../main';
+import type { PluginServices } from './PluginServices';
 
 /**
  * 初始化管理器
@@ -15,19 +16,8 @@ import type CommentPlugin from '../../main';
 export class InitializationManager {
     // 延迟初始化标志
     private isInitialized: boolean = false;
-    private initializationPromise: Promise<void> | null = null;
-
-    // 服务实例
-    public eventManager!: EventManager;
-    public dataManager!: HiNoteDataManager;
-    public highlightService!: HighlightService;
-    public canvasService!: CanvasService;
-    public fsrsManager!: FSRSManager;
-    public highlightDecorator!: HighlightDecorator;
-    
-    // 架构层实例
-    public highlightRepository!: HighlightRepository;
-    public highlightManager!: HighlightManager;
+    private initializationPromise: Promise<PluginServices> | null = null;
+    private services: PluginServices | null = null;
 
     constructor(private plugin: CommentPlugin) {}
 
@@ -35,10 +25,10 @@ export class InitializationManager {
      * 确保插件已初始化（延迟初始化）
      * 只在用户首次使用功能时才执行初始化
      */
-    async ensureInitialized(): Promise<void> {
+    async ensureInitialized(): Promise<PluginServices> {
         // 如果已经初始化，直接返回
-        if (this.isInitialized) {
-            return;
+        if (this.isInitialized && this.services) {
+            return this.services;
         }
 
         // 如果正在初始化，等待完成
@@ -47,49 +37,66 @@ export class InitializationManager {
         }
 
         // 开始初始化
-        this.initializationPromise = this.initialize();
-        await this.initializationPromise;
+        this.services = this.initialize();
         this.isInitialized = true;
+        this.initializationPromise = Promise.resolve(this.services);
+        return this.services;
     }
 
     /**
      * 实际的初始化逻辑
      */
-    private async initialize(): Promise<void> {
+    private initialize(): PluginServices {
         // 初始化事件管理器（共享实例）
-        this.eventManager = new EventManager(this.plugin.app);
+        const eventManager = new EventManager(this.plugin.app);
 
         // 初始化数据管理器（共享实例）
-        this.dataManager = new HiNoteDataManager(this.plugin.app);
-
-        // 初始化高亮服务（共享实例）
-        this.highlightService = new HighlightService(this.plugin.app);
-        // 异步构建索引，不阻塞初始化
-        this.highlightService.initialize();
-
-        // 初始化 Canvas 服务（共享实例）
-        this.canvasService = new CanvasService(this.plugin.app.vault);
+        const dataManager = new HiNoteDataManager(this.plugin.app);
 
         // 初始化架构层
-        this.highlightRepository = new HighlightRepository(this.dataManager);
-        this.highlightManager = new HighlightManager(
+        const highlightRepository = new HighlightRepository(dataManager);
+
+        // 初始化高亮服务（共享实例）
+        const highlightService = new HighlightService(
             this.plugin.app,
-            this.highlightRepository,
-            this.eventManager,
-            this.highlightService
+            () => this.plugin.settings,
+            () => highlightRepository
+        );
+        // 异步构建索引，不阻塞初始化
+        highlightService.initialize();
+
+        // 初始化 Canvas 服务（共享实例）
+        const canvasService = new CanvasService(this.plugin.app.vault);
+
+        const highlightManager = new HighlightManager(
+            this.plugin.app,
+            highlightRepository,
+            eventManager,
+            highlightService
         );
         
         // 异步加载数据，不阻塞初始化
-        this.highlightRepository.initialize().catch(error => {
+        highlightRepository.initialize().catch(error => {
             console.error('[HiNote] 加载高亮数据失败:', error);
         });
 
         // 初始化 FSRS 管理器（传入数据管理器以使用新存储层）
-        this.fsrsManager = new FSRSManager(this.plugin, this.dataManager);
+        const fsrsManager = new FSRSManager(this.plugin, dataManager);
 
         // 初始化高亮装饰器
-        this.highlightDecorator = new HighlightDecorator(this.plugin, this.highlightRepository);
-        this.highlightDecorator.enable();
+        const highlightDecorator = new HighlightDecorator(this.plugin, highlightRepository, highlightService, eventManager);
+        highlightDecorator.enable();
+
+        return {
+            eventManager,
+            dataManager,
+            highlightService,
+            canvasService,
+            fsrsManager,
+            highlightDecorator,
+            highlightRepository,
+            highlightManager
+        };
     }
 
     /**
@@ -99,13 +106,13 @@ export class InitializationManager {
         // 数据自动保存，无需手动保存
 
         // 清理高亮装饰器
-        if (this.highlightDecorator) {
-            this.highlightDecorator.disable();
+        if (this.services?.highlightDecorator) {
+            this.services.highlightDecorator.disable();
         }
 
         // 清理高亮服务（注销事件监听器，清空索引）
-        if (this.highlightService) {
-            this.highlightService.destroy();
+        if (this.services?.highlightService) {
+            this.services.highlightService.destroy();
         }
     }
 
@@ -114,5 +121,9 @@ export class InitializationManager {
      */
     get initialized(): boolean {
         return this.isInitialized;
+    }
+
+    get currentServices(): PluginServices | null {
+        return this.services;
     }
 }

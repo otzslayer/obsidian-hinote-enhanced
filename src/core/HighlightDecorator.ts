@@ -5,6 +5,7 @@ import { HighlightService } from '../services/HighlightService';
 import { PreviewWidgetRenderer } from '../views/highlight';
 import { createEditorHighlightDecorations } from "./EditorHighlightDecorations";
 import type { HighlightEvents } from "../services/EventManager";
+import type { EventManager } from "../services/EventManager";
 import type { HiNotePluginContext } from "../types/plugin";
 
 interface EditorWithCodeMirror {
@@ -18,10 +19,15 @@ export class HighlightDecorator {
     private highlightService: HighlightService;
     private previewRenderer: PreviewWidgetRenderer;
 
-    constructor(plugin: Plugin, highlightRepository: HighlightRepository) {
+    constructor(
+        plugin: Plugin,
+        highlightRepository: HighlightRepository,
+        highlightService: HighlightService,
+        private eventManager: EventManager
+    ) {
         this.plugin = plugin as HiNotePluginContext;
         this.highlightRepository = highlightRepository;
-        this.highlightService = this.plugin.highlightService;
+        this.highlightService = highlightService;
         this.previewRenderer = new PreviewWidgetRenderer(
             this.plugin,
             this.highlightRepository,
@@ -82,7 +88,7 @@ export class HighlightDecorator {
 
         refreshEvents.forEach(eventName => {
             this.plugin.registerEvent(
-                this.plugin.eventManager.on(eventName, () => {
+                this.eventManager.on(eventName, () => {
                     this.refreshDecorations();
                 })
             );

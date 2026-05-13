@@ -1,5 +1,6 @@
 import { CardGroup, FlashcardState, FlashcardProgress, FSRSStorage } from '../types/FSRSTypes';
 import { IdGenerator } from '../../utils/IdGenerator';
+import { CardGroupFilterMatcher } from './CardGroupFilterMatcher';
 
 interface CardGroupRepositoryOptions {
     storage: FSRSStorage;
@@ -398,28 +399,6 @@ export class CardGroupRepository {
     }
 
     private matchesGroupFilter(card: FlashcardState, filter: string): boolean {
-        if (!card.filePath) return false;
-
-        const filterConditions = filter.split(',').map(f => f.trim()).filter(f => f.length > 0);
-        const wikiLinkRegex = /\[\[([^\]]+)\]\]/;
-        const filePath = card.filePath.toLowerCase();
-        const fileName = filePath.split('/').pop() || '';
-        const fileNameWithoutExt = fileName.replace(/\.md$/i, '');
-        const cardText = card.text?.toLowerCase() || '';
-        const cardAnswer = card.answer?.toLowerCase() || '';
-
-        return filterConditions.some((condition: string) => {
-            const conditionLower = condition.toLowerCase();
-            const wikiMatch = conditionLower.match(wikiLinkRegex);
-
-            if (wikiMatch) {
-                const linkText = wikiMatch[1].toLowerCase();
-                return fileNameWithoutExt === linkText || fileName === linkText;
-            }
-
-            return filePath.includes(conditionLower)
-                || cardText.includes(conditionLower)
-                || cardAnswer.includes(conditionLower);
-        });
+        return CardGroupFilterMatcher.matches(card, filter);
     }
 }

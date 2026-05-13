@@ -3,11 +3,6 @@ import type { HighlightInfo } from '../../types/highlight';
 import type { PluginSettings } from '../../types/settings';
 import { ExcludePatternMatcher } from '../ExcludePatternMatcher';
 import { BlockIdService } from '../BlockIdService';
-import { ObsidianInternals } from '../../utils/ObsidianInternals';
-
-interface PluginWithSettings {
-    settings?: PluginSettings;
-}
 
 /**
  * 高亮提取器
@@ -28,14 +23,10 @@ export class HighlightExtractor {
         /==([^=\n](?:[^=\n]|=[^=\n])*?[^=\n])==|<mark[^>]*>([\s\S]*?)<\/mark>|<span[^>]*>([\s\S]*?)<\/span>/g;
 
     private blockIdService: BlockIdService;
-    private settings?: PluginSettings;
-    
     // 文件内容缓存
     private contentCache = new Map<string, {content: string, mtime: number}>();
 
-    constructor(private app: App) {
-        const plugin = ObsidianInternals.getPluginById<PluginWithSettings>(app, 'hi-note');
-        this.settings = plugin?.settings;
+    constructor(private app: App, private getSettings?: () => PluginSettings | undefined) {
         this.blockIdService = new BlockIdService(app);
     }
 
@@ -49,7 +40,7 @@ export class HighlightExtractor {
         if (file.extension !== 'md') {
             return false;
         }
-        return !ExcludePatternMatcher.shouldExclude(file, this.settings?.excludePatterns || '');
+        return !ExcludePatternMatcher.shouldExclude(file, this.getSettings?.()?.excludePatterns || '');
     }
 
     /**
@@ -62,7 +53,7 @@ export class HighlightExtractor {
         const highlights: HighlightInfo[] = [];
         
         // 如果使用自定义规则且有规则配置
-        const settings = this.settings;
+        const settings = this.getSettings?.();
         if (settings?.useCustomPattern && settings.regexRules?.length > 0) {
             // 遍历所有启用的规则
             for (const rule of settings.regexRules.filter(r => r.enabled)) {

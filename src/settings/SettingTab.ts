@@ -18,6 +18,8 @@ export class AISettingTab extends PluginSettingTab {
     }
 
     async display(): Promise<void> {
+        await this.plugin.ensureServicesInitialized();
+
         const { containerEl } = this;
         containerEl.empty();
 

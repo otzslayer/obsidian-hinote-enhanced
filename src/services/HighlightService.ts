@@ -2,6 +2,7 @@ import { App, TFile } from "obsidian";
 import { HighlightInfo } from '../types/highlight';
 import { HighlightInfo as HiNote } from '../types/highlight';
 import { HighlightRepository } from '../repositories/HighlightRepository';
+import type { PluginSettings } from '../types/settings';
 import {
     HighlightBatchOps,
     HighlightExtractor,
@@ -26,9 +27,13 @@ export class HighlightService {
     private indexer: HighlightIndexer;
     private batchOps: HighlightBatchOps;
 
-    constructor(private app: App) {
-        this.extractor = new HighlightExtractor(app);
-        this.matcher = new HighlightMatcher(app);
+    constructor(
+        private app: App,
+        getSettings?: () => PluginSettings | undefined,
+        getHighlightRepository?: () => HighlightRepository | undefined
+    ) {
+        this.extractor = new HighlightExtractor(app, getSettings);
+        this.matcher = new HighlightMatcher(app, getHighlightRepository);
         this.indexer = new HighlightIndexer(app, this.extractor);
         this.batchOps = new HighlightBatchOps(app, this.extractor);
     }

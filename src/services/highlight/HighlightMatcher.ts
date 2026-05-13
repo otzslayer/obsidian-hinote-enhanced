@@ -2,11 +2,6 @@ import { App, TFile } from "obsidian";
 import { HighlightInfo } from '../../types/highlight';
 import { HighlightInfo as HiNote } from '../../types/highlight';
 import { HighlightRepository } from '../../repositories/HighlightRepository';
-import { ObsidianInternals } from '../../utils/ObsidianInternals';
-
-interface PluginWithHighlightRepository {
-    highlightRepository?: HighlightRepository;
-}
 
 /**
  * 高亮匹配器
@@ -16,7 +11,10 @@ interface PluginWithHighlightRepository {
  * 3. 匹配成功后异步更新存储中的 position，防止偏移累积
  */
 export class HighlightMatcher {
-    constructor(private app: App) {}
+    constructor(
+        private app: App,
+        private getHighlightRepository?: () => HighlightRepository | undefined
+    ) {}
 
     /**
      * 查找与给定高亮最匹配的存储高亮
@@ -225,10 +223,9 @@ export class HighlightMatcher {
                 }
                 
                 if (changed) {
-                    // 获取 HighlightRepository 实例并保存
-                    const plugin = ObsidianInternals.getPluginById<PluginWithHighlightRepository>(this.app, 'hi-note');
-                    if (plugin?.highlightRepository) {
-                        await plugin.highlightRepository.saveFileHighlights(filePath, storedComments);
+                    const highlightRepository = this.getHighlightRepository?.();
+                    if (highlightRepository) {
+                        await highlightRepository.saveFileHighlights(filePath, storedComments);
                     }
                 }
             } catch (error) {

@@ -14,7 +14,7 @@ import { DeviceManager, EventCoordinator, UIInitializer } from '../views/manager
 import { ViewState } from './ViewState';
 import { setupHiNoteView } from './HiNoteViewSetup';
 import { HiNoteViewSetupResult } from './HiNoteViewSetupTypes';
-import { ObsidianInternals } from '../utils/ObsidianInternals';
+import type { PluginServices } from '../services/PluginServices';
 
 export const VIEW_TYPE_HINOTE = "hinote-view";
 
@@ -48,21 +48,22 @@ export class HiNoteView extends ItemView {
     private uiInitializer: UIInitializer | null = null;
     private eventCoordinator: EventCoordinator | null = null;
 
-    constructor(leaf: WorkspaceLeaf, highlightManager: HighlightManager, highlightRepository: HighlightRepository) {
+    constructor(leaf: WorkspaceLeaf, plugin: CommentPlugin, services: PluginServices) {
         super(leaf);
-        this.highlightManager = highlightManager;
-        this.highlightRepository = highlightRepository;
-        const plugin = ObsidianInternals.getPluginById<CommentPlugin>(this.app, 'hi-note');
-        if (!plugin) {
-            throw new Error('Hi-Note plugin not found');
-        }
         this.plugin = plugin;
+        this.highlightManager = services.highlightManager;
+        this.highlightRepository = services.highlightRepository;
         // 初始化 LocationService（已移除 TextSimilarityService 依赖）
         this.locationService = new LocationService(this.app);
-        this.highlightService = this.plugin.highlightService;
-        this.exportService = new ExportService(this.app, this.highlightRepository, this.highlightService);
+        this.highlightService = services.highlightService;
+        this.exportService = new ExportService(
+            this.app,
+            this.highlightRepository,
+            this.highlightService,
+            () => this.plugin.settings
+        );
         this.licenseManager = new LicenseManager(this.plugin);
-        this.canvasService = this.plugin.canvasService;
+        this.canvasService = services.canvasService;
         
         // === 初始化新 Manager（需要在事件注册前初始化）===
         this.deviceManager = new DeviceManager();
