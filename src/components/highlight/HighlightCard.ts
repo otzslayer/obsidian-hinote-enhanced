@@ -1,7 +1,5 @@
 import { HighlightInfo, CommentItem } from "../../types/highlight";
 import type CommentPlugin from "../../../main";
-import { HighlightContent } from "./HighlightContent";
-import { CommentList } from "./CommentList";
 import { Notice } from "obsidian";
 import { t } from "../../i18n";
 import { SelectionManager } from "../../views/selection";
@@ -16,6 +14,11 @@ import {
     HighlightCardTitleBarRenderer
 } from "./card";
 import { defaultHighlightCardRegistry, HighlightCardRegistry } from "./HighlightCardRegistry";
+import {
+    createHighlightCardElement,
+    renderHighlightCardComments,
+    renderHighlightCardContent
+} from "./HighlightCardView";
 
 export class HighlightCard {
     private card: HTMLElement;
@@ -103,12 +106,7 @@ export class HighlightCard {
     }
 
     private render() {
-        this.card = this.container.createEl("div", {
-            cls: `highlight-card ${this.highlight.isVirtual ? 'virtual-highlight-card' : ''}`,
-            attr: {
-                'data-highlight': JSON.stringify(this.highlight)
-            }
-        });
+        this.card = createHighlightCardElement(this.container, this.highlight);
 
         // 添加点击事件用于切换选中状态，支持多选
         this.card.addEventListener("click", (e: MouseEvent) => {
@@ -122,18 +120,12 @@ export class HighlightCard {
         
         this.titleBarRenderer.render(this.card);
 
-        // 创建 content 容器
-        const highlightContentEl = this.card.createEl("div", {
-            cls: "highlight-content"
-        });
-
-        // 渲染高亮内容
-        new HighlightContent(
-            highlightContentEl,
+        renderHighlightCardContent(
+            this.card,
             this.highlight,
-            this.options.onHighlightClick,
             this.plugin.app,
-            this.isInMainView
+            this.isInMainView,
+            this.options.onHighlightClick
         );
 
         this.renderComments();
@@ -317,18 +309,16 @@ export class HighlightCard {
     }
 
     private renderComments(): void {
-        if (this.highlight.comments && this.highlight.comments.length > 0) {
-            new CommentList(
-                this.card,
-                this.highlight,
-                (comment) => {
-                    this.selectionController.markEditing();
-                    this.selectCard(); // 在进入编辑模式时选中卡片
-                    this.options.onCommentEdit(this.highlight, comment);
-                },
-                this.plugin.app
-            );
-        }
+        renderHighlightCardComments(
+            this.card,
+            this.highlight,
+            this.plugin.app,
+            (comment) => {
+                this.selectionController.markEditing();
+                this.selectCard(); // 在进入编辑模式时选中卡片
+                this.options.onCommentEdit(this.highlight, comment);
+            }
+        );
     }
     
     /**
