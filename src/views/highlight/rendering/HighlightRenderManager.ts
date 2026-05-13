@@ -10,6 +10,9 @@ import { t } from '../../../i18n';
  * 负责高亮卡片的渲染和显示
  */
 export class HighlightRenderManager {
+    private static readonly MASONRY_MIN_COLUMN_WIDTH = 250;
+    private static readonly MASONRY_GAP = 12;
+
     private container: HTMLElement;
     private plugin: CommentPlugin;
     private searchInput: HTMLInputElement;
@@ -27,6 +30,7 @@ export class HighlightRenderManager {
     private isDraggedToMainView: boolean = false;
     private highlightsWithFlashcards: Set<string> = new Set();
     private currentBatch: number = 0;
+    private renderSequence = 0;
     
     constructor(
         container: HTMLElement,
@@ -106,6 +110,7 @@ export class HighlightRenderManager {
             
             this.container.empty();
             this.currentBatch = 0;
+            this.renderSequence = 0;
             
             // 清除多选状态
             if (this.selectionManager) {
@@ -123,16 +128,68 @@ export class HighlightRenderManager {
             this.selectionManager.initialize();
         }
 
-        let highlightList = this.container.querySelector('.highlight-list') as HTMLElement;
+        const highlightList = this.ensureHighlightList();
+        this.syncMasonryColumns(highlightList);
+
+        highlightsToRender.forEach((highlight) => {
+            this.renderHighlightCard(this.getShortestMasonryColumn(highlightList), highlight);
+        });
+    }
+
+    private ensureHighlightList(): HTMLElement {
+        let highlightList = this.container.querySelector<HTMLElement>('.highlight-list');
         if (!highlightList) {
             highlightList = this.container.createEl("div", {
                 cls: "highlight-list"
             });
         }
+        return highlightList;
+    }
 
-        highlightsToRender.forEach((highlight) => {
-            this.renderHighlightCard(highlightList, highlight);
+    private syncMasonryColumns(highlightList: HTMLElement): void {
+        const expectedColumnCount = this.getMasonryColumnCount(highlightList);
+        const columns = this.getMasonryColumns(highlightList);
+        if (columns.length === expectedColumnCount) {
+            return;
+        }
+
+        const cards = Array.from(highlightList.querySelectorAll<HTMLElement>('.highlight-card'))
+            .sort((a, b) => Number(a.dataset.masonryOrder || 0) - Number(b.dataset.masonryOrder || 0));
+        highlightList.empty();
+
+        for (let index = 0; index < expectedColumnCount; index++) {
+            highlightList.createEl('div', {
+                cls: 'highlight-masonry-column'
+            });
+        }
+
+        cards.forEach(card => {
+            this.getShortestMasonryColumn(highlightList).appendChild(card);
         });
+    }
+
+    private getMasonryColumnCount(highlightList: HTMLElement): number {
+        const width = highlightList.clientWidth || this.container.clientWidth;
+        return Math.max(
+            1,
+            Math.floor((width + HighlightRenderManager.MASONRY_GAP) / (HighlightRenderManager.MASONRY_MIN_COLUMN_WIDTH + HighlightRenderManager.MASONRY_GAP))
+        );
+    }
+
+    private getMasonryColumns(highlightList: HTMLElement): HTMLElement[] {
+        return Array.from(highlightList.querySelectorAll<HTMLElement>('.highlight-masonry-column'));
+    }
+
+    private getShortestMasonryColumn(highlightList: HTMLElement): HTMLElement {
+        const columns = this.getMasonryColumns(highlightList);
+        if (columns.length === 0) {
+            this.syncMasonryColumns(highlightList);
+            return this.getMasonryColumns(highlightList)[0];
+        }
+
+        return columns.reduce((shortest, column) => {
+            return column.scrollHeight < shortest.scrollHeight ? column : shortest;
+        }, columns[0]);
     }
     
     /**
@@ -193,6 +250,7 @@ export class HighlightRenderManager {
 
         // 根据位置更新样式
         const cardElement = highlightCard.getElement();
+        cardElement.dataset.masonryOrder = String(this.renderSequence++);
         if (this.isDraggedToMainView) {
             cardElement.classList.add('in-main-view');
             // 找到文本内容元素并移除点击提示
