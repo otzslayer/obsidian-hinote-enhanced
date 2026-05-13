@@ -1,4 +1,4 @@
-import type { HighlightDecorator } from "../core/HighlightDecorator";
+import type { HighlightDecorator } from "../editor/HighlightDecorator";
 import type { FSRSManager } from "../flashcard";
 import type { HighlightRepository } from "../repositories/HighlightRepository";
 import type { HiNoteDataManager } from "../storage/HiNoteDataManager";

@@ -1,4 +1,4 @@
-import { HighlightDecorator } from '../core/HighlightDecorator';
+import { HighlightDecorator } from '../editor/HighlightDecorator';
 import { FSRSManager } from '../flashcard';
 import { HighlightService } from './HighlightService';
 import { HiNoteDataManager } from '../storage/HiNoteDataManager';
