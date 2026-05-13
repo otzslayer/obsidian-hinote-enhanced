@@ -1,7 +1,7 @@
 import { Setting, Notice, Modal } from 'obsidian';
-import { t } from '../i18n';
-import { RegexRuleEditor } from './RegexRuleEditor';
-import type CommentPlugin from '../../main';
+import { t } from '../../i18n';
+import { RegexRuleEditor } from '../components/RegexRuleEditor';
+import type CommentPlugin from '../../../main';
 
 export class GeneralSettingsTab {
     private plugin: CommentPlugin;

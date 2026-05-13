@@ -1,7 +1,7 @@
 import { Setting, TextAreaComponent, Notice } from 'obsidian';
 import { setIcon } from 'obsidian';
-import { t } from '../i18n'; // 导入新的翻译系统
-import type CommentPlugin from '../../main';
+import { t } from '../../i18n'; // 导入新的翻译系统
+import type CommentPlugin from '../../../main';
 
 export class PromptSettingsTab {
     private plugin: CommentPlugin;

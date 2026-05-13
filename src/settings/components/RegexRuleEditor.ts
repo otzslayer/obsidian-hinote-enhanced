@@ -1,7 +1,7 @@
 import { Setting, ButtonComponent, TextComponent, ToggleComponent, setIcon } from 'obsidian';
-import type { RegexRule } from '../types/highlight';
-import { t } from '../i18n';
-import type CommentPlugin from '../../main';
+import type { RegexRule } from '../../types/highlight';
+import { t } from '../../i18n';
+import type CommentPlugin from '../../../main';
 
 /**
  * 正则表达式规则编辑器组件

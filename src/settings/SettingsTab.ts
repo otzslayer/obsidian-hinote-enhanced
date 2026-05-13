@@ -1,6 +1,6 @@
 import { App, PluginSettingTab } from 'obsidian';
-import { GeneralSettingsTab } from './GeneralSettingsTab';
-import { AIServiceTab } from './AIServiceTab';
+import { GeneralSettingsTab } from './tabs/GeneralSettingsTab';
+import { AIServiceTab } from './tabs/AIServiceTab';
 import { FlashcardSettingsTab } from '../flashcard';
 import { t } from '../i18n';
 import { LicenseManager } from '../services/LicenseManager';

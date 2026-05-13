@@ -1,9 +1,9 @@
 import { Setting } from 'obsidian';
-import type { AIProvider } from '../types/ai';
-import { t } from '../i18n';
-import { AI_PROVIDER_LABELS, createAISettingsRenderer } from './ai';
+import type { AIProvider } from '../../types/ai';
+import { t } from '../../i18n';
+import { AI_PROVIDER_LABELS, createAISettingsRenderer } from '../ai';
 import { PromptSettingsTab } from './PromptSettingsTab';
-import type CommentPlugin from '../../main';
+import type CommentPlugin from '../../../main';
 
 export class AIServiceTab {
     private plugin: CommentPlugin;
