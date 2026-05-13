@@ -1,5 +1,5 @@
 import { Plugin } from 'obsidian';
-import { WindowManager } from '../services/WindowManager';
+import { WindowManager } from '../plugin/WindowManager';
 import { registerOpenCommentPanelCommand } from './openCommentPanel';
 import { registerOpenMainWindowCommand } from './openMainWindow';
 

@@ -1,4 +1,4 @@
-import { App, WorkspaceLeaf } from 'obsidian';
+import { App } from 'obsidian';
 import { VIEW_TYPE_HINOTE } from '../views/hinote/HiNoteView';
 import { HiNoteView } from '../views/hinote/HiNoteView';
 

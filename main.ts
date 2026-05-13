@@ -2,7 +2,7 @@ import { Plugin } from 'obsidian';
 import { AISettingTab } from './src/settings/SettingsTab';
 import { PluginSettings } from './src/types/settings';
 import { InitializationManager } from './src/services/InitializationManager';
-import { WindowManager } from './src/services/WindowManager';
+import { WindowManager } from './src/plugin/WindowManager';
 import type { PluginServices } from './src/plugin/PluginServices';
 import { migrateSettings, normalizeSettings } from './src/settings/SettingsMigration';
 import {

@@ -1,6 +1,6 @@
 import { Plugin } from 'obsidian';
 import { t } from '../i18n';
-import { WindowManager } from '../services/WindowManager';
+import { WindowManager } from '../plugin/WindowManager';
 
 /**
  * 在主窗口打开评论面板命令
