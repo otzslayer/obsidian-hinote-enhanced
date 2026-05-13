@@ -17,6 +17,49 @@ export class HighlightMatcher {
     ) {}
 
     /**
+     * 使用多种策略匹配高亮和候选评论。
+     */
+    static findMatch(
+        target: HiNote,
+        candidates: HiNote[]
+    ): HiNote | null {
+        if (!candidates || candidates.length === 0) return null;
+
+        let match = this.exactMatch(target, candidates);
+        if (match) return match;
+
+        match = this.positionMatch(target, candidates);
+        if (match) return match;
+
+        return null;
+    }
+
+    /**
+     * 精确匹配高亮文本和近似位置。
+     */
+    static findExactMatch(target: HiNote, candidates: HiNote[]): HiNote | null {
+        return this.exactMatch(target, candidates);
+    }
+
+    private static exactMatch(target: HiNote, candidates: HiNote[]): HiNote | null {
+        return candidates.find(h =>
+            h.text === target.text &&
+            (typeof h.position !== 'number' ||
+             typeof target.position !== 'number' ||
+             Math.abs(h.position - target.position) < 10)
+        ) || null;
+    }
+
+    private static positionMatch(target: HiNote, candidates: HiNote[]): HiNote | null {
+        if (typeof target.position !== 'number') return null;
+
+        return candidates.find(h =>
+            typeof h.position === 'number' &&
+            Math.abs(h.position - target.position) < 30
+        ) || null;
+    }
+
+    /**
      * 查找与给定高亮最匹配的存储高亮
      * 使用多种策略进行匹配：精确匹配、位置匹配、模糊文本匹配
      */

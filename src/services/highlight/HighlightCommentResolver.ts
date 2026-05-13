@@ -1,7 +1,7 @@
 import { TFile } from "obsidian";
 import { HighlightInfo as HiNote, CommentItem } from "../../types/highlight";
 import { HighlightRepository } from "../../repositories/HighlightRepository";
-import { HighlightMatcher } from "../../utils/HighlightMatcher";
+import { HighlightMatcher } from "./HighlightMatcher";
 
 interface CommentResolverOptions {
     onTextChanged?: (storedHighlight: HiNote, currentHighlight: HiNote) => void;
