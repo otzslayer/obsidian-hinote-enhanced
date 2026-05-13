@@ -3,7 +3,7 @@
  * 负责管理所有 AI 服务的注册和创建
  */
 
-import { IAIService, IAIServiceFactory, AIProviderType, AIServiceError, AIErrorCode } from './BaseAIService';
+import { IAIService, IAIServiceFactory, AIProviderType, AIServiceError } from './BaseAIService';
 import type { AISettings } from '../../types/ai';
 
 export class AIServiceRegistry {

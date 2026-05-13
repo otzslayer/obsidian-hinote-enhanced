@@ -138,14 +138,9 @@ export class FileListManager {
         });
         
         // 添加点击刷新功能
-        titleEl.style.cursor = 'pointer';
-        titleEl.addEventListener("click", async () => {
-            // 刷新文件列表
-            await this.updateFileList(true);
-            // 刷新主视图的高亮卡片
-            if (this.onRefreshView) {
-                await this.onRefreshView();
-            }
+        titleEl.setCssProps({ cursor: 'pointer' });
+        titleEl.addEventListener("click", () => {
+            void this.refreshFromTitle();
         });
 
         // 创建文件列表
@@ -168,6 +163,15 @@ export class FileListManager {
         const files = await this.dataSource.getFilesWithHighlights();
         for (const file of files) {
             await this.itemRenderer.createFileItem(fileList, file);
+        }
+    }
+
+    private async refreshFromTitle(): Promise<void> {
+        // 刷新文件列表
+        await this.updateFileList(true);
+        // 刷新主视图的高亮卡片
+        if (this.onRefreshView) {
+            await this.onRefreshView();
         }
     }
     

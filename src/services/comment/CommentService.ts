@@ -1,6 +1,5 @@
 import { TFile, App, Notice } from 'obsidian';
 import { HighlightInfo, CommentItem } from '../../types/highlight';
-import { HighlightInfo as HiNote } from '../../types/highlight';
 import { HighlightManager } from '../HighlightManager';
 import { IdGenerator } from '../../utils/IdGenerator';
 import CommentPlugin from '../../../main';
@@ -107,7 +106,7 @@ export class CommentService {
         highlight.comments.push(newComment);
         highlight.updatedAt = Date.now();
 
-        await this.highlightManager.addHighlight(file, highlight as HiNote);
+        await this.highlightManager.addHighlight(file, highlight);
 
         // 只更新单个卡片，而不是刷新整个视图
         if (this.onCardUpdate) {
@@ -132,7 +131,7 @@ export class CommentService {
             comment.content = content;
             comment.updatedAt = Date.now();
             highlight.updatedAt = Date.now();
-            await this.highlightManager.addHighlight(file, highlight as HiNote);
+            await this.highlightManager.addHighlight(file, highlight);
 
             // 通过 EventManager 触发批注更新事件，用于闪卡同步
             if (highlight.id) {
@@ -168,7 +167,7 @@ export class CommentService {
             // 如果是虚拟高亮或者没有关联闪卡，则删除整个高亮
             if (highlight.isVirtual || !hasFlashcard) {
                 // 从 HighlightManager 中删除高亮
-                await this.highlightManager.removeHighlight(file, highlight as HiNote);
+                await this.highlightManager.removeHighlight(file, highlight);
                 
                 // 从当前高亮列表中移除
                 this.highlights = this.highlights.filter(h => {
@@ -186,11 +185,11 @@ export class CommentService {
                 }
             } else {
                 // 有关联闪卡，只更新评论
-                await this.highlightManager.addHighlight(file, highlight as HiNote);
+                await this.highlightManager.addHighlight(file, highlight);
             }
         } else {
             // 还有其他评论，只更新评论
-            await this.highlightManager.addHighlight(file, highlight as HiNote);
+            await this.highlightManager.addHighlight(file, highlight);
         }
 
         // 只更新单个卡片，而不是刷新整个视图
@@ -212,7 +211,7 @@ export class CommentService {
         
         const file = await this.getFileForHighlight(highlight);
         if (file) {
-            await this.highlightManager.removeHighlight(file, highlight as HiNote);
+            await this.highlightManager.removeHighlight(file, highlight);
             this.highlights = this.highlights.filter(h => {
                 // 如果有 ID，通过 ID 比较
                 if (h.id && highlight.id) {

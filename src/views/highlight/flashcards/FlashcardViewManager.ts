@@ -1,4 +1,4 @@
-import { App, TFile } from "obsidian";
+import { App } from "obsidian";
 import { FlashcardComponent } from "../../../flashcard";
 import { HighlightInfo } from "../../../types/highlight";
 import CommentPlugin from "../../../../main";

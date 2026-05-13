@@ -136,7 +136,7 @@ export class FlashcardSettingsTab {
                 const inputEl = text.inputEl;
                 inputEl.type = 'number';
                 inputEl.min = '1';
-                inputEl.style.width = '80px';
+                inputEl.setCssProps({ width: '80px' });
                 
                 // 添加天数后缀
                 const suffixEl = createEl('span', {
@@ -271,7 +271,7 @@ export class FlashcardSettingsTab {
                                 // 显示错误提示
                                 new Notice(t('Invalid format. Must be an array of 21 numbers.'), 5000);
                             }
-                        } catch (e) {
+                        } catch {
                             // JSON 解析错误
                             new Notice(t('Invalid JSON format. Please check your input.'), 5000);
                         }

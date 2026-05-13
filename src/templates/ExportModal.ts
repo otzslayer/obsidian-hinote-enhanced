@@ -84,7 +84,7 @@ export class ExportPreviewModal extends Modal {
             });
 
             // 创建标签
-            const label = showCommentsContainer.createEl('label', {
+            showCommentsContainer.createEl('label', {
                 text: t('Include Comments'),
                 attr: {
                     for: 'include-comments-checkbox'
@@ -109,56 +109,56 @@ export class ExportPreviewModal extends Modal {
         buttonContainer.createEl('button', {
             cls: 'highlight-btn highlight-btn-primary',
             text: t('Download')
-        }).addEventListener('click', async () => {
-            try {
-                // 创建临时容器用于导出
-                const exportContainer = activeDocument.createElement('div');
-                exportContainer.className = 'highlight-export-container';
-                
-                const template = getTemplate(this.selectedTemplateId);
-                const cardElement = template.render(this.highlight);
-                exportContainer.appendChild(cardElement);
-                
-                // 如果开启了批注显示，则添加批注
-                if (this.includeComments && this.highlight.comments && this.highlight.comments.length > 0) {
-                    this.addCommentsToContainer(exportContainer);
-                }
-                
-                activeDocument.body.appendChild(exportContainer);
-
-                const canvas = await this.html2canvasInstance(exportContainer, {
-                    backgroundColor: null,
-                    scale: window.devicePixelRatio * 2, // 使用设备像素比的2倍来确保清晰度
-                    useCORS: true,
-                    allowTaint: true,
-                    logging: false,
-                    imageTimeout: 0, // 禁用图片超时
-                    removeContainer: true, // 自动移除临时容器
-                    onclone: async (clonedDoc: Document) => {
-                        const style = clonedDoc.createElement('style');
-                        style.textContent = this.getExportStyles();
-                        clonedDoc.head.appendChild(style);
-                        
-                        // 给样式应用一个短暂的延时，确保样式完全加载
-                        await new Promise(resolve => window.setTimeout(resolve, 100));
-                    }
-                });
-
-                // 优化 canvas 导出质量
-                const dataUrl = canvas.toDataURL('image/png', 1.0);
-
-                const link = activeDocument.createElement('a');
-                link.download = `highlight-${this.selectedTemplateId}-${Date.now()}.png`;
-                link.href = dataUrl;
-                link.click();
-
-                this.close();
-                new Notice(t('Export successful!'));
-            } catch {
-
-                new Notice(t('Export failed, please try again'));
-            }
+        }).addEventListener('click', () => {
+            void this.downloadImage();
         });
+    }
+
+    private async downloadImage(): Promise<void> {
+        try {
+            // 创建临时容器用于导出
+            const exportContainer = activeDocument.createElement('div');
+            exportContainer.className = 'highlight-export-container';
+
+            const template = getTemplate(this.selectedTemplateId);
+            const cardElement = template.render(this.highlight);
+            exportContainer.appendChild(cardElement);
+
+            // 如果开启了批注显示，则添加批注
+            if (this.includeComments && this.highlight.comments && this.highlight.comments.length > 0) {
+                this.addCommentsToContainer(exportContainer);
+            }
+
+            activeDocument.body.appendChild(exportContainer);
+
+            const canvas = await this.html2canvasInstance(exportContainer, {
+                backgroundColor: null,
+                scale: window.devicePixelRatio * 2, // 使用设备像素比的2倍来确保清晰度
+                useCORS: true,
+                allowTaint: true,
+                logging: false,
+                imageTimeout: 0, // 禁用图片超时
+                removeContainer: true, // 自动移除临时容器
+                onclone: (clonedDoc: Document) => {
+                    const style = clonedDoc.createElement('style');
+                    style.textContent = this.getExportStyles();
+                    clonedDoc.head.appendChild(style);
+                }
+            });
+
+            // 优化 canvas 导出质量
+            const dataUrl = canvas.toDataURL('image/png', 1.0);
+
+            const link = activeDocument.createElement('a');
+            link.download = `highlight-${this.selectedTemplateId}-${Date.now()}.png`;
+            link.href = dataUrl;
+            link.click();
+
+            this.close();
+            new Notice(t('Export successful!'));
+        } catch {
+            new Notice(t('Export failed, please try again'));
+        }
     }
 
     private updatePreview() {

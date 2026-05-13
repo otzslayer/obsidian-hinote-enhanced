@@ -1,4 +1,4 @@
-import { App, TFile, Component, EventRef } from "obsidian";
+import { App, TFile, Component, EventRef, MarkdownView } from "obsidian";
 import { defaultHighlightCardRegistry } from "../../components/highlight";
 import { HighlightInfo as HiNote } from "../../types/highlight";
 import type { EventManager } from "../../services/EventManager";
@@ -73,9 +73,8 @@ export class EventCoordinator {
         const ref = this.app.workspace.on('file-open', (file) => {
             // 只在非主视图时同步文件
             if (file && !isDraggedToMainView()) {
-                const activeLeaf = this.app.workspace.activeLeaf;
-                const isInCanvas = activeLeaf?.getViewState()?.state?.file !== file.path && 
-                                  activeLeaf?.view?.getViewType() === 'canvas';
+                const activeMarkdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
+                const isInCanvas = !activeMarkdownView && this.app.workspace.getActiveFile()?.path !== file.path;
                 
                 if (this.callbacks.onFileOpen) {
                     this.callbacks.onFileOpen(file, isInCanvas);
@@ -99,9 +98,8 @@ export class EventCoordinator {
             
             // 只在非主视图时同步文件
             if (file === currentFile && !isDraggedToMainView() && file instanceof TFile) {
-                const activeLeaf = this.app.workspace.activeLeaf;
-                const isInCanvas = activeLeaf?.getViewState()?.state?.file !== file.path && 
-                                  activeLeaf?.view?.getViewType() === 'canvas';
+                const activeMarkdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
+                const isInCanvas = !activeMarkdownView && this.app.workspace.getActiveFile()?.path !== file.path;
                 
                 if (this.callbacks.onFileModify) {
                     this.callbacks.onFileModify(file, isInCanvas);

@@ -32,7 +32,7 @@ export class FlashcardReviewService {
         this.updateGlobalStats(rating, updatedCard.retrievability);
         this.options.getDailyStatsService().updateDailyStats(isNewCard, rating);
 
-        this.options.saveStorage();
+        void this.options.saveStorage();
         this.options.emitFlashcardChanged();
 
         return storage.cards[cardId];

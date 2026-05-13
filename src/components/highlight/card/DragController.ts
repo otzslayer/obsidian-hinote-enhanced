@@ -14,31 +14,35 @@ export class HighlightCardDragController {
         element.setAttribute('draggable', 'true');
         this.preloadDragContent();
 
-        element.addEventListener('dragstart', async (event: DragEvent) => {
-            try {
-                const highlight = this.getHighlight();
-                if (!highlight?.text) {
-                    throw new Error('Invalid highlight data');
-                }
-
-                const formattedContent = await this.generateDragContentWithFallback();
-
-                event.dataTransfer?.setData('text/plain', formattedContent);
-                event.dataTransfer?.setData('application/highlight', JSON.stringify(highlight));
-
-                element.addClass('dragging');
-                DragPreview.start(event, highlight.text);
-            } catch (error) {
-                console.error('[HighlightCard] Error during drag start:', error);
-                event.preventDefault();
-                event.stopPropagation();
-            }
+        element.addEventListener('dragstart', (event: DragEvent) => {
+            void this.handleDragStart(element, event);
         });
 
         element.addEventListener('dragend', () => {
             element.removeClass('dragging');
             DragPreview.clear();
         });
+    }
+
+    private async handleDragStart(element: HTMLElement, event: DragEvent): Promise<void> {
+        try {
+            const highlight = this.getHighlight();
+            if (!highlight?.text) {
+                throw new Error('Invalid highlight data');
+            }
+
+            const formattedContent = await this.generateDragContentWithFallback();
+
+            event.dataTransfer?.setData('text/plain', formattedContent);
+            event.dataTransfer?.setData('application/highlight', JSON.stringify(highlight));
+
+            element.addClass('dragging');
+            DragPreview.start(event, highlight.text);
+        } catch (error) {
+            console.error('[HighlightCard] Error during drag start:', error);
+            event.preventDefault();
+            event.stopPropagation();
+        }
     }
 
     preloadDragContent(): void {

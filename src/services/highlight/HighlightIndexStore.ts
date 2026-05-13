@@ -66,7 +66,7 @@ export class HighlightIndexStore {
             .toLowerCase()
             .split(/\s+/)
             .filter(word => word.length >= HighlightIndexStore.MIN_WORD_LENGTH)
-            .map(word => word.replace(/[.,;:!?()\[\]{}'"`~]/g, ""))
+            .map(word => word.replace(/[.,;:!?()[\]{}'"`~]/g, ""))
             .filter(word => word.length >= HighlightIndexStore.MIN_WORD_LENGTH);
     }
 

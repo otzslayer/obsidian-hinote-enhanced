@@ -1,4 +1,4 @@
-import { Setting, Notice, Modal } from 'obsidian';
+import { Setting, Notice } from 'obsidian';
 import { t } from '../../i18n';
 import { RegexRuleEditor } from '../components/RegexRuleEditor';
 import type CommentPlugin from '../../../main';
@@ -82,12 +82,6 @@ export class GeneralSettingsTab {
                     .setPlaceholder('folder1, folder1/folder2, [[note1]], [[note2]], *.excalidraw.md')
                     .setValue(this.plugin.settings.excludePatterns || '')
                     .onChange(async (value) => {
-                        // 将输入的文本分割成数组并处理
-                        const patterns = value
-                            .split(',')
-                            .map(pattern => pattern.trim())
-                            .filter(pattern => pattern.length > 0);
-                        
                         this.plugin.settings.excludePatterns = value;
                         await this.plugin.saveSettings();
                     });
@@ -168,8 +162,7 @@ export class GeneralSettingsTab {
 
         let orphanedCount = 0;
         let affectedFiles = 0;
-        let isChecked = false;
-        const checkButton = orphanedDataSetting.addButton(button => {
+        orphanedDataSetting.addButton(button => {
             button.setButtonText(t('Check'));
             button.onClick(async () => {
                 button.setButtonText(t('Checking...'));
@@ -179,8 +172,6 @@ export class GeneralSettingsTab {
                     const stats = await this.plugin.highlightManager.checkOrphanedDataCount();
                     orphanedCount = stats.orphanedHighlights;
                     affectedFiles = stats.affectedFiles;
-                    isChecked = true;
-
                     // 更新描述
                     const descEl = orphanedDataSetting.descEl;
                     // 移除现有的计数元素
@@ -205,7 +196,6 @@ export class GeneralSettingsTab {
                                 }
                                 // 清理后重置按钮和描述
                                 button.setButtonText(t('Check'));
-                                isChecked = false;
                                 // 移除计数元素
                                 if (countEl && countEl.parentElement) countEl.parentElement.removeChild(countEl);
                             } catch (error) {

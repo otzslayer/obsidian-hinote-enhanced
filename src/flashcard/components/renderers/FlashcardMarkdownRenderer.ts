@@ -19,12 +19,13 @@ export class FlashcardMarkdownRenderer {
             : content.replace(/\{\{([^{}]+)\}\}/g, "$1");
 
         try {
+            const markdownComponent = new Component();
             await MarkdownRenderer.render(
                 this.component.getApp(),
                 markdownContent,
                 containerEl,
                 filePath || "",
-                new Component()
+                markdownComponent
             );
 
             containerEl.querySelectorAll("ul, ol").forEach(list => {

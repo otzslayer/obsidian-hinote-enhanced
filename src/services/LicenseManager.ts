@@ -1,4 +1,4 @@
-import { Notice, Plugin, requestUrl } from 'obsidian';
+import { Platform, Plugin, requestUrl } from 'obsidian';
 
 interface VaultAdapterWithBasePath {
     basePath: string;
@@ -50,7 +50,7 @@ export class LicenseManager {
             if (this.hasBasePath(adapter)) {
                 vaultPath = adapter.basePath + '/' + vaultPath;
             }
-            const platform = navigator.platform || '';
+            const platform = Platform.isWin ? 'windows' : Platform.isMacOS ? 'macos' : Platform.isLinux ? 'linux' : Platform.isIosApp ? 'ios' : Platform.isAndroidApp ? 'android' : 'unknown';
             
             // 组合因素 (减少变化频繁的因素)
             const vaultInfo = [vaultPath, platform].join('|');
@@ -135,8 +135,6 @@ export class LicenseManager {
 
             return false;
         } catch (error) {
-
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
             return false;
         }

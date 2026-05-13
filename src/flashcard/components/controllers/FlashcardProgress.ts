@@ -113,7 +113,7 @@ export class FlashcardProgressManager {
         const percent = calculateProgressPercent(progress, this.component.getCards().length);
         
         // 设置进度条宽度
-        progressBar.style.width = `${percent}%`;
+        progressBar.setCssProps({ width: `${percent}%` });
         
         // 如果有选择分组，添加分组信息
         if (this.component.getCurrentGroupName()) {

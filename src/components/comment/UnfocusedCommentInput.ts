@@ -49,6 +49,6 @@ export class UnfocusedCommentInput {
      * 隐藏不聚焦的输入框
      */
     public hide() {
-        this.container.style.display = 'none';
+        this.container.setCssProps({ display: 'none' });
     }
 }

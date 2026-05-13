@@ -45,7 +45,6 @@ export class FlashcardFactory {
             } catch (e) {
                 console.error('第二次尝试创建卡片失败:', e);
                 // 如果仍然失败，则使用最简单的方式创建卡片
-                const now = new Date();
                 // 创建一个简单的卡片对象
                 return this.fsrsService.initializeCard(text, answer, filePath);
             }
@@ -91,7 +90,7 @@ export class FlashcardFactory {
             return [];
         }
         
-        return (Object.values(this.storage.cards) as FlashcardState[]).filter((card: FlashcardState) => card.filePath === filePath);
+        return Object.values(this.storage.cards).filter((card: FlashcardState) => card.filePath === filePath);
     }
     
     /**

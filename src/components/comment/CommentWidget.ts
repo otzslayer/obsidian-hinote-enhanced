@@ -78,7 +78,7 @@ export class CommentWidget extends WidgetType {
         const comments = this.highlight.comments || [];
         const hasComments = comments.length > 0;
         const button = CommentWidgetHelper.createButton(wrapper, hasComments);
-        const iconContainer = button.querySelector('.hi-note-icon-container') as HTMLElement | null;
+        const iconContainer = button.querySelector<HTMLElement>('.hi-note-icon-container');
 
         if (iconContainer) {
             CommentWidgetHelper.addCommentCount(iconContainer, comments.length);

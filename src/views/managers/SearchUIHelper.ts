@@ -133,9 +133,11 @@ export class SearchUIHelper {
         const searchRect = this.searchInput.getBoundingClientRect();
         
         hintsContainer.addClass('search-hints-container');
-        hintsContainer.style.top = (searchRect.bottom + 4) + 'px';
-        hintsContainer.style.left = searchRect.left + 'px';
-        hintsContainer.style.width = searchRect.width + 'px';
+        hintsContainer.setCssProps({
+            top: (searchRect.bottom + 4) + 'px',
+            left: searchRect.left + 'px',
+            width: searchRect.width + 'px'
+        });
     }
     
     /**

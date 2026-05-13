@@ -221,7 +221,7 @@ export class OllamaService {
             }
         }
 
-        throw lastError;
+        throw lastError ?? new Error('Request failed');
     }
 
     private handleError(error: unknown): Error {

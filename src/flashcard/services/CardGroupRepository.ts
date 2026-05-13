@@ -306,7 +306,7 @@ export class CardGroupRepository {
         
         // 如果没有卡片ID，但有筛选条件，则根据筛选条件获取卡片
         if (group.filter && group.filter.trim().length > 0) {
-            const allCards = Object.values(this.storage.cards) as FlashcardState[];
+            const allCards = Object.values(this.storage.cards);
             return allCards.filter((card: FlashcardState) => this.matchesGroupFilter(card, group.filter));
         }
         
@@ -370,7 +370,7 @@ export class CardGroupRepository {
             return false;
         }
         
-        const allCards = Object.values(this.storage.cards || {}) as FlashcardState[];
+        const allCards = Object.values(this.storage.cards || {});
         const matchedCards = allCards.filter((card: FlashcardState) => this.matchesGroupFilter(card, group.filter));
         
         // 获取匹配卡片的ID列表

@@ -1,6 +1,6 @@
-import { App, TFile } from 'obsidian';
+import { App } from 'obsidian';
 import { HighlightInfo as HiNote } from '../types/highlight';
-import { FlashcardState, FSRSStorage, FSRSGlobalStats } from '../flashcard';
+import { FSRSStorage } from '../flashcard';
 import { DataValidator } from './DataValidator';
 import {
     convertToLegacyHighlight,

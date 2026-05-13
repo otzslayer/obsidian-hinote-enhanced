@@ -37,7 +37,7 @@ export class HighlightRepository implements IHighlightRepository {
             }
             
             for (const filePath of highlightFiles) {
-                this.loadFileHighlightsAsync(filePath);
+                void this.loadFileHighlightsAsync(filePath);
             }
         } catch (error) {
             console.error('[HighlightRepository] 加载高亮文件列表失败:', error);

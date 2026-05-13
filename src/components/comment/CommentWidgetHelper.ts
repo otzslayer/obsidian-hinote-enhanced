@@ -103,12 +103,13 @@ export class CommentWidgetHelper {
      * 渲染 Markdown 内容
      */
     private static renderMarkdownContent(app: App, containerEl: HTMLElement, content: string): void {
+        const markdownComponent = new Component();
         MarkdownRenderer.render(
             app,
             content,
             containerEl,
             '',
-            new Component()
+            markdownComponent
         ).then(() => {
             containerEl.querySelectorAll('ul, ol').forEach(list => {
                 list.addClass('tooltip-markdown-list');
@@ -129,8 +130,10 @@ export class CommentWidgetHelper {
         const margin = this.TOOLTIP_MARGIN;
         const maxTooltipWidth = Math.max(160, viewportWidth - margin * 2);
 
-        tooltip.style.position = 'fixed';
-        tooltip.style.maxWidth = `${Math.min(360, maxTooltipWidth)}px`;
+        tooltip.setCssProps({
+            position: 'fixed',
+            maxWidth: `${Math.min(360, maxTooltipWidth)}px`
+        });
 
         const tooltipRect = tooltip.getBoundingClientRect();
         const tooltipWidth = tooltipRect.width || tooltip.offsetWidth;
@@ -206,7 +209,7 @@ export class CommentWidgetHelper {
         const existing = workspace.getLeavesOfType("hinote-view");
 
         if (existing.length) {
-            workspace.revealLeaf(existing[0]);
+            await workspace.revealLeaf(existing[0]);
             await new Promise(resolve => window.setTimeout(resolve, 50));
         } else {
             const leaf = workspace.getRightLeaf(false);

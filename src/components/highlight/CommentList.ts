@@ -65,7 +65,8 @@ export class CommentList extends Component {
             const content = comment.content;
             try {
                 // 使用 MarkdownRenderer 渲染 Markdown 内容
-                await MarkdownRenderer.renderMarkdown(
+                await MarkdownRenderer.render(
+                    this.app,
                     content,
                     contentEl,
                     this.highlight.filePath || '',
@@ -156,7 +157,7 @@ export class CommentList extends Component {
             wrapper.addClass('collapsed');
 
             // 添加渐变遮罩
-            const fadeOut = wrapper.createEl("div", {
+            wrapper.createEl("div", {
                 cls: "content-fade-out"
             });
 
@@ -212,7 +213,7 @@ export class CommentList extends Component {
                 // 打开链接
                 const targetFile = this.app.metadataCache.getFirstLinkpathDest(target, sourcePath);
                 if (targetFile) {
-                    this.app.workspace.openLinkText(target, sourcePath, false);
+                    void this.app.workspace.openLinkText(target, sourcePath, false);
                 }
             });
             

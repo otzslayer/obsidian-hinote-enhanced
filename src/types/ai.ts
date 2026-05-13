@@ -12,7 +12,7 @@ export type AnthropicModel =
     | 'claude-3-5-haiku-20241022'
     | 'claude-3-haiku-20240307';
 
-export interface DeepseekModel extends AIModelBase {}
+export type DeepseekModel = AIModelBase;
 
 export interface DeepseekModelState {
     selectedModel: DeepseekModel;
@@ -24,9 +24,9 @@ export const DEFAULT_DEEPSEEK_MODELS: DeepseekModel[] = [
     { id: 'deepseek-reasoner', name: 'Deepseek Reasoner' }
 ];
 
-export interface SiliconFlowModel extends AIModelBase {}
+export type SiliconFlowModel = AIModelBase;
 
-export interface GeminiModel extends AIModelBase {}
+export type GeminiModel = AIModelBase;
 
 export interface GeminiModelState {
     selectedModel: GeminiModel;

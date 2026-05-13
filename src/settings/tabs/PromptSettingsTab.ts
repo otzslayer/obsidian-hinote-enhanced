@@ -1,4 +1,4 @@
-import { Setting, TextAreaComponent, Notice } from 'obsidian';
+import { TextAreaComponent, Notice } from 'obsidian';
 import { setIcon } from 'obsidian';
 import { t } from '../../i18n'; // 导入新的翻译系统
 import type CommentPlugin from '../../../main';
@@ -42,7 +42,8 @@ export class PromptSettingsTab {
             if (container.querySelector('.new-prompt-section')) return;
             
             // 创建新的表单并插入到 promptList 之前
-            const promptList = container.querySelector('.prompt-list') as HTMLElement;
+            const promptList = container.querySelector<HTMLElement>('.prompt-list');
+            if (!promptList) return;
             if (promptList) {
                 this.createNewPromptForm(container, promptList);
             }
@@ -126,7 +127,7 @@ export class PromptSettingsTab {
             infoContainer.createEl('div', { cls: 'prompt-name', text: name });
             
             // 创建内容预览，移除换行符并限制显示
-            const contentPreview = (content as string).replace(/\n/g, ' ');
+            const contentPreview = content.replace(/\n/g, ' ');
             infoContainer.createEl('div', { 
                 cls: 'prompt-content-preview', 
                 text: contentPreview
@@ -154,7 +155,7 @@ export class PromptSettingsTab {
             });
 
             const contentArea = new TextAreaComponent(editContainer);
-            contentArea.setValue(content as string);
+            contentArea.setValue(content);
             contentArea.inputEl.classList.add('prompt-content-input');
             contentArea.inputEl.addClass('prompt-textarea');
 

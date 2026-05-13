@@ -83,8 +83,6 @@ export class HighlightIndexer {
         }
         
         this.isIndexing = true;
-        const startTime = Date.now();
-        
         try {
             // 获取所有高亮
             const allHighlights = await this.extractor.getAllHighlights();
@@ -129,7 +127,7 @@ export class HighlightIndexer {
     public getAllHighlightsFromCache(): HighlightInfo[] | null {
         // 如果索引从未构建过，触发按需构建
         if (this.indexStore.lastUpdated === 0 && !this.isIndexing) {
-            this.buildFileIndex();
+            void this.buildFileIndex();
         }
         
         // 检查索引是否可用
@@ -164,7 +162,7 @@ export class HighlightIndexer {
         // 如果索引已过期，触发完整重建（异步，不阻塞当前更新）
         if (this.indexStore.isExpired()) {
             // 异步触发重建，但不等待
-            this.buildFileIndex();
+            void this.buildFileIndex();
             return;
         }
         

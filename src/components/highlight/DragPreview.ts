@@ -12,7 +12,6 @@ export class DragPreview {
         maxLength?: number;
     } = {}) {
         const {
-            showIcon = true,
             maxLength = 30
         } = options;
 
@@ -49,7 +48,10 @@ export class DragPreview {
 
     private static updatePosition(x: number, y: number) {
         if (this.instance) {
-            this.instance.setAttribute('style', `left: ${x + 10}px; top: ${y + 10}px;`);
+            this.instance.setCssProps({
+                left: `${x + 10}px`,
+                top: `${y + 10}px`
+            });
         }
     }
 

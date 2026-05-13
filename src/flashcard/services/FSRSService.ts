@@ -2,8 +2,7 @@ import {
     FlashcardState, 
     FSRSParameters, 
     DEFAULT_FSRS_PARAMETERS,
-    FSRSRating,
-    FSRS_RATING
+    FSRSRating
 } from '../types/FSRSTypes';
 import { FSRSAdapter } from './FSRSAdapter';
 

@@ -52,8 +52,7 @@ export class UIInitializer {
         });
 
         // 创建返回按钮（仅在移动端显示）
-        const backButtonContainer = this.createBackButton(mainContentContainer);
-        const backButton = backButtonContainer.querySelector('.highlight-back-button') as HTMLElement;
+        const { backButtonContainer, backButton } = this.createBackButton(mainContentContainer);
 
         // 创建搜索区域
         const searchContainer = mainContentContainer.createEl("div", {
@@ -97,7 +96,7 @@ export class UIInitializer {
     /**
      * 创建返回按钮
      */
-    private createBackButton(parent: HTMLElement): HTMLElement {
+    private createBackButton(parent: HTMLElement): { backButtonContainer: HTMLElement; backButton: HTMLElement } {
         const backButtonContainer = parent.createEl("div", {
             cls: "highlight-back-button-container"
         });
@@ -112,7 +111,7 @@ export class UIInitializer {
             cls: "highlight-back-button-text"
         });
 
-        return backButtonContainer;
+        return { backButtonContainer, backButton };
     }
 
     /**
@@ -125,7 +124,7 @@ export class UIInitializer {
                 type: "text",
                 placeholder: t("Search..."),
             }
-        }) as HTMLInputElement;
+        });
 
         // 添加焦点和失焦事件
         searchInput.addEventListener('focus', () => {

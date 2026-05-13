@@ -44,7 +44,7 @@ export class WindowManager {
                 }
             } else {
                 // 如果已经在侧边栏，则直接激活它
-                workspace.revealLeaf(existingLeaf);
+                await workspace.revealLeaf(existingLeaf);
             }
             return;
         }

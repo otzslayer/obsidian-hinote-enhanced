@@ -48,14 +48,14 @@ export class FlashcardCardRenderer {
         }).createEl("div", {
             cls: "flashcard-content markdown-rendered"
         });
-        this.markdownRenderer.render(frontEl, frontContent, currentCard.filePath);
+        void this.markdownRenderer.render(frontEl, frontContent, currentCard.filePath);
 
         const backEl = card.createEl("div", {
             cls: "flashcard-side flashcard-back"
         }).createEl("div", {
             cls: "flashcard-content markdown-rendered"
         });
-        this.markdownRenderer.render(backEl, backContent, currentCard.filePath);
+        void this.markdownRenderer.render(backEl, backContent, currentCard.filePath);
     }
 
     private isCardReversed(currentCard: FlashcardState): boolean {
@@ -138,7 +138,7 @@ export class FlashcardCardRenderer {
             event.stopPropagation();
             const file = this.component.getApp().vault.getAbstractFileByPath(filePath);
             if (file && file instanceof TFile) {
-                this.component.getApp().workspace.getLeaf().openFile(file);
+                void this.component.getApp().workspace.getLeaf().openFile(file);
             }
         });
     }

@@ -1,12 +1,13 @@
 import { TFile } from "obsidian";
 import { HighlightInfo } from '../../types/highlight';
-import { HighlightInfo as HiNote } from '../../types/highlight';
 import { HighlightRepository } from '../../repositories/HighlightRepository';
 import {
     canUpdateStoredHighlight,
     findStoredHighlightMatch
 } from './HighlightMatchStrategies';
 import type { HighlightMatchConfidence } from './HighlightMatchStrategies';
+
+type HiNote = HighlightInfo;
 
 interface StoredHighlightUpdate {
     id: string;
@@ -191,7 +192,7 @@ export class HighlightMatcher {
     /**
      * 创建高亮信息对象
      */
-    private createHighlightInfo(highlight: HighlightInfo | HiNote, file: TFile): HighlightInfo {
+    private createHighlightInfo(highlight: HighlightInfo, file: TFile): HighlightInfo {
         return {
             ...highlight,
             comments: highlight.comments || [],

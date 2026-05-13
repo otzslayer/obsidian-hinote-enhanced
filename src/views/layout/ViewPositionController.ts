@@ -72,10 +72,10 @@ export class ViewPositionController {
                 this.options.highlightContainer.empty();
                 this.options.highlightContainer.appendChild(this.options.loadingIndicator);
                 window.setTimeout(() => {
-                    this.options.updateHighlights();
+                    void this.options.updateHighlights();
                 }, this.options.canvasUpdateDelay);
             } else {
-                this.options.updateHighlights();
+                void this.options.updateHighlights();
             }
         } else {
             state.highlights = [];

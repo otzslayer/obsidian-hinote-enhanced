@@ -10,9 +10,9 @@ export class HighlightCardFileNavigator {
     ) {}
 
     bindOpenOnDoubleClick(element: HTMLElement): void {
-        element.addEventListener('dblclick', async (event) => {
+        element.addEventListener('dblclick', (event) => {
             event.stopPropagation();
-            await this.openHighlightFile();
+            void this.openHighlightFile();
         });
     }
 
@@ -54,8 +54,8 @@ export class HighlightCardFileNavigator {
         if (!(abstractFile instanceof TFile)) return;
 
         const leaves = this.plugin.app.workspace.getLeavesOfType('markdown');
-        const activeLeaf = this.plugin.app.workspace.activeLeaf;
-        const targetLeaf = leaves.find(leaf => leaf !== activeLeaf)
+        const activeMarkdownLeaf = this.plugin.app.workspace.getActiveViewOfType(MarkdownView)?.leaf;
+        const targetLeaf = leaves.find(leaf => leaf !== activeMarkdownLeaf)
             || this.plugin.app.workspace.getLeaf('split', 'vertical');
 
         await targetLeaf.openFile(abstractFile);

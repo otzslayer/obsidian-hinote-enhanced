@@ -144,10 +144,10 @@ export class InfiniteScrollManager {
         
         // 使用 Intersection Observer 监听哨兵元素
         this.observer = new IntersectionObserver(
-            async (entries) => {
+            (entries) => {
                 const entry = entries[0];
                 if (entry.isIntersecting && !this.isLoading) {
-                    await this.loadMoreHighlights(allHighlights, renderCallback);
+                    void this.loadMoreHighlights(allHighlights, renderCallback);
                 }
             },
             {

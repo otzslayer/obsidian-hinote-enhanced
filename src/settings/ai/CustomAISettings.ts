@@ -174,7 +174,7 @@ export class CustomAISettings extends BaseAIServiceSettings {
                 });
             
             text.inputEl.rows = 4;
-            text.inputEl.style.fontFamily = 'monospace';
+            text.inputEl.setCssProps({ fontFamily: 'monospace' });
             return text;
         });
     }

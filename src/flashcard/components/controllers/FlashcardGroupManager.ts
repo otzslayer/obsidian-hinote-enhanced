@@ -28,36 +28,8 @@ export class FlashcardGroupManager {
     public showEditGroupModal(group?: CardGroup) {
         const modal = createFlashcardGroupModal(group);
 
-        modal.saveButton.addEventListener('click', async () => {
-            const values = modal.getValues();
-            if (!values.name) {
-                new Notice(t('Group name cannot be empty'));
-                return;
-            }
-
-            const fsrsManager = this.component.getFsrsManager();
-
-            if (group) {
-                await this.updateExistingGroup(group, values);
-            } else {
-                await fsrsManager.createCardGroup({
-                    name: values.name,
-                    filter: values.filter,
-                    isReversed: values.isReversed,
-                    createdTime: Date.now(),
-                    sortOrder: fsrsManager.getCardGroups().length,
-                    settings: this.createGroupSettings(values)
-                });
-
-                new Notice(t('Group created'));
-                this.refreshFlashcardView();
-            }
-
-            modal.close();
-
-            if (group) {
-                this.component.getRenderer().render();
-            }
+        modal.saveButton.addEventListener('click', () => {
+            void this.saveGroupFromModal(modal, group);
         });
 
         modal.cancelButton.addEventListener('click', () => {
@@ -67,6 +39,38 @@ export class FlashcardGroupManager {
                 this.component.getRenderer().render();
             }
         });
+    }
+
+    private async saveGroupFromModal(modal: ReturnType<typeof createFlashcardGroupModal>, group?: CardGroup): Promise<void> {
+        const values = modal.getValues();
+        if (!values.name) {
+            new Notice(t('Group name cannot be empty'));
+            return;
+        }
+
+        const fsrsManager = this.component.getFsrsManager();
+
+        if (group) {
+            await this.updateExistingGroup(group, values);
+        } else {
+            await fsrsManager.createCardGroup({
+                name: values.name,
+                filter: values.filter,
+                isReversed: values.isReversed,
+                createdTime: Date.now(),
+                sortOrder: fsrsManager.getCardGroups().length,
+                settings: this.createGroupSettings(values)
+            });
+
+            new Notice(t('Group created'));
+            this.refreshFlashcardView();
+        }
+
+        modal.close();
+
+        if (group) {
+            this.component.getRenderer().render();
+        }
     }
 
     private async updateExistingGroup(group: CardGroup, values: FlashcardGroupFormValues): Promise<void> {

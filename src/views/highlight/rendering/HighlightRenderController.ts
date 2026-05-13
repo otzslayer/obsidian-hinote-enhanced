@@ -1,4 +1,4 @@
-import { CommentItem, HighlightInfo } from "../../../types/highlight";
+import { HighlightInfo } from "../../../types/highlight";
 import { ExportManager } from "../exports";
 import { HighlightRenderManager } from "./HighlightRenderManager";
 import { CommentController } from "../comments";
@@ -20,10 +20,8 @@ export class HighlightRenderController {
             onCommentEdit: (element, highlight, comment) => {
                 this.options.commentController.showCommentInput(element, highlight, comment);
             },
-            onExport: async (highlight) => {
-                await this.options.exportManager.exportHighlightAsImage(
-                    highlight as HighlightInfo & { comments?: CommentItem[] }
-                );
+            onExport: (highlight) => {
+                void this.options.exportManager.exportHighlightAsImage(highlight);
             },
             onAIResponse: async (highlight, content) => {
                 await this.options.commentController.addAIComment(highlight, content);

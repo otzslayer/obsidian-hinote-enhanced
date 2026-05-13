@@ -1,5 +1,6 @@
 import { Notice, setIcon } from "obsidian";
 import { t } from "../../../i18n";
+import { showConfirmModal } from "../../../utils/ConfirmModal";
 import type { CardGroup } from "../../types/FSRSTypes";
 import type { FlashcardComponentContext } from "../FlashcardComponentContext";
 import { FlashcardStatsPanel } from "../FlashcardStatsPanel";
@@ -94,26 +95,34 @@ export class FlashcardGroupListRenderer {
             attr: { "aria-label": t("Delete Group") }
         });
         setIcon(deleteButton, "trash");
-        deleteButton.addEventListener("click", async (event: MouseEvent) => {
+        deleteButton.addEventListener("click", (event: MouseEvent) => {
             event.stopPropagation();
-            if (!confirm(t("Are you sure you want to delete group \"") + group.name + t("\"?"))) {
-                return;
-            }
+            void this.deleteGroup(group, rerender);
+        });
+    }
 
-            try {
-                const deleted = await this.component.getFsrsManager().deleteCardGroup(group.id);
-                if (deleted) {
-                    this.switchCurrentGroupAfterDelete(group);
-                    new Notice(t("Group deleted"));
-                    rerender();
-                } else {
-                    new Notice(t("Delete group failed"));
-                }
-            } catch (error) {
-                console.error("Delete group failed:", error);
+    private async deleteGroup(group: CardGroup, rerender: () => void): Promise<void> {
+        const confirmed = await showConfirmModal(this.component.getApp(), {
+            title: t("Delete Group"),
+            message: t("Are you sure you want to delete group \"") + group.name + t("\"?")
+        });
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            const deleted = await this.component.getFsrsManager().deleteCardGroup(group.id);
+            if (deleted) {
+                this.switchCurrentGroupAfterDelete(group);
+                new Notice(t("Group deleted"));
+                rerender();
+            } else {
                 new Notice(t("Delete group failed"));
             }
-        });
+        } catch (error) {
+            console.error("Delete group failed:", error);
+            new Notice(t("Delete group failed"));
+        }
     }
 
     private renderGroupStats(groupItem: HTMLElement, group: CardGroup): void {

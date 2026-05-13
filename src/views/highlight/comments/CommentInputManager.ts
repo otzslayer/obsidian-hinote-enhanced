@@ -70,9 +70,9 @@ export class CommentInputManager {
                     await this.onCommentDelete(highlight, existingComment.id);
                 }
             } : undefined,
-            onCancel: async () => {
+            onCancel: () => {
                 if (this.onCommentCancel) {
-                    await this.onCommentCancel(highlight);
+                    void this.onCommentCancel(highlight);
                 }
             },
             onShown: () => {

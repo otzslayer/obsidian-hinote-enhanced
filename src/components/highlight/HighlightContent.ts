@@ -1,7 +1,6 @@
-import { setIcon, MarkdownRenderer, Component, App, TFile } from "obsidian";
+import { MarkdownRenderer, Component, App } from "obsidian";
 import { HighlightInfo } from "../../types/highlight";
 import { t } from "../../i18n";
-import { DragPreview } from './DragPreview';
 
 export class HighlightContent extends Component {
     private container: HTMLElement;
@@ -63,12 +62,13 @@ export class HighlightContent extends Component {
         try {
             // 使用 Obsidian 的 MarkdownRenderer.render 方法渲染 Markdown 内容
             // 使用新的 Component 实例代替 this，避免继承复杂的样式规则
+            const markdownComponent = new Component();
             await MarkdownRenderer.render(
                 this.app,
                 text,
                 textContent,
                 this.highlight.filePath || '',
-                new Component()
+                markdownComponent
             );
             
             // 添加自定义样式类以修复可能的样式问题
@@ -102,14 +102,14 @@ export class HighlightContent extends Component {
             // 设置提示文本为“跳转到高亮”
             textContent.setAttribute('aria-label', t('Jump to highlight'));
             
-            textContent.addEventListener("mousedown", async (e) => {
+            textContent.addEventListener("mousedown", (e) => {
                 // 如果点击的是链接，不触发高亮点击事件
                 if ((e.target as HTMLElement).closest('a')) {
                     return;
                 }
                 e.preventDefault();
                 e.stopPropagation();
-                await this.onHighlightClick(this.highlight);
+                void this.onHighlightClick(this.highlight);
             });
         } else {
             // 全局搜索结果或主视图添加特殊样式类
@@ -119,7 +119,7 @@ export class HighlightContent extends Component {
             textContent.removeAttribute('aria-label');
             
             // 添加提示性鼠标样式
-            textContent.style.cursor = 'default';
+            textContent.setCssProps({ cursor: 'default' });
         }
     }
     
@@ -145,7 +145,7 @@ export class HighlightContent extends Component {
                 // 打开链接
                 const targetFile = this.app.metadataCache.getFirstLinkpathDest(target, sourcePath);
                 if (targetFile) {
-                    this.app.workspace.openLinkText(target, sourcePath, false);
+                    void this.app.workspace.openLinkText(target, sourcePath, false);
                 }
             });
             

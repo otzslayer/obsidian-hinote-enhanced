@@ -9,7 +9,7 @@ export class FilePathUtils {
      */
     static toSafeFileName(filePath: string): string {
         return filePath
-            .replace(/[\/\\:*?"<>|]/g, '_')  // 替换特殊字符
+            .replace(/[/\\:*?"<>|]/g, '_')  // 替换特殊字符
             .replace(/\s+/g, '_')           // 替换空格
             .toLowerCase()                  // 转小写
             + '.json';
@@ -49,7 +49,7 @@ export class FilePathUtils {
      */
     static isSafePath(filePath: string): boolean {
         // 检查是否包含危险字符
-        const dangerousChars = /[\/\\:*?"<>|]/;
+        const dangerousChars = /[/\\:*?"<>|]/;
         return !dangerousChars.test(filePath);
     }
 

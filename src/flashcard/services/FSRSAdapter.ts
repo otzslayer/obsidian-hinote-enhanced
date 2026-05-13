@@ -7,7 +7,6 @@ import {
     Rating,
     Grade,
     State, 
-    RecordLog,
     RecordLogItem
 } from 'ts-fsrs';
 
@@ -41,8 +40,7 @@ export class FSRSAdapter {
         // 从自定义参数中提取相关配置
         const { 
             request_retention = 0.9, 
-            maximum_interval = 36500,
-            w = [] 
+            maximum_interval = 36500
         } = customParams;
 
         // 使用 ts-fsrs 的 generatorParameters 生成参数
@@ -114,12 +112,15 @@ export class FSRSAdapter {
      */
     public fromTsFSRSCard(originalCard: FlashcardState, recordItem: RecordLogItem): FlashcardState {
         const { card, log } = recordItem;
+        const elapsedDays = originalCard.lastReview > 0
+            ? (log.review.getTime() - originalCard.lastReview) / (24 * 60 * 60 * 1000)
+            : 0;
         
         return {
             ...originalCard,
             difficulty: card.difficulty,
             stability: card.stability,
-            retrievability: Math.exp(Math.log(0.9) * card.elapsed_days / card.stability), // 计算可提取性
+            retrievability: Math.exp(Math.log(0.9) * elapsedDays / card.stability), // 计算可提取性
             lastReview: log.review.getTime(),
             nextReview: card.due.getTime(),
             reviews: card.reps,
@@ -129,7 +130,7 @@ export class FSRSAdapter {
                 {
                     timestamp: log.review.getTime(),
                     rating: this.convertTsFSRSRatingToFSRSRating(log.rating),
-                    elapsed: log.elapsed_days
+                    elapsed: elapsedDays
                 }
             ]
         };

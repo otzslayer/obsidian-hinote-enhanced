@@ -1,4 +1,3 @@
-import { setIcon } from "obsidian";
 import { FSRSManager } from "../services/FSRSManager";
 import { DailyStats } from "../types/FSRSTypes";
 
@@ -135,16 +134,16 @@ export class FlashcardStatsPanel {
         const cols = 12; // 84天约12周
         
         // 设置网格样式
-        grid.style.display = 'grid';
-        grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-        grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        grid.setCssProps({
+            display: 'grid',
+            gridTemplateRows: `repeat(${rows}, 1fr)`,
+            gridTemplateColumns: `repeat(${cols}, 1fr)`
+        });
         
         // 重新设计热力图布局，确保当天在正确位置
         // 先计算当天是周几（0是周日，1-6是周一到周六）
         const todayDayOfWeek = today.getDay();
         // 在热力图中，周一在第0行，周六在第5行，周日在第6行
-        const todayRowIndex = todayDayOfWeek === 0 ? 6 : todayDayOfWeek - 1;
-        
         // 计算当前周的周一的日期
         const thisWeekMonday = new Date(today);
         thisWeekMonday.setDate(today.getDate() - ((todayDayOfWeek === 0 ? 7 : todayDayOfWeek) - 1));

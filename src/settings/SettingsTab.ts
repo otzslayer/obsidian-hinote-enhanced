@@ -17,7 +17,11 @@ export class AISettingTab extends PluginSettingTab {
         this.licenseManager = new LicenseManager(this.plugin);
     }
 
-    async display(): Promise<void> {
+    display(): void {
+        void this.render();
+    }
+
+    private async render(): Promise<void> {
         await this.plugin.ensureServicesInitialized();
 
         const { containerEl } = this;
@@ -68,7 +72,18 @@ export class AISettingTab extends PluginSettingTab {
             attr: { role: 'button', tabindex: '0' }
         });
         flashcardContent = contentContainer.createEl('div', { cls: 'setting-tab-pane' });
-        flashcardTab.onclick = async () => {
+        flashcardTab.onclick = () => {
+            void this.renderFlashcardTab(switchTab, flashcardTab!, flashcardContent!);
+        };
+        // 默认加载 HiCard 内容（可选，首次加载时自动判断）
+        // flashcardTab.onclick();
+    }
+
+    private async renderFlashcardTab(
+        switchTab: (targetTab: HTMLElement, targetContent: HTMLElement) => void,
+        flashcardTab: HTMLElement,
+        flashcardContent: HTMLElement
+    ): Promise<void> {
             switchTab(flashcardTab!, flashcardContent!);
             flashcardContent!.empty();
             // 检查激活状态
@@ -101,22 +116,23 @@ export class AISettingTab extends PluginSettingTab {
                 const input = inputContainer.createEl('input', { cls: 'flashcard-activation-input', type: 'text', placeholder: t('Enter license key') });
                 const btn = inputContainer.createEl('button', { cls: 'flashcard-activation-button', text: t('Activate') });
                 const msg = activationDiv.createEl('div', { cls: 'activation-msg' });
-                btn.onclick = async () => {
-                    btn.setAttr('disabled', 'true');
-                    msg.textContent = t('Verifying...');
-                    const ok = await this.licenseManager.activateLicense(input.value);
-                    if (ok) {
-                        msg.textContent = t('Activation successful!');
-                        flashcardContent!.empty();
-                        new FlashcardSettingsTab(this.plugin, flashcardContent!).display();
-                    } else {
-                        msg.textContent = t('Activation failed. Please check your license key.');
-                        btn.removeAttribute('disabled');
-                    }
+                btn.onclick = () => {
+                    void this.activateFlashcardLicense(input, btn, msg, flashcardContent);
                 };
             }
-        };
-        // 默认加载 HiCard 内容（可选，首次加载时自动判断）
-        // flashcardTab.onclick();
+    }
+
+    private async activateFlashcardLicense(input: HTMLInputElement, btn: HTMLButtonElement, msg: HTMLElement, flashcardContent: HTMLElement): Promise<void> {
+        btn.setAttr('disabled', 'true');
+        msg.textContent = t('Verifying...');
+        const ok = await this.licenseManager.activateLicense(input.value);
+        if (ok) {
+            msg.textContent = t('Activation successful!');
+            flashcardContent.empty();
+            new FlashcardSettingsTab(this.plugin, flashcardContent).display();
+        } else {
+            msg.textContent = t('Activation failed. Please check your license key.');
+            btn.removeAttribute('disabled');
+        }
     }
 }

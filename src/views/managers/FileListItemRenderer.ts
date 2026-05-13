@@ -1,4 +1,4 @@
-import { TFile, setIcon } from "obsidian";
+import { MarkdownView, TFile, setIcon } from "obsidian";
 import CommentPlugin from "../../../main";
 import { t } from "../../i18n";
 import { FileListDataSource } from "./FileListDataSource";
@@ -112,10 +112,10 @@ export class FileListItemRenderer {
         });
         setIcon(fileIcon, "file-text");
 
-        fileIcon.addEventListener("dblclick", async (e) => {
+        fileIcon.addEventListener("dblclick", (e) => {
             e.stopPropagation();
             const leaf = this.getPreferredLeaf();
-            await leaf.openFile(file);
+            void leaf.openFile(file);
         });
 
         const fileNameEl = fileItemLeft.createEl("span", {
@@ -188,7 +188,8 @@ export class FileListItemRenderer {
         const leaves = this.options.plugin.app.workspace.getLeavesOfType("markdown");
 
         if (this.options.getState().isDraggedToMainView) {
-            const otherLeaf = leaves.find(leaf => leaf !== this.options.plugin.app.workspace.activeLeaf);
+            const activeMarkdownLeaf = this.options.plugin.app.workspace.getActiveViewOfType(MarkdownView)?.leaf;
+            const otherLeaf = leaves.find(leaf => leaf !== activeMarkdownLeaf);
             if (otherLeaf) {
                 return otherLeaf;
             }

@@ -61,20 +61,24 @@ export class FlashcardActivationRenderer {
             text: t("Activate")
         });
 
-        button.addEventListener("click", async () => {
-            const licenseKey = input.value.trim();
-            if (!licenseKey) {
-                new Notice(t("Please enter a license key"));
-                return;
-            }
-
-            const activated = await this.component.getLicenseManager().activateLicense(licenseKey);
-            if (activated) {
-                new Notice(t("HiCard activated successfully!"));
-                this.renderMainView();
-            } else {
-                new Notice(t("Invalid license key"));
-            }
+        button.addEventListener("click", () => {
+            void this.activate(input);
         });
+    }
+
+    private async activate(input: HTMLInputElement): Promise<void> {
+        const licenseKey = input.value.trim();
+        if (!licenseKey) {
+            new Notice(t("Please enter a license key"));
+            return;
+        }
+
+        const activated = await this.component.getLicenseManager().activateLicense(licenseKey);
+        if (activated) {
+            new Notice(t("HiCard activated successfully!"));
+            this.renderMainView();
+        } else {
+            new Notice(t("Invalid license key"));
+        }
     }
 }

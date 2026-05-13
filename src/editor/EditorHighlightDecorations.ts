@@ -1,6 +1,6 @@
 import { Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import type { Range } from "@codemirror/state";
-import { MarkdownView, Plugin, TFile } from "obsidian";
+import { MarkdownView, TFile } from "obsidian";
 import { CommentWidget, CommentWidgetHelper } from "../components/comment";
 import { HighlightRepository } from "../repositories/HighlightRepository";
 import { HighlightService } from "../services/HighlightService";
@@ -71,7 +71,9 @@ function createCommentWidget(plugin: HiNotePluginContext, highlight: HiNote): De
         widget: new CommentWidget(
             plugin,
             highlight,
-            () => CommentWidgetHelper.openCommentPanel(plugin.app, highlight, plugin.eventManager)
+            () => {
+                void CommentWidgetHelper.openCommentPanel(plugin.app, highlight, plugin.eventManager);
+            }
         ),
         side: 2,
         stopEvent: (event: Event) => event.type === 'mousedown' || event.type === 'mouseup'

@@ -263,7 +263,7 @@ export abstract class BaseAIServiceSettings implements AIServiceSettings {
 
         const dropdownEl = modelSetting.settingEl.querySelector('.setting-item-control');
         if (dropdownEl) {
-            (dropdownEl as HTMLElement).addClass('openai-dropdown-container');
+            dropdownEl.addClass('openai-dropdown-container');
             dropdownEl.insertBefore(refs.customModelContainer, dropdownEl.firstChild);
         }
 
@@ -294,7 +294,7 @@ export abstract class BaseAIServiceSettings implements AIServiceSettings {
         settingItem.addClass('openai-setting-no-border');
         const controlEl = settingItem.querySelector('.setting-item-control');
         if (controlEl) {
-            (controlEl as HTMLElement).addClass('openai-setting-no-margin');
+            controlEl.addClass('openai-setting-no-margin');
         }
 
         if (modelState.selectedModel.isCustom) {
@@ -330,7 +330,7 @@ export abstract class BaseAIServiceSettings implements AIServiceSettings {
 
                 const inputEl = refs.customModelContainer.querySelector('input');
                 if (inputEl) {
-                    (inputEl as HTMLInputElement).value = modelId;
+                    inputEl.value = modelId;
                 }
             }
         }

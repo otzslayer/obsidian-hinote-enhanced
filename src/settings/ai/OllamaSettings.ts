@@ -15,7 +15,11 @@ export class OllamaSettings extends BaseAIServiceSettings {
         return this.plugin.settings.ai.ollama;
     }
 
-    async display(containerEl: HTMLElement): Promise<void> {
+    display(containerEl: HTMLElement): void {
+        void this.render(containerEl);
+    }
+
+    private async render(containerEl: HTMLElement): Promise<void> {
         const settingsContainer = containerEl.createEl('div', {
             cls: 'ai-service-settings'
         });

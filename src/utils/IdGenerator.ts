@@ -24,7 +24,7 @@ export class IdGenerator {
      */
     static generateCommentId(): string {
         const timestamp = Date.now();
-        const random = Math.random().toString(36).substr(2, 9);
+        const random = Math.random().toString(36).slice(2, 11);
         return `comment-${timestamp}-${random}`;
     }
 
@@ -34,7 +34,7 @@ export class IdGenerator {
      */
     static generateCardId(): string {
         const timestamp = Date.now();
-        const random = Math.random().toString(36).substr(2, 9);
+        const random = Math.random().toString(36).slice(2, 11);
         return `card-${timestamp}-${random}`;
     }
 
@@ -44,7 +44,7 @@ export class IdGenerator {
      */
     static generateGroupId(): string {
         const timestamp = Date.now();
-        const random = Math.random().toString(36).substr(2, 7);
+        const random = Math.random().toString(36).slice(2, 9);
         return `group-${timestamp}-${random}`;
     }
 

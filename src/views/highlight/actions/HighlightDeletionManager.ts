@@ -4,6 +4,7 @@ import { HighlightRegexUtils } from '../../../utils/HighlightRegexUtils';
 import CommentPlugin from '../../../../main';
 import { t } from '../../../i18n';
 import type { PluginSettings } from '../../../types/settings';
+import { showConfirmModal } from '../../../utils/ConfirmModal';
 
 type LegacyHighlightSettings = PluginSettings & {
     customHighlightRegex?: string;
@@ -35,9 +36,10 @@ export class HighlightDeletionManager {
         try {
             // 显示确认对话框
             if (!skipConfirmation) {
-                const confirmDelete = confirm(
-                    t('Delete this highlight and all its data, including Comments and HiCards? Can\'t undo.')
-                );
+                const confirmDelete = await showConfirmModal(this.plugin.app, {
+                    title: t('Delete highlight'),
+                    message: t('Delete this highlight and all its data, including Comments and HiCards? Can\'t undo.')
+                });
                 if (!confirmDelete) {
                     return false;
                 }

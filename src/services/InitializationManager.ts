@@ -63,7 +63,7 @@ export class InitializationManager {
             () => highlightRepository
         );
         // 异步构建索引，不阻塞初始化
-        highlightService.initialize();
+        void highlightService.initialize();
 
         // 初始化 Canvas 服务（共享实例）
         const canvasService = new CanvasService(this.plugin.app.vault);

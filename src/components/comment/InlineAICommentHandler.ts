@@ -69,13 +69,13 @@ export class InlineAICommentHandler {
 
         if (loading) {
             textarea.disabled = true;
-            textarea.style.opacity = "0.6";
+            textarea.setCssProps({ opacity: "0.6" });
             this.showLoadingHint(actionHint);
             return;
         }
 
         textarea.disabled = false;
-        textarea.style.opacity = "1";
+        textarea.setCssProps({ opacity: "1" });
         this.hideLoadingHint(actionHint);
     }
 
@@ -84,7 +84,7 @@ export class InlineAICommentHandler {
 
         const deleteLink = actionHint.querySelector(".hi-note-delete-link") as HTMLElement;
         if (deleteLink) {
-            deleteLink.style.visibility = "hidden";
+            deleteLink.setCssProps({ visibility: "hidden" });
         }
 
         const loadingHint = actionHint.querySelector(".ai-loading-hint");
@@ -107,7 +107,7 @@ export class InlineAICommentHandler {
 
         const deleteLink = actionHint.querySelector(".hi-note-delete-link") as HTMLElement;
         if (deleteLink) {
-            deleteLink.style.visibility = "";
+            deleteLink.setCssProps({ visibility: "" });
         }
     }
 }

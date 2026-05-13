@@ -120,7 +120,7 @@ export class HighlightExtractor {
         
         let match: RegExpExecArray | null;
         while ((match = pattern.exec(content)) !== null) {
-            const safeMatch = match as RegExpExecArray; // 类型断言，因为在循环中 match 一定不为 null
+            const safeMatch = match;
             const fullMatch = safeMatch[0];
             const matchStart = safeMatch.index;
             const matchEnd = matchStart + fullMatch.length;
@@ -228,7 +228,6 @@ export class HighlightExtractor {
     async getFilesWithHighlights(): Promise<TFile[]> {
         const files = this.app.vault.getMarkdownFiles();
         const filesWithHighlights: TFile[] = [];
-        let totalHighlights = 0;
 
         for (const file of files) {
             // 检查文件是否应该被排除
@@ -241,7 +240,6 @@ export class HighlightExtractor {
             const highlights = this.extractHighlights(content, file);
             if (highlights.length > 0) {
                 filesWithHighlights.push(file);
-                totalHighlights += highlights.length;
             }
         }
 
@@ -275,21 +273,17 @@ export class HighlightExtractor {
      * @returns Promise<string> 返回创建的 Block ID 引用（文件名#^BlockID）
      */
     public async createBlockIdForHighlight(file: TFile, position: number, length?: number): Promise<string> {
-        try {
-            // 检查是否已有 Block ID
-            const existingId = this.blockIdService.getParagraphBlockId(file, position);
-            if (existingId) {
-                return existingId;
-            }
-            
-            // 计算高亮结束位置（如果提供了长度）
-            const endPosition = length ? position + length : position;
-            
-            // 强制创建并返回 Block ID 引用，传递起始和结束位置
-            return await this.blockIdService.createParagraphBlockId(file, position, endPosition);
-        } catch (error) {
-            throw error;
+        // 检查是否已有 Block ID
+        const existingId = this.blockIdService.getParagraphBlockId(file, position);
+        if (existingId) {
+            return existingId;
         }
+
+        // 计算高亮结束位置（如果提供了长度）
+        const endPosition = length ? position + length : position;
+
+        // 强制创建并返回 Block ID 引用，传递起始和结束位置
+        return await this.blockIdService.createParagraphBlockId(file, position, endPosition);
     }
 
     /**

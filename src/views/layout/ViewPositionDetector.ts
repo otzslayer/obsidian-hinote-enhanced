@@ -1,4 +1,4 @@
-import { WorkspaceLeaf, TFile, App } from 'obsidian';
+import { WorkspaceLeaf, App } from 'obsidian';
 
 interface WorkspaceSplitLike {
     children: Array<WorkspaceSplitLike | WorkspaceLeaf>;

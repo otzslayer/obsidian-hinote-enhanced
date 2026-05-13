@@ -36,7 +36,7 @@ export class LocationService {
                     return null;
                 }
                 
-                targetLeaf = await this.app.workspace.getLeaf('tab');
+                targetLeaf = this.app.workspace.getLeaf('tab');
                 await targetLeaf.openFile(file);
             } catch {
                 new Notice("打开文件失败");
@@ -45,7 +45,7 @@ export class LocationService {
         }
         
         // 激活编辑器视图，但不聚焦
-        await this.app.workspace.setActiveLeaf(targetLeaf, { focus: false });
+        this.app.workspace.setActiveLeaf(targetLeaf, { focus: false });
         return targetLeaf;
     }
 

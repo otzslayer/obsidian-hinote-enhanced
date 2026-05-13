@@ -97,17 +97,21 @@ export class SelectionBoxController {
         const height = e.clientY - this.selectionStartY;
 
         if (width < 0) {
-            this.selectionBox.style.left = `${e.clientX}px`;
-            this.selectionBox.style.width = `${-width}px`;
+            this.selectionBox.setCssProps({
+                left: `${e.clientX}px`,
+                width: `${-width}px`
+            });
         } else {
-            this.selectionBox.style.width = `${width}px`;
+            this.selectionBox.setCssProps({ width: `${width}px` });
         }
 
         if (height < 0) {
-            this.selectionBox.style.top = `${e.clientY}px`;
-            this.selectionBox.style.height = `${-height}px`;
+            this.selectionBox.setCssProps({
+                top: `${e.clientY}px`,
+                height: `${-height}px`
+            });
         } else {
-            this.selectionBox.style.height = `${height}px`;
+            this.selectionBox.setCssProps({ height: `${height}px` });
         }
 
         this.selectCardsInBox();
