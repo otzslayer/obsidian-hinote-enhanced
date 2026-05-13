@@ -124,18 +124,12 @@ export class HighlightManager {
 
         return fileHighlights.filter(c => {
             const textMatch = c.text === highlight.text;
-            if (textMatch) {
-                if (typeof c.position === 'number' && typeof highlight.position === 'number') {
-                    return Math.abs(c.position - highlight.position) < 1000;
-                }
-                return true;
-            }
+            if (!textMatch) return false;
 
             if (typeof c.position === 'number' && typeof highlight.position === 'number') {
-                return Math.abs(c.position - highlight.position) < 30;
+                return Math.abs(c.position - highlight.position) < 1000;
             }
-
-            return false;
+            return true;
         });
     }
 

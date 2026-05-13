@@ -3,7 +3,6 @@ import { HighlightInfo } from "../types/highlight";
 import { HighlightRepository } from "../repositories/HighlightRepository";
 import { t } from "../i18n";
 import { HighlightService } from "./HighlightService";
-import { IdGenerator } from '../utils/IdGenerator';
 import type { PluginSettings } from "../types/settings";
 import { ExportContentRenderer } from "./export/ExportContentRenderer";
 import { ExportFileWriter } from "./export/ExportFileWriter";
@@ -137,46 +136,7 @@ export class ExportService {
         // 获取已存储的评论
         const storedComments = this.highlightRepository.getCachedHighlights(file.path) || [];
         
-        // 分离虚拟高亮和普通高亮
-        const virtualHighlights = storedComments.filter(c => c.isVirtual && c.comments && c.comments.length > 0);
-        const normalHighlights = storedComments.filter(c => !c.isVirtual);
-        
-        // 处理普通高亮
-        const processedHighlights = highlights.map(highlight => {
-            const storedComment = normalHighlights.find(c => {
-                const textMatch = c.text === highlight.text;
-                // 如果存储的评论没有 position，则不进行位置匹配
-                if (textMatch && typeof c.position === 'number' && typeof highlight.position === 'number') {
-                    return Math.abs(c.position - highlight.position) < 1000;
-                }
-                return textMatch;
-            });
-
-            if (storedComment) {
-                return {
-                    ...storedComment,
-                    position: highlight.position ?? 0,
-                    paragraphOffset: highlight.paragraphOffset ?? 0
-                };
-            }
-
-            return {
-                ...highlight,
-                id: highlight.id || IdGenerator.generateHighlightId(
-                    file.path, 
-                    highlight.position || 0, 
-                    highlight.text
-                ),
-                position: highlight.position ?? 0,
-                paragraphOffset: highlight.paragraphOffset ?? 0,
-                comments: [],
-                createdAt: Date.now(),
-                updatedAt: Date.now()
-            };
-        });
-
-        // 合并虚拟高亮和普通高亮，虚拟高亮放在前面
-        return [...virtualHighlights, ...processedHighlights];
+        return this.highlightService.mergeHighlightsWithComments(highlights, storedComments, file);
     }
 
     /**

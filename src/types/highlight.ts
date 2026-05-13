@@ -15,6 +15,9 @@ export interface HighlightInfo {
 
     paragraphOffset?: number;
     blockId?: string;
+    contextBefore?: string;
+    contextAfter?: string;
+    textFingerprint?: string;
 
     filePath?: string;
     fileName?: string;

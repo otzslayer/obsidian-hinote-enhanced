@@ -3,19 +3,22 @@ import { HighlightInfo } from '../../types/highlight';
 import { HighlightInfo as HiNote } from '../../types/highlight';
 import { HighlightRepository } from '../../repositories/HighlightRepository';
 import {
-    buildHighlightMatchIndexes,
-    findExactHighlightMatch,
-    findMergeCandidate,
-    findSimpleHighlightMatch,
+    canUpdateStoredHighlight,
     findStoredHighlightMatch
 } from './HighlightMatchStrategies';
+import type { HighlightMatchConfidence } from './HighlightMatchStrategies';
+
+interface StoredHighlightUpdate {
+    id: string;
+    patch: Partial<HiNote>;
+}
 
 /**
  * 高亮匹配器
  * 职责：
  * 1. 将从文件中提取的高亮与存储的评论数据进行匹配合并
- * 2. 使用多种策略（ID、文本+位置、纯文本）进行匹配
- * 3. 匹配成功后异步更新存储中的 position，防止偏移累积
+ * 2. 使用统一策略（ID、block+text、文本+位置、上下文、唯一文本）进行匹配
+ * 3. 高置信匹配成功后异步更新存储中的定位锚点，防止偏移累积
  */
 export class HighlightMatcher {
     constructor(
@@ -29,23 +32,23 @@ export class HighlightMatcher {
         target: HiNote,
         candidates: HiNote[]
     ): HiNote | null {
-        return findSimpleHighlightMatch(target, candidates);
+        return findStoredHighlightMatch(target, candidates)?.highlight || null;
     }
 
     /**
-     * 精确匹配高亮文本和近似位置。
+     * 使用统一匹配策略查找候选高亮。
      */
     static findExactMatch(target: HiNote, candidates: HiNote[]): HiNote | null {
-        return findExactHighlightMatch(target, candidates);
+        return findStoredHighlightMatch(target, candidates)?.highlight || null;
     }
 
     /**
      * 查找与给定高亮最匹配的存储高亮
-     * 使用多种策略进行匹配：精确匹配、位置匹配、模糊文本匹配
+     * 使用统一策略进行匹配，禁止纯位置匹配。
      */
     public findMatchingHighlight(file: TFile, highlight: HiNote, highlightRepository: HighlightRepository): HiNote | null {
         const fileHighlights = highlightRepository.getCachedHighlights(file.path) || [];
-        return findStoredHighlightMatch(fileHighlights, highlight);
+        return findStoredHighlightMatch(highlight, fileHighlights)?.highlight || null;
     }
     
     /**
@@ -60,17 +63,17 @@ export class HighlightMatcher {
             return highlights.map(h => this.createHighlightInfo(h, file));
         }
         
-        const indexes = buildHighlightMatchIndexes(storedComments);
         const usedCommentIds = new Set<string>();
-        // 收集需要更新 position 的高亮，在合并完成后批量异步更新存储
-        const positionUpdates: { id: string; newPosition: number }[] = [];
+        // 收集需要更新定位锚点的高亮，在合并完成后批量异步更新存储
+        const highlightUpdates: StoredHighlightUpdate[] = [];
         
         // 合并高亮和评论数据
         const mergedHighlights = highlights.map(highlight => {
-            const storedComment = findMergeCandidate(highlight, indexes, usedCommentIds);
-            if (storedComment?.id) {
+            const match = findStoredHighlightMatch(highlight, storedComments, { usedIds: usedCommentIds });
+            const storedComment = match?.highlight;
+            if (storedComment?.id && match) {
                 usedCommentIds.add(storedComment.id);
-                this.trackPositionUpdate(positionUpdates, storedComment, highlight);
+                this.trackStoredHighlightUpdate(highlightUpdates, storedComment, highlight, match.confidence);
                 return this.createMergedHighlight(highlight, storedComment, file);
             }
 
@@ -82,48 +85,69 @@ export class HighlightMatcher {
             .filter(c => c.id && c.isVirtual && c.comments && c.comments.length > 0 && !usedCommentIds.has(c.id))
             .map(vh => this.createHighlightInfo(vh, file));
         
-        // 异步更新存储中的 position，防止偏移累积
-        if (positionUpdates.length > 0) {
-            this.applyPositionUpdates(file.path, storedComments, positionUpdates);
+        // 异步更新存储中的定位锚点，防止偏移累积
+        if (highlightUpdates.length > 0) {
+            this.applyStoredHighlightUpdates(file.path, storedComments, highlightUpdates);
         }
         
         return [...virtualHighlights, ...mergedHighlights];
     }
     
     /**
-     * 记录需要更新 position 的高亮
+     * 记录需要更新定位锚点的高亮
      */
-    private trackPositionUpdate(
-        updates: { id: string; newPosition: number }[],
+    private trackStoredHighlightUpdate(
+        updates: StoredHighlightUpdate[],
         storedComment: HiNote,
-        highlight: HighlightInfo
+        highlight: HighlightInfo,
+        confidence: HighlightMatchConfidence
     ): void {
-        if (storedComment.id &&
-            highlight.position !== undefined &&
-            storedComment.position !== undefined &&
-            highlight.position !== storedComment.position &&
-            storedComment.text === highlight.text) {
-            updates.push({ id: storedComment.id, newPosition: highlight.position });
+        if (!storedComment.id || !canUpdateStoredHighlight(confidence)) {
+            return;
+        }
+
+        const patch: Partial<HiNote> = {};
+        if (highlight.position !== undefined && highlight.position !== storedComment.position) {
+            patch.position = highlight.position;
+        }
+        if (highlight.text && highlight.text !== storedComment.text) {
+            patch.text = highlight.text;
+        }
+        if (highlight.contextBefore && highlight.contextBefore !== storedComment.contextBefore) {
+            patch.contextBefore = highlight.contextBefore;
+        }
+        if (highlight.contextAfter && highlight.contextAfter !== storedComment.contextAfter) {
+            patch.contextAfter = highlight.contextAfter;
+        }
+        if (highlight.textFingerprint && highlight.textFingerprint !== storedComment.textFingerprint) {
+            patch.textFingerprint = highlight.textFingerprint;
+        }
+        if (highlight.blockId && highlight.blockId !== storedComment.blockId) {
+            patch.blockId = highlight.blockId;
+        }
+        if (Object.keys(patch).length > 0) {
+            updates.push({ id: storedComment.id, patch });
         }
     }
     
     /**
-     * 异步批量更新存储中的 position，防止偏移累积导致匹配失败
+     * 异步批量更新存储中的定位锚点，防止偏移累积导致匹配失败
      */
-    private applyPositionUpdates(
+    private applyStoredHighlightUpdates(
         filePath: string,
         storedComments: HiNote[],
-        updates: { id: string; newPosition: number }[]
+        updates: StoredHighlightUpdate[]
     ): void {
         // 使用 setTimeout 异步执行，不阻塞合并流程
         setTimeout(async () => {
             try {
-                const updateMap = new Map(updates.map(u => [u.id, u.newPosition]));
+                const updateMap = new Map(updates.map(u => [u.id, u.patch]));
                 let changed = false;
                 
                 for (const comment of storedComments) {
                     if (comment.id && updateMap.has(comment.id)) {
-                        comment.position = updateMap.get(comment.id)!;
+                        Object.assign(comment, updateMap.get(comment.id)!);
+                        comment.updatedAt = Date.now();
                         changed = true;
                     }
                 }
@@ -135,7 +159,7 @@ export class HighlightMatcher {
                     }
                 }
             } catch (error) {
-                // 静默处理，position 更新失败不影响主流程
+                // 静默处理，定位锚点更新失败不影响主流程
             }
         }, 100);
     }

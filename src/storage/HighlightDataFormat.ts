@@ -21,6 +21,9 @@ export interface OptimizedHighlight {
     isCloze?: boolean;
     isVirtual?: boolean;
     paragraphOffset?: number;
+    contextBefore?: string;
+    contextAfter?: string;
+    textFingerprint?: string;
     comments?: OptimizedComment[];
 }
 
@@ -57,6 +60,9 @@ export function convertToLegacyHighlight(
         isCloze: highlight.isCloze || false,
         isVirtual: highlight.isVirtual || false,
         paragraphOffset: highlight.paragraphOffset,
+        contextBefore: highlight.contextBefore,
+        contextAfter: highlight.contextAfter,
+        textFingerprint: highlight.textFingerprint,
         comments: highlight.comments?.map(comment => ({
             id: comment.id,
             content: comment.content,
@@ -96,6 +102,18 @@ export function convertToOptimizedHighlight(highlight: HiNote): OptimizedHighlig
 
     if (highlight.paragraphOffset !== undefined) {
         optimized.paragraphOffset = highlight.paragraphOffset;
+    }
+
+    if (highlight.contextBefore) {
+        optimized.contextBefore = highlight.contextBefore;
+    }
+
+    if (highlight.contextAfter) {
+        optimized.contextAfter = highlight.contextAfter;
+    }
+
+    if (highlight.textFingerprint) {
+        optimized.textFingerprint = highlight.textFingerprint;
     }
 
     if (highlight.comments && highlight.comments.length > 0) {

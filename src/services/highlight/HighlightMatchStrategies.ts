@@ -1,154 +1,232 @@
 import type { HighlightInfo } from '../../types/highlight';
 import type { HighlightInfo as HiNote } from '../../types/highlight';
 
-export interface HighlightMatchIndexes {
-    idIndex: Map<string, HiNote>;
-    textIndex: Map<string, HiNote[]>;
+export type HighlightMatchConfidence =
+    | 'id'
+    | 'block-text'
+    | 'text-position'
+    | 'context'
+    | 'unique-text';
+
+export interface HighlightMatchResult {
+    highlight: HiNote;
+    confidence: HighlightMatchConfidence;
 }
 
-export function findSimpleHighlightMatch(target: HiNote, candidates: HiNote[]): HiNote | null {
-    if (!candidates || candidates.length === 0) return null;
-
-    return findExactHighlightMatch(target, candidates)
-        || findPositionHighlightMatch(target, candidates);
+export interface HighlightMatchOptions {
+    usedIds?: Set<string>;
 }
 
-export function findExactHighlightMatch(target: HiNote, candidates: HiNote[]): HiNote | null {
-    return candidates.find(h =>
-        h.text === target.text &&
-        (typeof h.position !== 'number' ||
-         typeof target.position !== 'number' ||
-         Math.abs(h.position - target.position) < 10)
-    ) || null;
-}
+const TEXT_POSITION_THRESHOLD = 500;
+const CONTEXT_POSITION_THRESHOLD = 1200;
+const CONTEXT_SCORE_THRESHOLD = 1.35;
+const CONTEXT_TIE_MARGIN = 0.2;
 
 export function findStoredHighlightMatch(
-    fileHighlights: HiNote[],
-    highlight: HiNote
-): HiNote | null {
-    if (!fileHighlights || fileHighlights.length === 0) {
+    target: HiNote,
+    candidates: HiNote[],
+    options: HighlightMatchOptions = {}
+): HighlightMatchResult | null {
+    const availableCandidates = filterAvailableCandidates(candidates, options.usedIds);
+    if (availableCandidates.length === 0) return null;
+
+    const idMatch = findIdMatch(target, availableCandidates);
+    if (idMatch) return { highlight: idMatch, confidence: 'id' };
+
+    const blockTextMatch = findBlockTextMatch(target, availableCandidates);
+    if (blockTextMatch) return { highlight: blockTextMatch, confidence: 'block-text' };
+
+    const textPositionMatch = findTextPositionMatch(target, availableCandidates);
+    if (textPositionMatch) return { highlight: textPositionMatch, confidence: 'text-position' };
+
+    const contextMatch = findContextMatch(target, availableCandidates);
+    if (contextMatch) return { highlight: contextMatch, confidence: 'context' };
+
+    const uniqueTextMatch = findUniqueTextMatch(target, availableCandidates);
+    if (uniqueTextMatch) return { highlight: uniqueTextMatch, confidence: 'unique-text' };
+
+    return null;
+}
+
+export function canUpdateStoredHighlight(confidence: HighlightMatchConfidence): boolean {
+    return confidence === 'id' ||
+        confidence === 'block-text' ||
+        confidence === 'text-position' ||
+        confidence === 'context';
+}
+
+function filterAvailableCandidates(candidates: HiNote[], usedIds?: Set<string>): HiNote[] {
+    if (!usedIds) return candidates;
+    return candidates.filter(candidate => !candidate.id || !usedIds.has(candidate.id));
+}
+
+function findIdMatch(target: HiNote, candidates: HiNote[]): HiNote | null {
+    if (!target.id) return null;
+    return candidates.find(candidate => candidate.id === target.id) || null;
+}
+
+function findBlockTextMatch(target: HiNote, candidates: HiNote[]): HiNote | null {
+    if (!target.blockId) return null;
+
+    const blockCandidates = candidates.filter(candidate => candidate.blockId === target.blockId);
+    if (blockCandidates.length === 0) return null;
+
+    const exactText = blockCandidates.find(candidate => candidate.text === target.text);
+    if (exactText) return exactText;
+
+    if (blockCandidates.length === 1 && getContextScore(target, blockCandidates[0]) >= CONTEXT_SCORE_THRESHOLD) {
+        return blockCandidates[0];
+    }
+
+    return null;
+}
+
+function findTextPositionMatch(target: HiNote, candidates: HiNote[]): HiNote | null {
+    if (!target.text || typeof target.position !== 'number') return null;
+
+    const sortedCandidates = candidates
+        .filter(candidate =>
+            candidate.text === target.text &&
+            typeof candidate.position === 'number'
+        )
+        .sort((a, b) =>
+            Math.abs(a.position - target.position) -
+            Math.abs(b.position - target.position)
+        );
+
+    const best = sortedCandidates[0];
+    if (!best || typeof best.position !== 'number') return null;
+
+    return Math.abs(best.position - target.position) < TEXT_POSITION_THRESHOLD
+        ? best
+        : null;
+}
+
+function findContextMatch(target: HiNote, candidates: HiNote[]): HiNote | null {
+    const scored = candidates
+        .map(candidate => ({
+            candidate,
+            score: getContextScore(target, candidate)
+        }))
+        .filter(item => item.score >= CONTEXT_SCORE_THRESHOLD)
+        .sort((a, b) => b.score - a.score);
+
+    if (scored.length === 0) return null;
+    if (scored.length > 1 && scored[0].score - scored[1].score < CONTEXT_TIE_MARGIN) {
         return null;
     }
 
-    const exactMatch = fileHighlights.find((h: HiNote) => {
-        if (h.text !== highlight.text) return false;
-        if (typeof h.position === 'number' && typeof highlight.position === 'number') {
-            return Math.abs(h.position - highlight.position) < 10;
-        }
-        return false;
-    });
-
-    if (exactMatch) return exactMatch;
-
-    if (highlight.text && highlight.position !== undefined) {
-        const textCandidates = fileHighlights
-            .filter((h: HiNote) => h.text === highlight.text && typeof h.position === 'number')
-            .sort((a, b) =>
-                Math.abs((a.position ?? 0) - (highlight.position ?? 0)) -
-                Math.abs((b.position ?? 0) - (highlight.position ?? 0))
-            );
-        if (textCandidates.length > 0 &&
-            Math.abs((textCandidates[0].position ?? 0) - (highlight.position ?? 0)) < 500) {
-            return textCandidates[0];
-        }
+    const best = scored[0].candidate;
+    if (!hasPositionNear(target, best, CONTEXT_POSITION_THRESHOLD) &&
+        !hasStrongTwoSidedContext(target, best)) {
+        return null;
     }
 
-    if (highlight.text) {
-        const textOnlyCandidates = fileHighlights.filter((h: HiNote) => h.text === highlight.text);
-        if (textOnlyCandidates.length === 1) {
-            return textOnlyCandidates[0];
-        }
-    }
-
-    if (highlight.position !== undefined) {
-        return fileHighlights.find((h: HiNote) =>
-            typeof h.position === 'number' &&
-            Math.abs(h.position - highlight.position) < 50
-        ) || null;
-    }
-
-    return null;
+    return best;
 }
 
-export function buildHighlightMatchIndexes(storedComments: HiNote[]): HighlightMatchIndexes {
-    const idIndex = new Map<string, HiNote>();
-    const textIndex = new Map<string, HiNote[]>();
+function findUniqueTextMatch(target: HiNote, candidates: HiNote[]): HiNote | null {
+    if (!target.text) return null;
 
-    for (const comment of storedComments) {
-        if (comment.id) idIndex.set(comment.id, comment);
-        if (comment.text) {
-            if (!textIndex.has(comment.text)) textIndex.set(comment.text, []);
-            textIndex.get(comment.text)!.push(comment);
+    const textMatches = candidates.filter(candidate => candidate.text === target.text);
+    return textMatches.length === 1 ? textMatches[0] : null;
+}
+
+function getContextScore(target: HiNote, candidate: HiNote): number {
+    let score = 0;
+
+    if (target.blockId && candidate.blockId && target.blockId === candidate.blockId) {
+        score += 0.75;
+    }
+
+    if (hasPositionNear(target, candidate, CONTEXT_POSITION_THRESHOLD)) {
+        score += 0.25;
+    }
+
+    score += getAnchorScore(target.contextBefore, candidate.contextBefore);
+    score += getAnchorScore(target.contextAfter, candidate.contextAfter);
+    score += getTextSimilarityScore(target, candidate);
+
+    return score;
+}
+
+function getAnchorScore(a?: string, b?: string): number {
+    if (!a || !b) return 0;
+
+    const normalizedA = normalizeText(a);
+    const normalizedB = normalizeText(b);
+    if (!normalizedA || !normalizedB) return 0;
+
+    if (normalizedA === normalizedB) return 0.65;
+    if (normalizedA.includes(normalizedB) || normalizedB.includes(normalizedA)) return 0.45;
+
+    const similarity = getDiceSimilarity(normalizedA, normalizedB);
+    return similarity >= 0.72 ? 0.35 : 0;
+}
+
+function getTextSimilarityScore(target: HiNote, candidate: HiNote): number {
+    if (target.text === candidate.text) return 0.5;
+
+    const targetText = normalizeText(target.textFingerprint || target.text);
+    const candidateText = normalizeText(candidate.textFingerprint || candidate.text);
+    const similarity = getDiceSimilarity(targetText, candidateText);
+
+    if (similarity >= 0.85) return 0.45;
+    if (similarity >= 0.65) return 0.3;
+    if (similarity >= 0.45) return 0.15;
+    return 0;
+}
+
+function hasStrongTwoSidedContext(target: HiNote, candidate: HiNote): boolean {
+    return getAnchorScore(target.contextBefore, candidate.contextBefore) >= 0.35 &&
+        getAnchorScore(target.contextAfter, candidate.contextAfter) >= 0.35;
+}
+
+function hasPositionNear(a: HighlightInfo, b: HighlightInfo, threshold: number): boolean {
+    return typeof a.position === 'number' &&
+        typeof b.position === 'number' &&
+        Math.abs(a.position - b.position) < threshold;
+}
+
+function normalizeText(value: string): string {
+    return value.replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
+function getDiceSimilarity(a: string, b: string): number {
+    if (!a || !b) return 0;
+    if (a === b) return 1;
+
+    const aTokens = getBigrams(a);
+    const bTokens = getBigrams(b);
+    if (aTokens.length === 0 || bTokens.length === 0) {
+        return a === b ? 1 : 0;
+    }
+
+    const counts = new Map<string, number>();
+    for (const token of aTokens) {
+        counts.set(token, (counts.get(token) || 0) + 1);
+    }
+
+    let overlap = 0;
+    for (const token of bTokens) {
+        const count = counts.get(token) || 0;
+        if (count > 0) {
+            overlap++;
+            counts.set(token, count - 1);
         }
     }
 
-    return { idIndex, textIndex };
+    return (2 * overlap) / (aTokens.length + bTokens.length);
 }
 
-export function findMergeCandidate(
-    highlight: HighlightInfo,
-    indexes: HighlightMatchIndexes,
-    usedCommentIds: Set<string>
-): HiNote | null {
-    if (highlight.id && indexes.idIndex.has(highlight.id)) {
-        const storedComment = indexes.idIndex.get(highlight.id)!;
-        if (storedComment.id && !usedCommentIds.has(storedComment.id)) {
-            return storedComment;
-        }
+function getBigrams(value: string): string[] {
+    const compact = value.replace(/\s+/g, '');
+    if (compact.length < 2) return compact ? [compact] : [];
+
+    const bigrams: string[] = [];
+    for (let i = 0; i < compact.length - 1; i++) {
+        bigrams.push(compact.slice(i, i + 2));
     }
 
-    const textPositionMatch = findTextPositionMergeCandidate(highlight, indexes.textIndex, usedCommentIds);
-    if (textPositionMatch) return textPositionMatch;
-
-    const textOnlyMatch = findTextOnlyMergeCandidate(highlight, indexes.textIndex, usedCommentIds);
-    if (textOnlyMatch) return textOnlyMatch;
-
-    return null;
-}
-
-function findPositionHighlightMatch(target: HiNote, candidates: HiNote[]): HiNote | null {
-    if (typeof target.position !== 'number') return null;
-
-    return candidates.find(h =>
-        typeof h.position === 'number' &&
-        Math.abs(h.position - target.position) < 30
-    ) || null;
-}
-
-function findTextPositionMergeCandidate(
-    highlight: HighlightInfo,
-    textIndex: Map<string, HiNote[]>,
-    usedCommentIds: Set<string>
-): HiNote | null {
-    if (!highlight.text || !textIndex.has(highlight.text)) return null;
-
-    const sortedCandidates = textIndex.get(highlight.text)!
-        .filter(c => c.id && !usedCommentIds.has(c.id) &&
-            highlight.position !== undefined &&
-            c.position !== undefined)
-        .sort((a, b) =>
-            Math.abs((a.position ?? 0) - (highlight.position ?? 0)) -
-            Math.abs((b.position ?? 0) - (highlight.position ?? 0))
-        );
-
-    for (const candidate of sortedCandidates) {
-        if (Math.abs((candidate.position ?? 0) - (highlight.position ?? 0)) < 500) {
-            return candidate;
-        }
-    }
-
-    return null;
-}
-
-function findTextOnlyMergeCandidate(
-    highlight: HighlightInfo,
-    textIndex: Map<string, HiNote[]>,
-    usedCommentIds: Set<string>
-): HiNote | null {
-    if (!highlight.text || !textIndex.has(highlight.text)) return null;
-
-    const candidates = textIndex.get(highlight.text)!
-        .filter(c => c.id && !usedCommentIds.has(c.id));
-
-    return candidates.length === 1 ? candidates[0] : null;
+    return bigrams;
 }

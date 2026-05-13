@@ -96,6 +96,18 @@ export class DataValidator {
             errors.push(`高亮 ${id}: blockId必须是字符串`);
         }
 
+        if (highlight.contextBefore && typeof highlight.contextBefore !== 'string') {
+            errors.push(`高亮 ${id}: contextBefore必须是字符串`);
+        }
+
+        if (highlight.contextAfter && typeof highlight.contextAfter !== 'string') {
+            errors.push(`高亮 ${id}: contextAfter必须是字符串`);
+        }
+
+        if (highlight.textFingerprint && typeof highlight.textFingerprint !== 'string') {
+            errors.push(`高亮 ${id}: textFingerprint必须是字符串`);
+        }
+
         if (highlight.isCloze && typeof highlight.isCloze !== 'boolean') {
             errors.push(`高亮 ${id}: isCloze必须是布尔值`);
         }
@@ -252,6 +264,18 @@ export class DataValidator {
 
         if (highlight.blockId && typeof highlight.blockId === 'string') {
             sanitized.blockId = highlight.blockId;
+        }
+
+        if (highlight.contextBefore && typeof highlight.contextBefore === 'string') {
+            sanitized.contextBefore = highlight.contextBefore;
+        }
+
+        if (highlight.contextAfter && typeof highlight.contextAfter === 'string') {
+            sanitized.contextAfter = highlight.contextAfter;
+        }
+
+        if (highlight.textFingerprint && typeof highlight.textFingerprint === 'string') {
+            sanitized.textFingerprint = highlight.textFingerprint;
         }
 
         if (typeof highlight.isCloze === 'boolean') {

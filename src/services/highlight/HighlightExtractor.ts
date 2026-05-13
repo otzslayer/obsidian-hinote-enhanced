@@ -17,6 +17,7 @@ import { IdGenerator } from '../../utils/IdGenerator';
 export class HighlightExtractor {
     // 常量定义
     private static readonly DUPLICATE_POSITION_THRESHOLD = 10; // 位置差异阈值
+    private static readonly CONTEXT_LENGTH = 80;
 
     // 默认的文本提取正则（可以被用户自定义替换）
     // 使用更严格的模式：==后面和前面不能是=或换行符，避免匹配URL中的==
@@ -164,6 +165,7 @@ export class HighlightExtractor {
                 const isCloze = /\{\{([^{}]+)\}\}/.test(text);
                 
                 // 创建高亮对象（只包含提取阶段必需的字段）
+                const context = this.createContextAnchors(content, matchStart, matchEnd, text);
                 const highlight = {
                     id: IdGenerator.generateHighlightId(file.path, safeMatch.index, text),
                     text,
@@ -171,12 +173,35 @@ export class HighlightExtractor {
                     backgroundColor: extractedColor || backgroundColor,
                     isCloze: isCloze,
                     filePath: file.path,
-                    originalLength: fullMatch.length
+                    originalLength: fullMatch.length,
+                    contextBefore: context.before,
+                    contextAfter: context.after,
+                    textFingerprint: context.fingerprint
                 };
                 
                 highlights.push(highlight);
             }
         }
+    }
+
+    private createContextAnchors(
+        content: string,
+        matchStart: number,
+        matchEnd: number,
+        text: string
+    ): { before: string; after: string; fingerprint: string } {
+        const beforeStart = Math.max(0, matchStart - HighlightExtractor.CONTEXT_LENGTH);
+        const afterEnd = Math.min(content.length, matchEnd + HighlightExtractor.CONTEXT_LENGTH);
+
+        return {
+            before: this.normalizeContext(content.slice(beforeStart, matchStart)),
+            after: this.normalizeContext(content.slice(matchEnd, afterEnd)),
+            fingerprint: this.normalizeContext(text)
+        };
+    }
+
+    private normalizeContext(value: string): string {
+        return value.replace(/\s+/g, ' ').trim();
     }
     
     /**
