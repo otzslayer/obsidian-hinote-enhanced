@@ -70,15 +70,28 @@ export class HighlightCommentResolver {
         storedHighlights: HiNote[],
         highlight: HiNote
     ): HiNote | null {
-        return storedHighlights.find(storedHighlight => {
-            const textMatch = storedHighlight.text === highlight.text;
+        if (highlight.id) {
+            const idMatch = storedHighlights.find(storedHighlight => storedHighlight.id === highlight.id);
+            if (idMatch) return idMatch;
+        }
 
-            if (textMatch) {
-                return this.isPositionNear(storedHighlight, highlight, 1000) || !this.hasPositions(storedHighlight, highlight);
-            }
+        const textMatches = storedHighlights.filter(storedHighlight => storedHighlight.text === highlight.text);
+        if (textMatches.length === 0) return null;
 
-            return this.isPositionNear(storedHighlight, highlight, 30);
-        }) || null;
+        const positionMatch = textMatches
+            .filter(storedHighlight => this.hasPositions(storedHighlight, highlight))
+            .sort((a, b) =>
+                Math.abs(a.position - highlight.position) -
+                Math.abs(b.position - highlight.position)
+            )
+            .find(storedHighlight => this.isPositionNear(storedHighlight, highlight, 500));
+
+        if (positionMatch) return positionMatch;
+
+        const matchesWithoutPosition = textMatches.filter(storedHighlight => !this.hasPositions(storedHighlight, highlight));
+        if (matchesWithoutPosition.length === 1) return matchesWithoutPosition[0];
+
+        return textMatches.length === 1 ? textMatches[0] : null;
     }
 
     private isPositionNear(a: HiNote, b: HiNote, threshold: number): boolean {

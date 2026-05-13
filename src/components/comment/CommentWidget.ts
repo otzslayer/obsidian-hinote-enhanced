@@ -6,9 +6,6 @@ import { CommentWidgetHelper } from "./CommentWidgetHelper";
 export class CommentWidget extends WidgetType {
     private cleanupResizePositioning: (() => void) | null = null;
     
-    // 常量定义
-    private static readonly POSITION_MATCH_THRESHOLD = 30;
-    
     /**
      * 构造函数
      * @param plugin Obsidian 插件实例
@@ -31,20 +28,13 @@ export class CommentWidget extends WidgetType {
      */
     eq(widget: WidgetType): boolean {
         if (!(widget instanceof CommentWidget)) return false;
-        
-        // 使用位置匹配策略：如果位置接近且评论数量相同，认为是同一个 widget
-        // 不依赖 ID 匹配，因为每次提取高亮时 ID 可能会变化
-        const positionMatch = typeof this.highlight.position === 'number' && 
-                             typeof widget.highlight.position === 'number' &&
-                             Math.abs(this.highlight.position - widget.highlight.position) < CommentWidget.POSITION_MATCH_THRESHOLD;
-        
+
+        const idMatch = !!this.highlight.id && this.highlight.id === widget.highlight.id;
         const textMatch = this.highlight.text === widget.highlight.text;
+        const positionMatch = this.highlight.position === widget.highlight.position;
         const commentsMatch = (this.highlight.comments?.length ?? 0) === (widget.highlight.comments?.length ?? 0);
-        
-        // 只要位置匹配或文本匹配，且评论数量相同，就认为是同一个 widget
-        const isEqual = (textMatch || positionMatch) && commentsMatch;
-        
-        return isEqual;
+
+        return (idMatch || (textMatch && positionMatch)) && commentsMatch;
     }
 
     /**

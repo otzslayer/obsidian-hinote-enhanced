@@ -3,6 +3,7 @@ import type { HighlightInfo } from '../../types/highlight';
 import type { PluginSettings } from '../../types/settings';
 import { ExcludePatternMatcher } from '../ExcludePatternMatcher';
 import { BlockIdService } from '../BlockIdService';
+import { IdGenerator } from '../../utils/IdGenerator';
 
 /**
  * 高亮提取器
@@ -164,6 +165,7 @@ export class HighlightExtractor {
                 
                 // 创建高亮对象（只包含提取阶段必需的字段）
                 const highlight = {
+                    id: IdGenerator.generateHighlightId(file.path, safeMatch.index, text),
                     text,
                     position: safeMatch.index,
                     backgroundColor: extractedColor || backgroundColor,

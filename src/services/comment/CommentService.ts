@@ -87,7 +87,7 @@ export class CommentService {
         // 确保高亮有 ID
         if (!highlight.id) {
             highlight.id = IdGenerator.generateHighlightId(
-                this.currentFile?.path || '', 
+                file.path,
                 highlight.position || 0, 
                 highlight.text
             );

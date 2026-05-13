@@ -8,6 +8,8 @@ import type { EventManager } from "../../services/EventManager";
  */
 export class CommentWidgetHelper {
     private static readonly MAX_TOOLTIP_COMMENTS = 3;
+    private static readonly TOOLTIP_MARGIN = 8;
+    private static readonly TOOLTIP_GAP = 4;
 
     /**
      * 创建批注按钮
@@ -122,9 +124,36 @@ export class CommentWidgetHelper {
      */
     static updateTooltipPosition(widget: HTMLElement, tooltip: HTMLElement): void {
         const buttonRect = widget.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const margin = this.TOOLTIP_MARGIN;
+        const maxTooltipWidth = Math.max(160, viewportWidth - margin * 2);
+
         tooltip.style.position = 'fixed';
-        tooltip.style.top = `${buttonRect.bottom + 4}px`;
-        tooltip.style.left = `${buttonRect.right - tooltip.offsetWidth}px`;
+        tooltip.style.maxWidth = `${Math.min(360, maxTooltipWidth)}px`;
+
+        const tooltipRect = tooltip.getBoundingClientRect();
+        const tooltipWidth = tooltipRect.width || tooltip.offsetWidth;
+        const tooltipHeight = tooltipRect.height || tooltip.offsetHeight;
+
+        const spaceRight = viewportWidth - buttonRect.left - margin;
+        let left = spaceRight >= tooltipWidth
+            ? buttonRect.left
+            : buttonRect.right - tooltipWidth;
+
+        left = Math.min(
+            Math.max(left, margin),
+            Math.max(margin, viewportWidth - tooltipWidth - margin)
+        );
+
+        let top = buttonRect.bottom + this.TOOLTIP_GAP;
+        if (top + tooltipHeight + margin > viewportHeight) {
+            top = buttonRect.top - tooltipHeight - this.TOOLTIP_GAP;
+        }
+        top = Math.max(margin, top);
+
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
     }
 
     /**

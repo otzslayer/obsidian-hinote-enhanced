@@ -4,7 +4,6 @@ import type { HighlightInfo as HiNote } from '../../types/highlight';
 export interface HighlightMatchIndexes {
     idIndex: Map<string, HiNote>;
     textIndex: Map<string, HiNote[]>;
-    positionIndex: Map<number, HiNote[]>;
 }
 
 export function findSimpleHighlightMatch(target: HiNote, candidates: HiNote[]): HiNote | null {
@@ -74,7 +73,6 @@ export function findStoredHighlightMatch(
 export function buildHighlightMatchIndexes(storedComments: HiNote[]): HighlightMatchIndexes {
     const idIndex = new Map<string, HiNote>();
     const textIndex = new Map<string, HiNote[]>();
-    const positionIndex = new Map<number, HiNote[]>();
 
     for (const comment of storedComments) {
         if (comment.id) idIndex.set(comment.id, comment);
@@ -82,14 +80,9 @@ export function buildHighlightMatchIndexes(storedComments: HiNote[]): HighlightM
             if (!textIndex.has(comment.text)) textIndex.set(comment.text, []);
             textIndex.get(comment.text)!.push(comment);
         }
-        if (comment.position !== undefined) {
-            const bucket = Math.floor(comment.position / 50);
-            if (!positionIndex.has(bucket)) positionIndex.set(bucket, []);
-            positionIndex.get(bucket)!.push(comment);
-        }
     }
 
-    return { idIndex, textIndex, positionIndex };
+    return { idIndex, textIndex };
 }
 
 export function findMergeCandidate(
@@ -110,7 +103,7 @@ export function findMergeCandidate(
     const textOnlyMatch = findTextOnlyMergeCandidate(highlight, indexes.textIndex, usedCommentIds);
     if (textOnlyMatch) return textOnlyMatch;
 
-    return findPositionMergeCandidate(highlight, indexes.positionIndex, usedCommentIds);
+    return null;
 }
 
 function findPositionHighlightMatch(target: HiNote, candidates: HiNote[]): HiNote | null {
@@ -158,29 +151,4 @@ function findTextOnlyMergeCandidate(
         .filter(c => c.id && !usedCommentIds.has(c.id));
 
     return candidates.length === 1 ? candidates[0] : null;
-}
-
-function findPositionMergeCandidate(
-    highlight: HighlightInfo,
-    positionIndex: Map<number, HiNote[]>,
-    usedCommentIds: Set<string>
-): HiNote | null {
-    if (highlight.position === undefined) return null;
-
-    const bucket = Math.floor(highlight.position / 50);
-    for (let b = bucket - 1; b <= bucket + 1; b++) {
-        if (!positionIndex.has(b)) continue;
-
-        const candidates = positionIndex.get(b)!;
-        for (const candidate of candidates) {
-            if (candidate.id &&
-                !usedCommentIds.has(candidate.id) &&
-                candidate.position !== undefined &&
-                Math.abs(candidate.position - highlight.position) < 50) {
-                return candidate;
-            }
-        }
-    }
-
-    return null;
 }

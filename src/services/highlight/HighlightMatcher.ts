@@ -14,7 +14,7 @@ import {
  * 高亮匹配器
  * 职责：
  * 1. 将从文件中提取的高亮与存储的评论数据进行匹配合并
- * 2. 使用多种策略（ID、文本+位置、纯文本、位置模糊）进行匹配
+ * 2. 使用多种策略（ID、文本+位置、纯文本）进行匹配
  * 3. 匹配成功后异步更新存储中的 position，防止偏移累积
  */
 export class HighlightMatcher {
@@ -101,7 +101,8 @@ export class HighlightMatcher {
         if (storedComment.id &&
             highlight.position !== undefined &&
             storedComment.position !== undefined &&
-            highlight.position !== storedComment.position) {
+            highlight.position !== storedComment.position &&
+            storedComment.text === highlight.text) {
             updates.push({ id: storedComment.id, newPosition: highlight.position });
         }
     }
