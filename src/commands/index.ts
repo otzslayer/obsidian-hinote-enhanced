@@ -2,6 +2,7 @@ import { Plugin } from 'obsidian';
 import { WindowManager } from '../plugin/WindowManager';
 import { registerOpenCommentPanelCommand } from './openCommentPanel';
 import { registerOpenMainWindowCommand } from './openMainWindow';
+import { registerAddCommentCommand } from './addComment';
 
 /**
  * 注册所有命令
@@ -14,9 +15,12 @@ export function registerCommands(
 ): void {
     // 注册打开评论面板命令（右侧边栏）
     registerOpenCommentPanelCommand(plugin, windowManager, ensureInitialized);
-    
+
     // 注册在主窗口打开评论面板命令
     registerOpenMainWindowCommand(plugin, windowManager, ensureInitialized);
+
+    // 注册添加内联评论命令 (Mod+Shift+C)
+    registerAddCommentCommand(plugin);
 }
 
 /**
