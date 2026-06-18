@@ -73,7 +73,7 @@ export class BatchHighlightDeletionOperations {
             this.cleanupRenderedCards(highlightsArray);
             this.emitDeleteEvents(highlightsArray, fileMarkSuccess);
         } catch (error) {
-            console.error("[BatchDelete] 批量删除过程出错:", error);
+            console.error("[BatchDelete] 일괄 삭제 중 오류:", error);
             fileMarkFailed = highlightsArray.length;
         }
 
@@ -91,7 +91,7 @@ export class BatchHighlightDeletionOperations {
             try {
                 fsrsManager.deleteCardsBySourceId(highlight.id, "highlight");
             } catch (error) {
-                console.error("[BatchDelete] 删除闪卡失败:", highlight.id, error);
+                console.error("[BatchDelete] 플래시카드 삭제 실패:", highlight.id, error);
             }
         }
     }
@@ -138,12 +138,12 @@ export class BatchHighlightDeletionOperations {
                     try {
                         await highlightManager.removeHighlight(file, highlight);
                     } catch (error) {
-                        console.error("[BatchDelete] 从 HighlightManager 删除失败:", highlight.id, error);
+                        console.error("[BatchDelete] HighlightManager에서 삭제 실패:", highlight.id, error);
                         dataDeleteFailed++;
                     }
                 }
             } catch (error) {
-                console.error("[BatchDelete] 处理文件失败:", filePath, error);
+                console.error("[BatchDelete] 파일 처리 실패:", filePath, error);
                 dataDeleteFailed += fileHighlights.length;
             }
         }
@@ -165,7 +165,7 @@ export class BatchHighlightDeletionOperations {
                 }
                 highlightCard.destroy();
             } catch (error) {
-                console.error("[BatchDelete] 清理卡片实例失败:", highlight.id, error);
+                console.error("[BatchDelete] 카드 인스턴스 정리 실패:", highlight.id, error);
             }
         }
     }
@@ -188,18 +188,18 @@ export class BatchHighlightDeletionOperations {
         const totalFailed = fileMarkFailed + dataDeleteFailed;
 
         if (fileMarkSuccess > 0 && totalFailed === 0) {
-            new Notice(t(`成功删除 ${fileMarkSuccess} 个高亮`));
+            new Notice(t(`${fileMarkSuccess}개 하이라이트 삭제 성공`));
         } else if (fileMarkSuccess > 0 && totalFailed > 0) {
-            let message = t(`成功删除 ${fileMarkSuccess} 个高亮`);
+            let message = t(`${fileMarkSuccess}개 하이라이트 삭제 성공`);
             if (fileMarkFailed > 0) {
-                message += t(`，${fileMarkFailed} 个文件标记删除失败`);
+                message += t(`，${fileMarkFailed}개 파일 마크 삭제 실패`);
             }
             if (dataDeleteFailed > 0) {
-                message += t(`，${dataDeleteFailed} 个数据删除失败`);
+                message += t(`，${dataDeleteFailed}개 데이터 삭제 실패`);
             }
             new Notice(message);
         } else if (totalFailed > 0) {
-            new Notice(t("删除高亮失败"));
+            new Notice(t("하이라이트 삭제 실패"));
         }
     }
 }

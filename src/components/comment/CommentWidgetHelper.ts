@@ -3,8 +3,8 @@ import { HighlightInfo as HiNote, CommentItem } from "../../types/highlight";
 import type { EventManager } from "../../services/EventManager";
 
 /**
- * 批注小部件辅助类
- * 提供编辑模式和阅读模式共享的工具方法
+ * 주석 위젯 보조 클래스
+ * 편집 모드와 읽기 모드에서 공유되는 유틸리티 메서드 제공
  */
 export class CommentWidgetHelper {
     private static readonly MAX_TOOLTIP_COMMENTS = 3;
@@ -12,7 +12,7 @@ export class CommentWidgetHelper {
     private static readonly TOOLTIP_GAP = 4;
 
     /**
-     * 创建批注按钮
+     * 주석 버튼 생성
      */
     static createButton(container: HTMLElement, hasComments: boolean): HTMLElement {
         const button = container.createEl("button", {
@@ -29,7 +29,7 @@ export class CommentWidgetHelper {
     }
 
     /**
-     * 添加评论数量标签
+     * 댓글 수 라벨 추가
      */
     static addCommentCount(iconContainer: HTMLElement, count: number): void {
         if (count > 0) {
@@ -41,7 +41,7 @@ export class CommentWidgetHelper {
     }
 
     /**
-     * 创建工具提示
+     * 툴팁 생성
      */
     static createTooltip(app: App, highlight: HiNote): HTMLElement {
         const tooltip = activeDocument.createElement("div");
@@ -54,7 +54,7 @@ export class CommentWidgetHelper {
             cls: "hi-note-tooltip-list"
         });
 
-        // 渲染评论内容
+        // 댓글 내용 렌더링
         this.renderTooltipContent(app, commentsList, tooltip, highlight.comments || []);
 
         activeDocument.body.appendChild(tooltip);
@@ -63,7 +63,7 @@ export class CommentWidgetHelper {
     }
 
     /**
-     * 渲染工具提示内容
+     * 툴팁 내용 렌더링
      */
     private static renderTooltipContent(
         app: App,
@@ -73,13 +73,13 @@ export class CommentWidgetHelper {
     ): void {
         if (comments.length === 0) return;
 
-        // 最多显示3条评论
+        // 최대 3개의 댓글 표시
         comments.slice(0, this.MAX_TOOLTIP_COMMENTS).forEach(comment => {
             const item = commentsList.createEl('div', { cls: 'hi-note-tooltip-item' });
-            
-            // 使用 Markdown 渲染内容
-            const contentEl = item.createEl('div', { 
-                cls: 'hi-note-tooltip-content markdown-rendered' 
+
+            // Markdown으로 내용 렌더링
+            const contentEl = item.createEl('div', {
+                cls: 'hi-note-tooltip-content markdown-rendered'
             });
             
             this.renderMarkdownContent(app, contentEl, comment.content);
@@ -90,17 +90,17 @@ export class CommentWidgetHelper {
             });
         });
 
-        // 显示剩余评论数量
+        // 남은 댓글 수 표시
         if (comments.length > this.MAX_TOOLTIP_COMMENTS) {
             tooltip.createEl("div", {
                 cls: "hi-note-tooltip-more",
-                text: `还有 ${comments.length - this.MAX_TOOLTIP_COMMENTS} 条评论...`
+                text: `댓글 ${comments.length - this.MAX_TOOLTIP_COMMENTS}개 더 있음...`
             });
         }
     }
 
     /**
-     * 渲染 Markdown 内容
+     * Markdown 내용 렌더링
      */
     private static renderMarkdownContent(app: App, containerEl: HTMLElement, content: string): void {
         const markdownComponent = new Component();
@@ -121,7 +121,7 @@ export class CommentWidgetHelper {
     }
 
     /**
-     * 更新工具提示位置
+     * 툴팁 위치 업데이트
      */
     static updateTooltipPosition(widget: HTMLElement, tooltip: HTMLElement): void {
         const buttonRect = widget.getBoundingClientRect();
@@ -157,7 +157,7 @@ export class CommentWidgetHelper {
     }
 
     /**
-     * 设置工具提示的显示/隐藏事件
+     * 툴팁 표시/숨김 이벤트 설정
      */
     static setupTooltipEvents(
         button: HTMLElement,
@@ -175,7 +175,7 @@ export class CommentWidgetHelper {
     }
 
     /**
-     * 没有评论时，只有悬停在高亮区域才显示添加批注按钮
+     * 댓글이 없을 때 하이라이트 영역에 호버 시에만 주석 추가 버튼 표시
      */
     static setupEmptyCommentHover(widget: HTMLElement, button: HTMLElement): void {
         button.addClass("hi-note-button-hidden");
@@ -190,7 +190,7 @@ export class CommentWidgetHelper {
     }
 
     /**
-     * 让拥有独立生命周期的 Widget 能清理窗口监听器
+     * 독립적인 생명주기를 가진 위젯이 윈도우 리스너를 정리할 수 있도록 지원
      */
     static registerResizePositioning(widget: HTMLElement, tooltip: HTMLElement): () => void {
         const resizeListener = () => this.updateTooltipPosition(widget, tooltip);
@@ -199,7 +199,7 @@ export class CommentWidgetHelper {
     }
 
     /**
-     * 打开评论面板
+     * 댓글 패널 열기
      */
     static async openCommentPanel(app: App, highlight: HiNote, eventManager: EventManager): Promise<void> {
         const workspace = app.workspace;
@@ -223,7 +223,7 @@ export class CommentWidgetHelper {
     }
 
     /**
-     * 设置点击事件
+     * 클릭 이벤트 설정
      */
     static setupClickEvent(
         button: HTMLElement,
@@ -241,7 +241,7 @@ export class CommentWidgetHelper {
     }
 
     /**
-     * 创建清理观察器（用于阅读模式）
+     * 정리 옵저버 생성 (읽기 모드용)
      */
     static createCleanupObserver(widget: HTMLElement, tooltip: HTMLElement): MutationObserver {
         const observer = new MutationObserver((mutations) => {
@@ -263,7 +263,7 @@ export class CommentWidgetHelper {
     }
 
     /**
-     * 根据高亮 ID 清理工具提示，避免 CSS selector 转义问题
+     * 하이라이트 ID로 툴팁 정리, CSS 선택자 이스케이프 문제 방지
      */
     static removeTooltipsForHighlight(highlight: HiNote): void {
         if (!highlight.id) return;

@@ -18,8 +18,8 @@ interface GeminiResponse {
 }
 
 /**
- * Google Gemini AI 服务
- * 使用 Gemini 特定的 API 格式
+ * Google Gemini AI 서비스
+ * Gemini 전용 API 형식을 사용합니다
  */
 export class GeminiService extends BaseAIService {
     private generationConfig?: GenerationConfig;
@@ -44,14 +44,14 @@ export class GeminiService extends BaseAIService {
     }
 
     protected buildHeaders(): Record<string, string> {
-        // Gemini 使用 API key 作为 URL 参数，不需要 Authorization header
+        // Gemini는 API key를 URL 파라미터로 사용하므로 Authorization 헤더가 필요하지 않습니다
         return {
             'Content-Type': 'application/json'
         };
     }
 
     protected formatRequestBody(messages: AIMessage[]): Record<string, unknown> {
-        // 将统一的 AIMessage 格式转换为 Gemini 格式
+        // 통일된 AIMessage 형식을 Gemini 형식으로 변환
         const contents = messages.map(msg => ({
             role: msg.role === 'assistant' ? 'model' : 'user',
             parts: [{ text: msg.content }]
@@ -96,14 +96,14 @@ export class GeminiService extends BaseAIService {
     }
 
     /**
-     * 设置生成配置（用于 JSON 输出等特殊需求）
+     * 생성 설정 지정 (JSON 출력 등 특수 요구사항에 사용)
      */
     setGenerationConfig(config: GenerationConfig): void {
         this.generationConfig = config;
     }
 
     /**
-     * 生成响应（支持自定义配置）
+     * 응답 생성 (커스텀 설정 지원)
      */
     async generateResponse(prompt: string, config?: GenerationConfig): Promise<string> {
         if (config) {
@@ -113,7 +113,7 @@ export class GeminiService extends BaseAIService {
     }
 
     /**
-     * 多轮对话（支持自定义配置）
+     * 다중 대화 (커스텀 설정 지원)
      */
     async chat(messages: AIMessage[], config?: GenerationConfig): Promise<string> {
         if (config) {
@@ -123,7 +123,7 @@ export class GeminiService extends BaseAIService {
     }
 
     /**
-     * JSON 输出的便捷方法
+     * JSON 출력을 위한 편의 메서드
      */
     async generateJSONResponse(prompt: string, schema?: object): Promise<string> {
         return this.generateResponse(prompt, {
@@ -133,7 +133,7 @@ export class GeminiService extends BaseAIService {
     }
 
     /**
-     * JSON 对话的便捷方法
+     * JSON 대화를 위한 편의 메서드
      */
     async chatJSON(messages: AIMessage[], schema?: object): Promise<string> {
         return this.chat(messages, {
@@ -143,7 +143,7 @@ export class GeminiService extends BaseAIService {
     }
 
     /**
-     * 测试连接（覆盖基类方法，使用 Gemini 特定的测试端点）
+     * 연결 테스트 (기본 클래스 메서드 재정의, Gemini 전용 테스트 엔드포인트 사용)
      */
     async testConnection(): Promise<boolean> {
         const url = `${this.baseUrl}/v1/models/${this.model}?key=${this.apiKey}`;

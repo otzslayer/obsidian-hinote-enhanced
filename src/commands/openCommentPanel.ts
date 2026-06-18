@@ -3,7 +3,7 @@ import { t } from '../i18n';
 import { WindowManager } from '../plugin/WindowManager';
 
 /**
- * 在右侧边栏打开评论面板命令
+ * 오른쪽 사이드바에서 댓글 패널을 여는 명령
  */
 export async function openCommentPanel(
     plugin: Plugin,
@@ -15,7 +15,7 @@ export async function openCommentPanel(
 }
 
 /**
- * 注册命令
+ * 명령 등록
  */
 export function registerOpenCommentPanelCommand(
     plugin: Plugin,

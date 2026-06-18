@@ -19,7 +19,7 @@ export class FileMappingStore {
 
             const validation = DataValidator.validateFileMappingData(data);
             if (!validation.valid) {
-                console.warn('文件映射数据验证失败:', validation.errors);
+                console.warn('파일 매핑 데이터 유효성 검사 실패:', validation.errors);
                 return;
             }
 

@@ -36,7 +36,7 @@ export class HighlightCardFlashcardController {
             }
 
             if (!this.plugin.fsrsManager) {
-                new Notice(t('FSRS 管理器未初始化'));
+                new Notice(t('FSRS 매니저가 초기화되지 않았습니다.'));
                 return false;
             }
 
@@ -44,9 +44,9 @@ export class HighlightCardFlashcardController {
                 ? await this.deleteFlashcard()
                 : await this.createFlashcard();
         } catch (error) {
-            console.error('处理闪卡操作时出错:', error);
+            console.error('플래시카드 작업 처리 중 오류:', error);
             const message = error instanceof Error ? error.message : String(error);
-            new Notice(t(`操作失败: ${message}`));
+            new Notice(t(`작업 실패: ${message}`));
             return false;
         }
     }

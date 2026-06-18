@@ -27,6 +27,7 @@ export interface HighlightInfo {
     originalLength?: number;
 
     isVirtual?: boolean;
+    isOrphan?: boolean;
     isCloze?: boolean;
     isGlobalSearch?: boolean;
     isFromCanvas?: boolean;

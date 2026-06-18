@@ -4,11 +4,11 @@ import { HighlightManager } from "../../../services/HighlightManager";
 import { t } from "../../../i18n";
 
 /**
- * 虚拟高亮管理器
- * 职责：
- * 1. 创建和管理文件评论按钮
- * 2. 创建虚拟高亮（文件级别的评论）
- * 3. 过滤和管理虚拟高亮列表
+ * 가상 하이라이트 매니저
+ * 담당:
+ * 1. 파일 댓글 버튼 생성 및 관리
+ * 2. 가상 하이라이트 생성 (파일 수준의 댓글)
+ * 3. 가상 하이라이트 목록 필터링 및 관리
  */
 export class VirtualHighlightManager {
     private addCommentButton: HTMLElement | null = null;
@@ -18,9 +18,9 @@ export class VirtualHighlightManager {
     ) {}
 
     /**
-     * 创建文件评论按钮
-     * @param container 按钮容器
-     * @param callbacks 回调函数
+     * 파일 댓글 버튼 생성
+     * @param container 버튼 컨테이너
+     * @param callbacks 콜백 함수
      */
     createFileCommentButton(
         container: HTMLElement,
@@ -39,7 +39,7 @@ export class VirtualHighlightManager {
         setIcon(this.addCommentButton, "message-square-plus");
         this.addCommentButton.setAttribute("aria-label", t("Add File Comment"));
 
-        // 添加文件评论按钮点击事件
+        // 파일 댓글 버튼 클릭 이벤트 추가
         this.addCommentButton.addEventListener("click", () => {
             void this.handleAddFileComment(callbacks);
         });
@@ -48,7 +48,7 @@ export class VirtualHighlightManager {
     }
 
     /**
-     * 处理添加文件评论
+     * 파일 댓글 추가 처리
      */
     private async handleAddFileComment(callbacks: {
         getCurrentFile: () => TFile | null;
@@ -64,49 +64,49 @@ export class VirtualHighlightManager {
             return;
         }
 
-        // 生成唯一标识符
+        // 고유 식별자 생성
         const timestamp = Date.now();
         const uniqueId = `file-comment-${timestamp}`;
-        
-        // 创建虚拟高亮信息，在文档的最顶部创建了一个不可见的高亮内容
+
+        // 가상 하이라이트 정보 생성 - 문서 최상단에 보이지 않는 하이라이트 내용 생성
         const virtualHighlight: HiNote = {
             id: uniqueId,
-            text: t("File Comment"),  // 文件评论的显示文本
+            text: t("File Comment"),  // 파일 댓글의 표시 텍스트
             filePath: currentFile.path,
-            isVirtual: true,  // 标记这是一个虚拟高亮
-            position: 0,  // 给一个默认位置
-            paragraphOffset: 0,  // 给一个默认偏移量
-            blockId: `virtual-${timestamp}`,  // 生成一个虚拟 block ID
+            isVirtual: true,  // 가상 하이라이트임을 표시
+            position: 0,  // 기본 위치
+            paragraphOffset: 0,  // 기본 오프셋
+            blockId: `virtual-${timestamp}`,  // 가상 block ID 생성
             createdAt: timestamp,
             updatedAt: timestamp,
-            comments: []  // 初始化空的评论数组
+            comments: []  // 빈 댓글 배열 초기화
         };
 
-        // 先保存到 HighlightManager
+        // 먼저 HighlightManager에 저장
         await this.highlightManager.addHighlight(currentFile, virtualHighlight);
 
-        // 通知外部虚拟高亮已创建
+        // 외부에 가상 하이라이트 생성됨을 알림
         callbacks.onVirtualHighlightCreated(virtualHighlight);
 
-        // 找到新创建的高亮卡片并自动打开评论输入框
+        // 새로 생성된 하이라이트 카드를 찾아 댓글 입력창 자동 열기
         window.setTimeout(() => {
             const highlightContainer = callbacks.getHighlightContainer();
             const highlightCard = highlightContainer.querySelector('.highlight-card') as HTMLElement;
             if (highlightCard) {
-                // 自动打开评论输入框
+                // 댓글 입력창 자동 열기
                 callbacks.onShowCommentInput(highlightCard, virtualHighlight);
-                // 滚动到顶部
+                // 상단으로 스크롤
                 highlightContainer.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }, 100);
     }
 
     /**
-     * 过滤虚拟高亮
-     * 从存储的评论中提取虚拟高亮，排除已经在高亮列表中的
-     * @param currentFile 当前文件
-     * @param existingHighlights 已存在的高亮列表
-     * @returns 需要添加的虚拟高亮列表
+     * 가상 하이라이트 필터링
+     * 저장된 댓글에서 가상 하이라이트를 추출하되, 이미 하이라이트 목록에 있는 것은 제외
+     * @param currentFile 현재 파일
+     * @param existingHighlights 기존 하이라이트 목록
+     * @returns 추가할 가상 하이라이트 목록
      */
     async filterVirtualHighlights(
         currentFile: TFile,
@@ -115,21 +115,21 @@ export class VirtualHighlightManager {
         const storedComments = await this.highlightManager.getFileHighlights(currentFile);
         const usedCommentIds = new Set<string>();
         
-        // 标记已使用的评论ID
+        // 이미 사용된 댓글 ID 표시
         existingHighlights.forEach(h => {
             if (h.id) usedCommentIds.add(h.id);
         });
-        
-        // 添加虚拟高亮（只添加有评论的虚拟高亮）
+
+        // 가상 하이라이트 추가 (댓글이 있는 가상 하이라이트만 추가)
         const virtualHighlights = storedComments
             .filter(c => c.isVirtual && c.comments && c.comments.length > 0 && c.id && !usedCommentIds.has(c.id));
-        
-        // 去重：确保虚拟高亮的文本不与现有高亮重复
+
+        // 중복 제거: 가상 하이라이트 텍스트가 기존 하이라이트와 겹치지 않도록
         const uniqueVirtualHighlights = virtualHighlights.filter(vh => {
             return !existingHighlights.some(h => h.text === vh.text);
         });
-        
-        // 标记这些虚拟高亮为已使用
+
+        // 해당 가상 하이라이트를 사용됨으로 표시
         uniqueVirtualHighlights.forEach(vh => {
             if (vh.id) usedCommentIds.add(vh.id);
         });
@@ -138,7 +138,7 @@ export class VirtualHighlightManager {
     }
 
     /**
-     * 销毁虚拟高亮管理器
+     * 가상 하이라이트 매니저 소멸
      */
     destroy(): void {
         if (this.addCommentButton) {

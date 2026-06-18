@@ -2,8 +2,8 @@ import { AIServiceConfig, AIProviderType, AIModel } from './BaseAIService';
 import { OpenAICompatibleService } from './OpenAICompatibleService';
 
 /**
- * OpenAI AI 服务
- * 支持 GPT-4o, GPT-4o-mini, GPT-o1 等模型
+ * OpenAI AI 서비스
+ * GPT-4o, GPT-4o-mini, GPT-o1 등의 모델을 지원합니다
  */
 export class OpenAIService extends OpenAICompatibleService {
     constructor(

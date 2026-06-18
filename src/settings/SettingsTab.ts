@@ -27,26 +27,26 @@ export class AISettingTab extends PluginSettingTab {
         const { containerEl } = this;
         containerEl.empty();
 
-        // 创建标签页容器
+        // 탭 컨테이너 생성
         const tabContainer = containerEl.createEl('div', { cls: 'setting-tabs' });
         const contentContainer = containerEl.createEl('div', { cls: 'setting-tab-content' });
 
-        // 创建标签按钮
-        const generalTab = tabContainer.createEl('div', { 
+        // 탭 버튼 생성
+        const generalTab = tabContainer.createEl('div', {
           text: t('General'),
           cls: 'setting-tab-btn active',
           attr: { role: 'button', tabindex: '0' }
         });
-        const aiTab = tabContainer.createEl('div', { 
+        const aiTab = tabContainer.createEl('div', {
           text: t('AI service'),
           cls: 'setting-tab-btn',
           attr: { role: 'button', tabindex: '0' }
         });
-        // 内容容器
+        // 콘텐츠 컨테이너
         const generalContent = contentContainer.createEl('div', { cls: 'setting-tab-pane active' });
         const aiContent = contentContainer.createEl('div', { cls: 'setting-tab-pane' });
 
-        // 添加标签切换事件
+        // 탭 전환 이벤트 추가
         const switchTab = (targetTab: HTMLElement, targetContent: HTMLElement) => {
             tabContainer.findAll('.setting-tab-btn').forEach(tab => tab.removeClass('active'));
             contentContainer.findAll('.setting-tab-pane').forEach(pane => pane.removeClass('active'));
@@ -57,12 +57,12 @@ export class AISettingTab extends PluginSettingTab {
         generalTab.onclick = () => switchTab(generalTab, generalContent);
         aiTab.onclick = () => switchTab(aiTab, aiContent);
 
-        // 添加通用设置到 General 标签页
+        // General 탭에 일반 설정 추가
         new GeneralSettingsTab(this.plugin, generalContent).display();
-        // 添加 AI 服务设置到 AI Service 标签页
+        // AI Service 탭에 AI 서비스 설정 추가
         new AIServiceTab(this.plugin, aiContent).display();
 
-        // HiCard 标签页始终显示
+        // HiCard 탭은 항상 표시
         const flashcardTab = tabContainer.createEl('div', {
             text: 'HiCard',
             cls: 'setting-tab-btn',
@@ -72,7 +72,7 @@ export class AISettingTab extends PluginSettingTab {
         flashcardTab.onclick = () => {
             void this.renderFlashcardTab(switchTab, flashcardTab, flashcardContent);
         };
-        // 默认加载 HiCard 内容（可选，首次加载时自动判断）
+        // 기본 HiCard 콘텐츠 로드 (선택, 첫 로드 시 자동 판단)
         // flashcardTab.onclick();
     }
 
@@ -83,22 +83,22 @@ export class AISettingTab extends PluginSettingTab {
     ): Promise<void> {
             switchTab(flashcardTab, flashcardContent);
             flashcardContent.empty();
-            // 检查激活状态
+            // 활성화 상태 확인
             const isFlashcardActivated = await this.licenseManager.isActivated();
             if (isFlashcardActivated) {
                 new FlashcardSettingsTab(this.plugin, flashcardContent).display();
             } else {
-                // 显示激活输入框（结构更贴近主视图，含描述文案和 class）
+                // 활성화 입력창 표시 (메인 뷰와 유사한 구조, 설명 문구 및 class 포함)
                 const activationDiv = flashcardContent.createEl('div', { cls: 'flashcard-activation-container' });
                 activationDiv.createEl('div', { cls: 'flashcard-activation-header', text: t('Activate HiCard') });
-                
-                // 创建包含链接的描述文案
+
+                // 링크가 포함된 설명 문구 생성
                 const descriptionDiv = activationDiv.createEl('div', { cls: 'flashcard-activation-description' });
                 descriptionDiv.createEl('span', { text: t('Enter your license key to activate HiCard feature.') + ' ' });
                 descriptionDiv.createEl('br');
                 descriptionDiv.createEl('span', { text: t('Get your license key from') + ' ' });
-                
-                // 根据语言设置不同的链接
+
+                // 언어 설정에 따라 링크 변경
                 const locale = ObsidianInternals.getMomentLocale();
                 const websiteUrl = locale.startsWith('zh') ? 'https://www.hinote.vip/index.html' : 'https://www.hinote.vip/en.html';
                 

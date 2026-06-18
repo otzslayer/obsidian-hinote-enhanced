@@ -1,5 +1,5 @@
 /**
- * Highlight 模块统一导出
+ * Highlight 모듈 통합 내보내기
  */
 export { HighlightRenderManager, HighlightRenderController } from './rendering';
 export { VirtualHighlightManager } from './virtual';

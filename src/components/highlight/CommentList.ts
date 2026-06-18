@@ -37,34 +37,34 @@ export class CommentList extends Component {
     private async renderComments() {
         const comments = this.highlight.comments || [];
         
-        // 按更新时间倒序排序
+        // 업데이트 시간 기준 내림차순 정렬
         comments.sort((a, b) => b.updatedAt - a.updatedAt);
 
-        // 清空容器
+        // 컨테이너 초기화
         while (this.container.firstChild) {
             this.container.removeChild(this.container.firstChild);
         }
-        
-        // 使用 for...of 循环以支持 await
+
+        // await를 지원하기 위해 for...of 루프 사용
         for (const comment of comments) {
             const commentEl = this.container.createEl("div", {
                 cls: "hi-note",
                 attr: { 'data-comment-id': comment.id }
             });
 
-            // 创建内容包装器（用于展开/收起功能）
+            // 콘텐츠 래퍼 생성 (펼치기/접기 기능용)
             const contentWrapper = commentEl.createEl("div", {
                 cls: "hi-note-content-wrapper"
             });
 
-            // 评论内容 - 添加双击事件
+            // 댓글 내용 - 더블클릭 이벤트 추가
             const contentEl = contentWrapper.createEl("div", {
                 cls: "hi-note-content markdown-rendered"
             });
 
             const content = comment.content;
             try {
-                // 使用 MarkdownRenderer 渲染 Markdown 内容
+                // MarkdownRenderer를 사용해 Markdown 내용 렌더링
                 await MarkdownRenderer.render(
                     this.app,
                     content,
@@ -73,63 +73,63 @@ export class CommentList extends Component {
                     this
                 );
                 
-                // 添加自定义样式类以修复可能的样式问题
+                // 스타일 문제를 수정하기 위한 커스텀 스타일 클래스 추가
                 const lists = contentEl.querySelectorAll('ul, ol');
                 lists.forEach(list => {
                     list.addClass('comment-markdown-list');
                 });
-                
-                // 激活内部链接
+
+                // 내부 링크 활성화
                 await this.activateInternalLinks(contentEl, this.highlight.filePath || '');
             } catch (error) {
                 console.error('Error rendering markdown in comment:', error);
-                // 如果渲染失败，回退到纯文本渲染
+                // 렌더링 실패 시 일반 텍스트 렌더링으로 대체
                 contentEl.textContent = content;
             }
 
-            // 添加双击事件监听
+            // 더블클릭 이벤트 리스너 추가
             contentEl.addEventListener("dblclick", (e) => {
-                // 如果点击的是链接，不触发编辑事件
+                // 링크를 클릭한 경우 편집 이벤트 미발생
                 if ((e.target as HTMLElement).closest('a')) {
                     return;
                 }
                 e.stopPropagation();
-                e.preventDefault(); // 阻止默认行为
+                e.preventDefault(); // 기본 동작 방지
                 this.onCommentEdit(comment);
             });
 
-            // 阻止单击事件冒泡，避免与双击冲突
+            // 더블클릭과의 충돌을 피하기 위해 단일 클릭 이벤트 버블링 방지
             contentEl.addEventListener("click", (e) => {
-                // 如果点击的是链接，允许事件传递
+                // 링크를 클릭한 경우 이벤트 전달 허용
                 if ((e.target as HTMLElement).closest('a')) {
                     return;
                 }
                 e.stopPropagation();
             });
 
-            // 检查内容高度并添加展开/收起按钮（在下一帧执行，确保内容已渲染）
+            // 콘텐츠 높이 확인 및 펼치기/접기 버튼 추가 (다음 프레임에서 실행하여 콘텐츠 렌더링 보장)
             window.requestAnimationFrame(() => {
                 this.checkAndAddToggleButton(contentWrapper, contentEl, comment);
             });
 
-            // 创建底部操作栏
+            // 하단 액션 바 생성
             const footer = commentEl.createEl("div", {
                 cls: "hi-note-footer"
             });
 
-            // 评论时间
+            // 댓글 시간
             footer.createEl("div", {
                 text: new Date(comment.updatedAt).toLocaleString(),
                 cls: "hi-note-time"
             });
 
-            // 添加双击编辑提示
+            // 더블클릭 편집 힌트 추가
             footer.createEl("span", {
                 text: "Double click to edit",
                 cls: "hi-note-edit-hint"
             });
 
-            // 操作按钮容器
+            // 액션 버튼 컨테이너
             footer.createEl("div", {
                 cls: "hi-note-actions"
             });
@@ -137,52 +137,52 @@ export class CommentList extends Component {
     }
     
     /**
-     * 检查内容高度并添加展开/收起按钮
-     * @param wrapper 内容包装器
-     * @param contentEl 内容元素
-     * @param comment 评论对象
+     * 콘텐츠 높이를 확인하고 펼치기/접기 버튼을 추가
+     * @param wrapper 콘텐츠 래퍼
+     * @param contentEl 콘텐츠 요소
+     * @param comment 댓글 객체
      */
     private checkAndAddToggleButton(
         wrapper: HTMLElement,
         contentEl: HTMLElement,
         comment: CommentItem
     ): void {
-        const MAX_HEIGHT = 240; // 折叠时的最大高度（像素）
+        const MAX_HEIGHT = 240; // 접힌 상태의 최대 높이 (픽셀)
         const actualHeight = contentEl.scrollHeight;
 
-        // 如果内容高度超过阈值，添加展开/收起功能
+        // 콘텐츠 높이가 임계값을 초과하면 펼치기/접기 기능 추가
         if (actualHeight > MAX_HEIGHT) {
-            // 添加可折叠标记类
+            // 접을 수 있는 마커 클래스 추가
             wrapper.addClass('has-collapsible-content');
             wrapper.addClass('collapsed');
 
-            // 添加渐变遮罩
+            // 그라디언트 마스크 추가
             wrapper.createEl("div", {
                 cls: "content-fade-out"
             });
 
-            // 添加展开/收起按钮
+            // 펼치기/접기 버튼 추가
             const toggleBtn = wrapper.createEl("div", {
                 cls: "toggle-content-btn"
             });
 
-            // 创建按钮文本和图标
+            // 버튼 텍스트 및 아이콘 생성
             const btnText = toggleBtn.createEl("span", {
                 text: t("Expand")
             });
 
-            // 添加点击事件
+            // 클릭 이벤트 추가
             toggleBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const isCollapsed = wrapper.hasClass('collapsed');
 
                 if (isCollapsed) {
-                    // 展开
+                    // 펼치기
                     wrapper.removeClass('collapsed');
                     wrapper.addClass('expanded');
                     btnText.textContent = t("Collapse");
                 } else {
-                    // 收起
+                    // 접기
                     wrapper.addClass('collapsed');
                     wrapper.removeClass('expanded');
                     btnText.textContent = t("Expand");
@@ -192,32 +192,32 @@ export class CommentList extends Component {
     }
 
     /**
-     * 激活内部链接，添加悬停预览和点击跳转功能
-     * @param element 包含链接的元素
-     * @param sourcePath 源文件路径
+     * 내부 링크를 활성화하여 호버 미리보기 및 클릭 이동 기능 추가
+     * @param element 링크를 포함하는 요소
+     * @param sourcePath 소스 파일 경로
      */
     private async activateInternalLinks(element: HTMLElement, sourcePath: string) {
-        // 查找所有内部链接元素
+        // 모든 내부 링크 요소 탐색
         const internalLinks = element.querySelectorAll('a.internal-link');
-        
+
         internalLinks.forEach(link => {
-            // 获取链接目标
+            // 링크 대상 가져오기
             const target = link.getAttribute('data-href') || link.getAttribute('href');
             if (!target) return;
-            
-            // 添加点击事件
+
+            // 클릭 이벤트 추가
             link.addEventListener('click', (event) => {
                 event.preventDefault();
                 event.stopPropagation();
-                
-                // 打开链接
+
+                // 링크 열기
                 const targetFile = this.app.metadataCache.getFirstLinkpathDest(target, sourcePath);
                 if (targetFile) {
                     void this.app.workspace.openLinkText(target, sourcePath, false);
                 }
             });
-            
-            // 添加悬停预览
+
+            // 호버 미리보기 추가
             link.addEventListener('mouseenter', (event) => {
                 this.app.workspace.trigger('hover-link', {
                     event,
@@ -229,21 +229,21 @@ export class CommentList extends Component {
                 });
             });
         });
-        
-        // 查找所有标签
+
+        // 모든 태그 탐색
         const tags = element.querySelectorAll('a.tag');
-        
+
         tags.forEach(tag => {
-            // 获取标签文本
+            // 태그 텍스트 가져오기
             const tagText = tag.getAttribute('href');
             if (!tagText) return;
-            
-            // 添加点击事件
+
+            // 클릭 이벤트 추가
             tag.addEventListener('click', (event) => {
                 event.preventDefault();
                 event.stopPropagation();
-                
-                // 打开标签搜索
+
+                // 태그 검색 열기
                 this.app.workspace.trigger('search:open', tagText);
             });
         });

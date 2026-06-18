@@ -1,31 +1,33 @@
 import { App, TFile } from "obsidian";
-import type { HighlightInfo } from '../../types/highlight';
+import type { HighlightInfo, CommentItem } from '../../types/highlight';
 import type { PluginSettings } from '../../types/settings';
 import { ExcludePatternMatcher } from '../ExcludePatternMatcher';
 import { BlockIdService } from '../BlockIdService';
 import { IdGenerator } from '../../utils/IdGenerator';
+import { parseInlineComments, type HighlightMatch, type InlineCommentBlock } from '../comment/inline/InlineCommentParser';
+import { parseFileLevelComments, type FileLevelComment } from '../comment/inline/FrontmatterComments';
 
 /**
- * 高亮提取器
- * 职责：
- * 1. 从文件内容中提取高亮文本
- * 2. 处理正则匹配和去重
- * 3. 文件排除判断
- * 4. 颜色提取
- * 5. 文件内容缓存
+ * 하이라이트 추출기
+ * 역할:
+ * 1. 파일 내용에서 하이라이트 텍스트 추출
+ * 2. 정규식 매칭 및 중복 제거 처리
+ * 3. 파일 제외 판단
+ * 4. 색상 추출
+ * 5. 파일 내용 캐싱
  */
 export class HighlightExtractor {
-    // 常量定义
-    private static readonly DUPLICATE_POSITION_THRESHOLD = 10; // 位置差异阈值
+    // 상수 정의
+    private static readonly DUPLICATE_POSITION_THRESHOLD = 10; // 위치 차이 임계값
     private static readonly CONTEXT_LENGTH = 80;
 
-    // 默认的文本提取正则（可以被用户自定义替换）
-    // 使用更严格的模式：==后面和前面不能是=或换行符，避免匹配URL中的==
+    // 기본 텍스트 추출 정규식 (사용자 정의로 대체 가능)
+    // 더 엄격한 패턴 사용: == 앞뒤에 = 또는 줄바꿈이 올 수 없어 URL의 ==가 매칭되지 않습니다
     private static readonly DEFAULT_HIGHLIGHT_PATTERN = 
         /==([^=\n](?:[^=\n]|=[^=\n])*?[^=\n])==|<mark[^>]*>([\s\S]*?)<\/mark>|<span[^>]*>([\s\S]*?)<\/span>/g;
 
     private blockIdService: BlockIdService;
-    // 文件内容缓存
+    // 파일 내용 캐시
     private contentCache = new Map<string, {content: string, mtime: number}>();
 
     constructor(private app: App, private getSettings?: () => PluginSettings | undefined) {
@@ -33,12 +35,12 @@ export class HighlightExtractor {
     }
 
     /**
-     * 检查文件是否应该被处理（不在排除列表中）
-     * @param file 要检查的文件
-     * @returns 如果文件应该被处理则返回 true
+     * 파일을 처리해야 하는지 확인합니다 (제외 목록에 없는지)
+     * @param file 확인할 파일
+     * @returns 파일을 처리해야 하면 true
      */
     shouldProcessFile(file: TFile): boolean {
-        // 只处理 Markdown 文件，跳过 PDF 等非文本文件
+        // Markdown 파일만 처리하고 PDF 등 비텍스트 파일은 건너뜁니다
         if (file.extension !== 'md') {
             return false;
         }
@@ -46,48 +48,69 @@ export class HighlightExtractor {
     }
 
     /**
-     * 从文本中提取所有高亮
-     * @param content 文本内容
-     * @param file 文件对象
-     * @returns 高亮信息数组
+     * 텍스트에서 모든 하이라이트를 추출합니다
+     * @param content 텍스트 내용
+     * @param file 파일 객체
+     * @returns 하이라이트 정보 배열
      */
     extractHighlights(content: string, file: TFile): HighlightInfo[] {
         const highlights: HighlightInfo[] = [];
         
-        // 如果使用自定义规则且有规则配置
+        // 사용자 정의 규칙을 사용하고 규칙이 설정된 경우
         const settings = this.getSettings?.();
         if (settings?.useCustomPattern && settings.regexRules?.length > 0) {
-            // 遍历所有启用的规则
+            // 활성화된 모든 규칙을 순회합니다
             for (const rule of settings.regexRules.filter(r => r.enabled)) {
                 try {
                     const pattern = new RegExp(rule.pattern, 'g');
                     this.processRegexMatches(content, pattern, highlights, file, rule.color);
                 } catch {
-                    // 忽略正则规则错误
+                    // 정규식 규칙 오류를 무시합니다
                 }
             }
         } else {
-            // 使用默认规则
+            // 기본 규칙을 사용합니다
             this.processRegexMatches(
                 content, 
                 HighlightExtractor.DEFAULT_HIGHLIGHT_PATTERN, 
                 highlights, 
                 file, 
-                '#ffeb3b' // 使用固定的默认黄色
+                '#ffeb3b' // 고정 기본 노란색을 사용합니다
             );
         }
         
-        // 按位置排序
-        return highlights.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+        // Sort by position before inline-comment pairing so match indices are stable.
+        highlights.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+
+        // Attach inline {>>...<<} comments (replaces sidecar join). Also surfaces orphans.
+        this.attachInlineComments(content, highlights);
+
+        // Attach frontmatter file-level comments as a virtual highlight entry (R5).
+        const fileLevelComments = this.extractFileLevelComments(file);
+        if (fileLevelComments.length > 0) {
+            highlights.push({
+                text: '',
+                position: -1,
+                isVirtual: true,
+                comments: fileLevelComments.map(c => ({
+                    id: IdGenerator.generateCommentId(),
+                    content: c.text,
+                    createdAt: this.parseTimestampToMs(c.ts),
+                    updatedAt: this.parseTimestampToMs(c.ts),
+                })),
+            });
+        }
+
+        return highlights;
     }
     
     /**
-     * 处理正则表达式匹配
-     * @param content 文本内容
-     * @param pattern 正则表达式
-     * @param highlights 高亮数组
-     * @param file 文件对象
-     * @param backgroundColor 背景颜色
+     * 정규식 매칭을 처리합니다
+     * @param content 텍스트 내용
+     * @param pattern 정규식
+     * @param highlights 하이라이트 배열
+     * @param file 파일 객체
+     * @param backgroundColor 배경 색상
      */
     private processRegexMatches(
         content: string, 
@@ -96,7 +119,7 @@ export class HighlightExtractor {
         file: TFile, 
         backgroundColor: string
     ): void {
-        // 优先用 Obsidian 的 metadataCache.sections 获取代码块区间
+        // Obsidian의 metadataCache.sections를 우선 사용하여 코드 블록 범위를 가져옵니다
         let codeBlockRanges: Array<[number, number]> = [];
         if (file) {
             const cache = this.app.metadataCache.getFileCache(file);
@@ -111,7 +134,7 @@ export class HighlightExtractor {
             }
         }
         
-        // 判断高亮区间是否与任意代码块区间有重叠
+        // 하이라이트 범위가 코드 블록 범위와 겹치는지 판단합니다
         function isInCodeBlockRange(start: number, end: number, ranges: Array<[number, number]>): boolean {
             return ranges.some(([blockStart, blockEnd]) =>
                 Math.max(start, blockStart) < Math.min(end, blockEnd)
@@ -125,35 +148,35 @@ export class HighlightExtractor {
             const matchStart = safeMatch.index;
             const matchEnd = matchStart + fullMatch.length;
             
-            // 检查当前高亮是否在代码块内
+            // 현재 하이라이트가 코드 블록 안에 있는지 확인합니다
             if (isInCodeBlockRange(matchStart, matchEnd, codeBlockRanges)) {
-                continue; // 跳过代码块内的高亮
+                continue; // 코드 블록 내의 하이라이트는 건너뜁니다
             }
             
-            // 额外检查：如果匹配的是 == 格式，确保前后没有额外的 = 符号
-            // 这可以防止 ===text=== 或 URL 中的 == 被误匹配
+            // 추가 확인: == 형식으로 매칭된 경우 앞뒤에 추가 = 기호가 없는지 확인합니다
+            // ===text=== 또는 URL의 ==가 잘못 매칭되는 것을 방지합니다
             if (fullMatch.startsWith('==') && fullMatch.endsWith('==')) {
                 const beforeMatch = matchStart > 0 ? content.charAt(matchStart - 1) : '';
                 const afterMatch = matchEnd < content.length ? content.charAt(matchEnd) : '';
                 if (beforeMatch === '=' || afterMatch === '=') {
-                    continue; // 跳过被额外 = 符号包围的匹配
+                    continue; // 추가 = 기호로 둘러싸인 매칭은 건너뜁니다
                 }
             }
             
-            // 找到第一个非空的捕获组作为文本内容
-            // 如果没有捕获组，则使用全部匹配内容
+            // 첫 번째 비어 있지 않은 캡처 그룹을 텍스트 내용으로 사용합니다
+            // 캡처 그룹이 없으면 전체 매칭 내용을 사용합니다
             let text = safeMatch.slice(1).find(group => group !== undefined);
             if (!text) {
-                text = fullMatch; // 如果没有捕获组，则使用全部匹配内容
+                text = fullMatch; // 캡처 그룹이 없으면 전체 매칭 내용을 사용합니다
             }
             
-            // 尝试提取颜色（内联逻辑）
+            // 색상 추출을 시도합니다 (인라인 로직)
             let extractedColor = null;
             if (fullMatch.includes('style=')) {
                 extractedColor = this.extractColorFromElement(fullMatch);
             }
 
-            // 检查是否已存在相同位置的高亮
+            // 동일한 위치에 이미 하이라이트가 있는지 확인합니다
             const isDuplicate = highlights.some(h => 
                 typeof h.position === 'number' && 
                 Math.abs(h.position - safeMatch.index) < HighlightExtractor.DUPLICATE_POSITION_THRESHOLD && 
@@ -161,10 +184,10 @@ export class HighlightExtractor {
             );
 
             if (!isDuplicate && text) {
-                // 检查是否包含挖空格式 {{}}
+                // 빈칸 채우기 형식 {{}}이 포함되어 있는지 확인합니다
                 const isCloze = /\{\{([^{}]+)\}\}/.test(text);
-                
-                // 创建高亮对象（只包含提取阶段必需的字段）
+
+                // 하이라이트 객체를 생성합니다 (추출 단계에서 필요한 필드만 포함)
                 const context = this.createContextAnchors(content, matchStart, matchEnd, text);
                 const highlight = {
                     id: IdGenerator.generateHighlightId(file.path, safeMatch.index, text),
@@ -205,37 +228,37 @@ export class HighlightExtractor {
     }
     
     /**
-     * 获取段落偏移量
-     * @param content 完整文本内容
-     * @param position 高亮位置
-     * @returns 段落偏移量
+     * 단락 오프셋을 가져옵니다
+     * @param content 전체 텍스트 내용
+     * @param position 하이라이트 위치
+     * @returns 단락 오프셋
      */
     getParagraphOffset(content: string, position: number): number {
         const beforeText = content.substring(0, position);
         
-        // 使用正则表达式找到最后一个段落分隔符（一个或多个空行）
+        // 정규식으로 마지막 단락 구분자(하나 이상의 빈 줄)를 찾습니다
         const paragraphs = beforeText.split(/\n\s*\n/);
         const currentParagraphStart = beforeText.length - paragraphs[paragraphs.length - 1].length;
         
-        // 返回段落的起始位置作为偏移量
+        // 단락의 시작 위치를 오프셋으로 반환합니다
         return currentParagraphStart;
     }
 
     /**
-     * 获取包含高亮的所有文件
-     * @returns 包含高亮的文件数组
+     * 하이라이트가 포함된 모든 파일을 가져옵니다
+     * @returns 하이라이트가 포함된 파일 배열
      */
     async getFilesWithHighlights(): Promise<TFile[]> {
         const files = this.app.vault.getMarkdownFiles();
         const filesWithHighlights: TFile[] = [];
 
         for (const file of files) {
-            // 检查文件是否应该被排除
+            // 파일을 제외해야 하는지 확인합니다
             if (!this.shouldProcessFile(file)) {
                 continue;
             }
 
-            // 使用缓存读取文件内容
+            // 캐시를 사용하여 파일 내용을 읽습니다
             const content = await this.getCachedFileContent(file);
             const highlights = this.extractHighlights(content, file);
             if (highlights.length > 0) {
@@ -247,14 +270,14 @@ export class HighlightExtractor {
     }
 
     /**
-     * 获取所有包含高亮内容的文件及其高亮内容
+     * 하이라이트가 포함된 모든 파일과 해당 하이라이트 내용을 가져옵니다
      */
     async getAllHighlights(): Promise<{ file: TFile, highlights: HighlightInfo[] }[]> {
         const files = this.app.vault.getMarkdownFiles();
         const result: { file: TFile, highlights: HighlightInfo[] }[] = [];
         for (const file of files) {
             if (!this.shouldProcessFile(file)) continue;
-            // 使用缓存读取文件内容
+            // 캐시를 사용하여 파일 내용을 읽습니다
             const content = await this.getCachedFileContent(file);
             const highlights = this.extractHighlights(content, file);
             if (highlights.length > 0) {
@@ -265,29 +288,29 @@ export class HighlightExtractor {
     }
 
     /**
-     * 为高亮创建 Block ID（用于拖拽和导出场景）
-     * 
-     * @param file 文件
-     * @param position 高亮起始位置
-     * @param length 高亮长度（可选）
-     * @returns Promise<string> 返回创建的 Block ID 引用（文件名#^BlockID）
+     * 하이라이트에 대한 Block ID를 생성합니다 (드래그 앤 드롭 및 내보내기 시나리오에 사용)
+     *
+     * @param file 파일
+     * @param position 하이라이트 시작 위치
+     * @param length 하이라이트 길이 (선택)
+     * @returns Promise<string> 생성된 Block ID 참조 (파일명#^BlockID)
      */
     public async createBlockIdForHighlight(file: TFile, position: number, length?: number): Promise<string> {
-        // 检查是否已有 Block ID
+        // 이미 Block ID가 있는지 확인합니다
         const existingId = this.blockIdService.getParagraphBlockId(file, position);
         if (existingId) {
             return existingId;
         }
 
-        // 计算高亮结束位置（如果提供了长度）
+        // 하이라이트 종료 위치를 계산합니다 (길이가 제공된 경우)
         const endPosition = length ? position + length : position;
 
-        // 强制创建并返回 Block ID 引用，传递起始和结束位置
+        // Block ID 참조를 강제로 생성하고 반환합니다. 시작 및 종료 위치를 전달합니다
         return await this.blockIdService.createParagraphBlockId(file, position, endPosition);
     }
 
     /**
-     * 从 HTML 元素中提取颜色（内联方法）
+     * HTML 요소에서 색상을 추출합니다 (인라인 메서드)
      */
     private extractColorFromElement(element: string): string | null {
         const styleMatch = element.match(/style=["']([^"']*)["']/);
@@ -301,7 +324,7 @@ export class HighlightExtractor {
     }
     
     /**
-     * 获取缓存的文件内容
+     * 캐시된 파일 내용을 가져옵니다
      */
     async getCachedFileContent(file: TFile): Promise<string> {
         const cached = this.contentCache.get(file.path);
@@ -315,21 +338,79 @@ export class HighlightExtractor {
     }
 
     /**
-     * 使文件内容缓存失效
+     * 파일 내용 캐시를 무효화합니다
      */
     invalidateContentCache(filePath: string): void {
         this.contentCache.delete(filePath);
     }
 
     /**
-     * 清空所有文件内容缓存
+     * 모든 파일 내용 캐시를 지웁니다
      */
     clearContentCache(): void {
         this.contentCache.clear();
     }
 
     /**
-     * 转义正则表达式特殊字符
+     * Parse inline {>>...<<} comment blocks from `content` and attach them to the
+     * corresponding `HighlightInfo` entries (replaces the sidecar HighlightCommentResolver join).
+     * Orphan blocks are added to `highlights` as virtual entries (KTD5 — isOrphan, never auto-deleted).
+     */
+    private attachInlineComments(content: string, highlights: HighlightInfo[]): void {
+        const highlightMatches: HighlightMatch[] = highlights.map(h => ({
+            text: h.text,
+            start: h.position ?? 0,
+            end: (h.position ?? 0) + (h.originalLength ?? h.text.length + 4),
+        }));
+
+        const { pairedComments, orphanComments } = parseInlineComments(content, highlightMatches);
+
+        for (const paired of pairedComments) {
+            const highlight = highlights.find(h => h.position === paired.highlightStart);
+            if (highlight) {
+                highlight.comments = paired.comments.map(b => this.blockToCommentItem(b));
+            }
+        }
+
+        // Surface orphan comment blocks in the in-memory model so the sidebar can show them
+        // as a separate group (KTD5). The plugin never auto-deletes orphans.
+        for (const orphan of orphanComments) {
+            highlights.push({
+                text: '',
+                position: orphan.startOffset,
+                isVirtual: true,
+                isOrphan: true,
+                comments: [this.blockToCommentItem(orphan)],
+            });
+        }
+    }
+
+    private blockToCommentItem(block: InlineCommentBlock): CommentItem {
+        const ms = block.timestamp ? this.parseTimestampToMs(block.timestamp) : Date.now();
+        return {
+            id: IdGenerator.generateCommentId(),
+            content: block.isAI ? `🤖 ${block.text}` : block.text,
+            createdAt: ms,
+            updatedAt: ms,
+        };
+    }
+
+    private parseTimestampToMs(ts: string): number {
+        // "YYYY-MM-DD HH:mm" → ISO 8601 for reliable Date parsing
+        return new Date(ts.replace(' ', 'T') + ':00').getTime();
+    }
+
+    /**
+     * Extract file-level comments from frontmatter (R5, KTD4).
+     * Returns an empty array when no {text, ts}-shaped comments are present.
+     */
+    public extractFileLevelComments(file: TFile): FileLevelComment[] {
+        const cache = this.app.metadataCache.getFileCache(file);
+        return parseFileLevelComments(cache?.frontmatter ?? null);
+    }
+
+    /**
+     * 정규식 특수 문자를 이스케이프합니다
      */
     escapeRegExp(string: string): string {
         return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

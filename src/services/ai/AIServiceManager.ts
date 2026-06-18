@@ -1,6 +1,6 @@
 /**
- * AI 服务管理器
- * 提供统一的 AI 服务访问接口，替代旧的 AIService
+ * AI 서비스 관리자
+ * 통일된 AI 서비스 접근 인터페이스를 제공하며, 기존 AIService를 대체합니다
  */
 
 import { AIMessage, AIModel, AIProviderType } from './BaseAIService';
@@ -26,12 +26,12 @@ export class AIServiceManager {
         this.registry = new AIServiceRegistry();
         this.currentProvider = this.parseProvider(settings.provider);
         
-        // 注册所有服务工厂
+        // 모든 서비스 팩토리 등록
         this.registerAllServices();
     }
     
     /**
-     * 注册所有 AI 服务
+     * 모든 AI 서비스 등록
      */
     private registerAllServices(): void {
         this.registry.register(new OpenAIServiceFactory());
@@ -44,14 +44,14 @@ export class AIServiceManager {
     }
     
     /**
-     * 获取当前服务实例
+     * 현재 서비스 인스턴스 가져오기
      */
     private getCurrentService() {
         return this.registry.getService(this.currentProvider, this.settings);
     }
     
     /**
-     * 生成响应（处理 Prompt 模板）
+     * 응답 생성 (프롬프트 템플릿 처리)
      */
     async generateResponse(prompt: string, highlight: string, comment?: string): Promise<string> {
         const processedPrompt = this.processPrompt(prompt, highlight, comment);
@@ -59,14 +59,14 @@ export class AIServiceManager {
     }
     
     /**
-     * 多轮对话
+     * 다중 대화
      */
     async chat(messages: AIMessage[]): Promise<string> {
         return await this.getCurrentService().chat(messages);
     }
     
     /**
-     * 测试连接
+     * 연결 테스트
      */
     async testConnection(provider?: AIProviderType): Promise<boolean> {
         const targetProvider = provider || this.currentProvider;
@@ -79,13 +79,13 @@ export class AIServiceManager {
     }
     
     /**
-     * 更新模型
+     * 모델 업데이트
      */
     updateModel(provider: AIProviderType, model: string): void {
-        // 清除缓存，下次获取时会使用新模型
+        // 캐시를 지우고, 다음 조회 시 새 모델을 사용합니다
         this.registry.clearCache(provider);
-        
-        // 更新设置中的模型
+
+        // 설정의 모델 업데이트
         switch (provider) {
             case AIProviderType.OPENAI:
                 if (this.settings.openai) this.settings.openai.model = model;
@@ -112,7 +112,7 @@ export class AIServiceManager {
     }
     
     /**
-     * 列出模型
+     * 모델 목록 조회
      */
     async listModels(provider?: AIProviderType): Promise<AIModel[]> {
         const targetProvider = provider || this.currentProvider;
@@ -126,7 +126,7 @@ export class AIServiceManager {
     }
     
     /**
-     * 切换提供商
+     * 공급자 전환
      */
     switchProvider(provider: AIProviderType): void {
         this.currentProvider = provider;
@@ -134,32 +134,32 @@ export class AIServiceManager {
     }
     
     /**
-     * 获取当前提供商
+     * 현재 공급자 가져오기
      */
     getCurrentProvider(): AIProviderType {
         return this.currentProvider;
     }
     
     /**
-     * 获取所有已注册的提供商
+     * 등록된 모든 공급자 가져오기
      */
     getRegisteredProviders(): AIProviderType[] {
         return this.registry.getRegisteredProviders();
     }
     
     /**
-     * 处理 Prompt 模板
-     * 替换 {{highlight}} 和 {{comment}} 占位符
-     * 如果 prompt 中不包含占位符，则自动将高亮文本作为上下文添加到 prompt 末尾
+     * 프롬프트 템플릿 처리
+     * {{highlight}}와 {{comment}} 플레이스홀더를 교체합니다
+     * 프롬프트에 플레이스홀더가 없으면 하이라이트 텍스트를 컨텍스트로 자동 추가합니다
      */
     private processPrompt(prompt: string, highlight: string, comment?: string): string {
         let processed = prompt;
-        
-        // 检查是否包含 {{highlight}} 占位符
+
+        // {{highlight}} 플레이스홀더 포함 여부 확인
         const hasHighlightPlaceholder = prompt.includes('{{highlight}}');
         const hasCommentPlaceholder = prompt.includes('{{comment}}');
-        
-        // 替换占位符
+
+        // 플레이스홀더 교체
         if (hasHighlightPlaceholder) {
             processed = processed.replace(/\{\{highlight\}\}/g, highlight);
         }
@@ -167,7 +167,7 @@ export class AIServiceManager {
             processed = processed.replace(/\{\{comment\}\}/g, comment);
         }
         
-        // 如果没有使用占位符，则将高亮文本作为上下文自动添加
+        // 플레이스홀더가 없으면 하이라이트 텍스트를 컨텍스트로 자동 추가
         if (!hasHighlightPlaceholder && highlight) {
             processed = `${processed}\n\n${highlight}`;
         }
@@ -176,7 +176,7 @@ export class AIServiceManager {
     }
     
     /**
-     * 解析提供商类型
+     * 공급자 유형 파싱
      */
     private parseProvider(provider: string): AIProviderType {
         const providerMap: Record<string, AIProviderType> = {
@@ -192,8 +192,8 @@ export class AIServiceManager {
     }
     
     /**
-     * 更新设置
-     * 当设置变更时调用，清除所有缓存
+     * 설정 업데이트
+     * 설정이 변경될 때 호출하며, 모든 캐시를 초기화합니다
      */
     updateSettings(settings: AISettings): void {
         this.settings = settings;

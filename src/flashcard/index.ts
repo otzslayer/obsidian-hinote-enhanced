@@ -1,6 +1,6 @@
 /**
- * Flashcard 模块入口文件
- * 导出所有公共 API
+ * Flashcard 모듈 진입 파일
+ * 모든 공개 API 내보내기
  */
 
 export * from './types';

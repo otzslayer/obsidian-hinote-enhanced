@@ -3,61 +3,61 @@ import { VIEW_TYPE_HINOTE } from '../views/hinote/HiNoteView';
 import { HiNoteView } from '../views/hinote/HiNoteView';
 
 /**
- * 窗口管理服务
- * 负责管理评论面板的打开、关闭、移动等操作
+ * 창 관리 서비스
+ * 댓글 패널의 열기, 닫기, 이동 등의 작업 관리 담당
  */
 export class WindowManager {
     constructor(private app: App) {}
 
     /**
-     * 在右侧侧边栏打开评论面板
-     * 如果面板已在主视图中打开，则移动到侧边栏
+     * 오른쪽 사이드바에 댓글 패널 열기
+     * 패널이 이미 메인 뷰에 열려 있으면 사이드바로 이동
      */
     async openCommentPanelInSidebar(): Promise<void> {
         const { workspace } = this.app;
-        
-        // 检查评论面板是否已经打开
+
+        // 댓글 패널이 이미 열려 있는지 확인
         const existing = workspace.getLeavesOfType(VIEW_TYPE_HINOTE);
         if (existing.length) {
-            // 如果已经打开，先检查当前视图是否在主视图区域
+            // 이미 열려 있으면 현재 뷰가 메인 뷰 영역에 있는지 확인
             const existingLeaf = existing[0];
             const view = existingLeaf.view;
-            
-            // 如果在主视图区域，则移动到右侧侧边栏
+
+            // 메인 뷰 영역에 있으면 오른쪽 사이드바로 이동
             if (view && view instanceof HiNoteView && view.isInMainWindowMode()) {
-                // 先分离当前叶子
+                // 현재 leaf 분리
                 workspace.detachLeavesOfType(VIEW_TYPE_HINOTE);
-                
-                // 然后在右侧侧边栏创建新的叶子
+
+                // 오른쪽 사이드바에 새 leaf 생성
                 const newLeaf = workspace.getRightLeaf(false);
                 if (newLeaf) {
                     await newLeaf.setViewState({
                         type: VIEW_TYPE_HINOTE,
                         active: true,
                     });
-                    
-                    // 将视图标记为侧边栏模式
+
+                    // 뷰를 사이드바 모드로 표시
                     const newView = newLeaf.view;
                     if (newView && newView instanceof HiNoteView) {
                         await newView.setMainWindowMode(false, true);
                     }
                 }
             } else {
-                // 如果已经在侧边栏，则直接激活它
+                // 이미 사이드바에 있으면 직접 활성화
                 await workspace.revealLeaf(existingLeaf);
             }
             return;
         }
 
-        // 如果评论面板未打开，则在右侧打开评论面板
+        // 댓글 패널이 열려 있지 않으면 오른쪽에 열기
         const leaf = workspace.getRightLeaf(false);
         if (leaf) {
             await leaf.setViewState({
                 type: VIEW_TYPE_HINOTE,
                 active: true,
             });
-            
-            // 确保视图标记为侧边栏模式
+
+            // 뷰가 사이드바 모드로 표시되었는지 확인
             const view = leaf.view;
             if (view && view instanceof HiNoteView) {
                 await view.setMainWindowMode(false);
@@ -66,33 +66,33 @@ export class WindowManager {
     }
 
     /**
-     * 在主窗口打开评论面板
-     * 如果面板已在侧边栏打开，则移动到主窗口
+     * 메인 창에 댓글 패널 열기
+     * 패널이 이미 사이드바에 열려 있으면 메인 창으로 이동
      */
     async openCommentPanelInMainWindow(): Promise<void> {
         const { workspace } = this.app;
-        
-        // 检查评论面板是否已经打开
+
+        // 댓글 패널이 이미 열려 있는지 확인
         const existing = workspace.getLeavesOfType(VIEW_TYPE_HINOTE);
         if (existing.length) {
-            // 如果已经打开，尝试将其移动到主视图区域
+            // 이미 열려 있으면 메인 뷰 영역으로 이동 시도
             const existingLeaf = existing[0];
-            
-            // 先激活现有视图
+
+            // 기존 뷰 먼저 활성화
             workspace.setActiveLeaf(existingLeaf, { focus: true });
-            
-            // 使用另一种方式将视图移动到主视图区域
-            // 先分离当前叶子
+
+            // 다른 방법으로 뷰를 메인 뷰 영역으로 이동
+            // 현재 leaf 분리
             workspace.detachLeavesOfType(VIEW_TYPE_HINOTE);
-            
-            // 然后在主视图区域创建新的叶子（使用tab而不是split避免分屏）
+
+            // 메인 뷰 영역에 새 leaf 생성 (분할 화면 방지를 위해 split 대신 tab 사용)
             const newLeaf = workspace.getLeaf('tab');
             await newLeaf.setViewState({
                 type: VIEW_TYPE_HINOTE,
                 active: true,
             });
-            
-            // 将视图标记为主窗口模式
+
+            // 뷰를 메인 창 모드로 표시
             const view = newLeaf.view;
             if (view && view instanceof HiNoteView) {
                 await this.updateViewToMainMode(view);
@@ -100,15 +100,15 @@ export class WindowManager {
             return;
         }
 
-        // 如果评论面板未打开，在主视图区域创建新标签页
+        // 댓글 패널이 열려 있지 않으면 메인 뷰 영역에 새 탭 생성
         const leaf = workspace.getLeaf('tab');
         if (leaf) {
             await leaf.setViewState({
                 type: VIEW_TYPE_HINOTE,
                 active: true,
             });
-            
-            // 将新创建的视图标记为主窗口模式
+
+            // 새로 생성된 뷰를 메인 창 모드로 표시
             window.setTimeout(() => {
                 const view = leaf.view;
                 if (view && view instanceof HiNoteView) {
@@ -119,8 +119,8 @@ export class WindowManager {
     }
 
     /**
-     * 更新视图为主窗口模式
-     * @param view 评论视图
+     * 뷰를 메인 창 모드로 업데이트
+     * @param view 댓글 뷰
      */
     private async updateViewToMainMode(view: HiNoteView): Promise<void> {
         await view.setMainWindowMode(true, true);

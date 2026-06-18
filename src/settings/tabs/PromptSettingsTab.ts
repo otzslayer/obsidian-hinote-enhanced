@@ -1,6 +1,6 @@
 import { TextAreaComponent, Notice } from 'obsidian';
 import { setIcon } from 'obsidian';
-import { t } from '../../i18n'; // 导入新的翻译系统
+import { t } from '../../i18n'; // 새 번역 시스템 임포트
 import type CommentPlugin from '../../../main';
 
 export class PromptSettingsTab {
@@ -17,18 +17,18 @@ export class PromptSettingsTab {
             cls: 'prompt-settings-container'
         });
 
-        // 标题和添加按钮容器
+        // 제목 및 추가 버튼 컨테이너
         const headerContainer = container.createEl('div', {
             cls: 'prompt-settings-header setting-item-heading'
         });
 
-        // 使用直接创建标题元素，而不是使用Setting组件
+        // Setting 컴포넌트 대신 직접 제목 요소 생성
         headerContainer.createEl('h4', { 
             text: t('Prompt settings'),
             cls: 'prompt-settings-title'
         });
 
-        // 添加按钮
+        // 추가 버튼
         const addButton = headerContainer.createEl('button', {
             cls: 'prompt-add-btn',
             attr: {
@@ -38,10 +38,10 @@ export class PromptSettingsTab {
         setIcon(addButton, 'plus');
         
         addButton.onclick = () => {
-            // 如果已经存在新建表单，就不要重复创建
+            // 새 폼이 이미 존재하면 중복 생성 방지
             if (container.querySelector('.new-prompt-section')) return;
-            
-            // 创建新的表单并插入到 promptList 之前
+
+            // 새 폼을 생성하여 promptList 앞에 삽입
             const promptList = container.querySelector<HTMLElement>('.prompt-list');
             if (!promptList) return;
             if (promptList) {
@@ -126,7 +126,7 @@ export class PromptSettingsTab {
             const infoContainer = displayContainer.createEl('div', { cls: 'prompt-info' });
             infoContainer.createEl('div', { cls: 'prompt-name', text: name });
             
-            // 创建内容预览，移除换行符并限制显示
+            // 내용 미리보기 생성, 줄바꿈 제거 및 표시 제한
             const contentPreview = content.replace(/\n/g, ' ');
             infoContainer.createEl('div', { 
                 cls: 'prompt-content-preview', 
@@ -200,14 +200,14 @@ export class PromptSettingsTab {
                 const newContent = contentArea.getValue();
                 
                 if (newName && newContent) {
-                    // 如果名称改变了，需要删除旧的
+                    // 이름이 변경된 경우 기존 항목 삭제
                     if (newName !== name) {
                         delete this.plugin.settings.ai.prompts[name];
                     }
                     this.plugin.settings.ai.prompts[newName] = newContent;
                     await this.plugin.saveSettings();
-                    
-                    // 重新显示列表
+
+                    // 목록 다시 표시
                     this.displayPromptList(container);
                     new Notice(t('Prompt updated'));
                 }

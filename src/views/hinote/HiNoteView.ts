@@ -16,20 +16,20 @@ import { setupHiNoteView } from './HiNoteViewSetup';
 import { HiNoteViewSetupResult } from './HiNoteViewSetupTypes';
 import type { PluginServices } from '../../plugin/PluginServices';
 
-export const VIEW_TYPE_HINOTE = "hinote-view";
+export const VIEW_TYPE_HINOTE = "hinote-enhanced-view";
 
 /**
- * HiNote 主视图
- * 负责显示和管理高亮、评论、闪卡等核心功能
+ * HiNote 메인 뷰
+ * 하이라이트, 댓글, 플래시카드 등 핵심 기능의 표시 및 관리를 담당
  */
 export class HiNoteView extends ItemView {
-    // === 常量定义 ===
-    private static readonly CANVAS_UPDATE_DELAY = 10; // Canvas 更新延迟（毫秒）
+    // === 상수 정의 ===
+    private static readonly CANVAS_UPDATE_DELAY = 10; // Canvas 업데이트 지연 시간 (밀리초)
 
-    // === 视图状态（集中管理） ===
+    // === 뷰 상태 (중앙 관리) ===
     private state = new ViewState();
 
-    // === 核心服务 ===
+    // === 핵심 서비스 ===
     private plugin: CommentPlugin;
     private highlightManager: HighlightManager;
     private highlightRepository: HighlightRepository;
@@ -39,7 +39,7 @@ export class HiNoteView extends ItemView {
     private licenseManager: LicenseManager;
     private canvasService: CanvasService;
 
-    // === 视图装配产物 ===
+    // === 뷰 조립 결과물 ===
     private setupResult: HiNoteViewSetupResult | null = null;
     private exportManager: ExportManager | null = null;
     private virtualHighlightManager: VirtualHighlightManager | null = null;
@@ -53,19 +53,18 @@ export class HiNoteView extends ItemView {
         this.plugin = plugin;
         this.highlightManager = services.highlightManager;
         this.highlightRepository = services.highlightRepository;
-        // 初始化 LocationService（已移除 TextSimilarityService 依赖）
+        // LocationService 초기화 (TextSimilarityService 의존성 제거됨)
         this.locationService = new LocationService(this.app);
         this.highlightService = services.highlightService;
         this.exportService = new ExportService(
             this.app,
-            this.highlightRepository,
             this.highlightService,
             () => this.plugin.settings
         );
         this.licenseManager = new LicenseManager(this.plugin);
         this.canvasService = services.canvasService;
         
-        // === 初始化新 Manager（需要在事件注册前初始化）===
+        // === 새 Manager 초기화 (이벤트 등록 전에 초기화해야 함) ===
         this.deviceManager = new DeviceManager();
         this.uiInitializer = new UIInitializer();
         this.eventCoordinator = new EventCoordinator(this.app, this, services.eventManager);
@@ -79,11 +78,11 @@ export class HiNoteView extends ItemView {
     }
 
     getDisplayText(): string {
-        return "HiNote";
+        return "HiNote Enhanced";
     }
 
     getIcon(): string {
-        return "highlighter";  // 使用与左侧功能区相同的图标
+        return "highlighter";  // 좌측 기능 패널과 동일한 아이콘 사용
     }
 
     isInMainWindowMode(): boolean {
@@ -131,11 +130,11 @@ export class HiNoteView extends ItemView {
 
     private async jumpToHighlight(highlight: HighlightInfo) {
         if (this.state.isDraggedToMainView) {
-            // 如果在视图中，则不执行转
+            // 메인 뷰에 있을 경우 이동을 실행하지 않음
             return;
         }
 
-        // 如果是全局搜索结果，静默禁止跳转
+        // 전역 검색 결과인 경우 이동을 조용히 차단
         if (highlight.isGlobalSearch) {
             return;
         }
@@ -147,7 +146,7 @@ export class HiNoteView extends ItemView {
         await this.locationService.jumpToHighlight(highlight, this.state.currentFile.path);
     }
 
-    // 检查视图位置（使用 ViewPositionDetector）
+    // 뷰 위치 확인 (ViewPositionDetector 사용)
     private async checkViewPosition() {
         if (this.setupResult) {
             const wasInAllHighlightsView = this.setupResult.highlightListController.isInAllHighlightsView();
@@ -155,7 +154,7 @@ export class HiNoteView extends ItemView {
         }
     }
     
-    // 更新视图布局（使用 LayoutManager）
+    // 뷰 레이아웃 업데이트 (LayoutManager 사용)
     private async updateViewLayout() {
         if (this.setupResult) {
             this.setupResult.layoutManager.updateState({
@@ -165,16 +164,16 @@ export class HiNoteView extends ItemView {
             });
             await this.setupResult.layoutManager.updateViewLayout();
             
-            // 同步设备信息（使用 DeviceManager）
+            // 디바이스 정보 동기화 (DeviceManager 사용)
             const deviceInfo = this.deviceManager!.getDeviceInfo();
             this.state.isMobileView = deviceInfo.isMobile;
             this.state.isSmallScreen = deviceInfo.isSmallScreen;
         }
     }
 
-    // 在 onunload 方法中确保清理
+    // onunload에서 정리 작업 보장
     onunload() {
-        // 清理有 destroy 方法的管理器
+        // destroy 메서드를 가진 매니저 정리
         this.setupResult?.searchUIManager.destroy();
         this.setupResult?.selectionManager.destroy();
         this.setupResult?.batchOperationsHandler.destroy();

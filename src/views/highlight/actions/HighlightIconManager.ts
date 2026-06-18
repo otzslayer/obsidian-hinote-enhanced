@@ -1,11 +1,11 @@
 import { setIcon } from 'obsidian';
 
 /**
- * 高亮图标管理器
- * 负责管理高亮卡片的图标状态
+ * 하이라이트 아이콘 매니저
+ * 하이라이트 카드의 아이콘 상태 관리 담당
  */
 export class HighlightIconManager {
-    // 图标常量
+    // 아이콘 상수
     private static readonly ICONS = {
         FLASHCARD: 'book-heart',
         FILE: 'file-text',
@@ -14,9 +14,9 @@ export class HighlightIconManager {
     } as const;
     
     /**
-     * 更新卡片图标状态
-     * @param cardElement 卡片元素
-     * @param hasFlashcard 是否有闪卡
+     * 카드 아이콘 상태 업데이트
+     * @param cardElement 카드 요소
+     * @param hasFlashcard 플래시카드 보유 여부
      */
     static updateCardIcons(cardElement: HTMLElement, hasFlashcard: boolean): void {
         const fileIcons = cardElement.querySelectorAll('.highlight-card-icon');
@@ -33,9 +33,9 @@ export class HighlightIconManager {
     }
     
     /**
-     * 设置文件图标
-     * @param iconElement 图标元素
-     * @param hasFlashcard 是否有闪卡
+     * 파일 아이콘 설정
+     * @param iconElement 아이콘 요소
+     * @param hasFlashcard 플래시카드 보유 여부
      */
     static setFileIcon(iconElement: HTMLElement, hasFlashcard: boolean): void {
         const iconName = hasFlashcard ? this.ICONS.FLASHCARD : this.ICONS.FILE;
@@ -49,9 +49,9 @@ export class HighlightIconManager {
     }
     
     /**
-     * 设置高亮图标
-     * @param iconElement 图标元素
-     * @param hasFlashcard 是否有闪卡
+     * 하이라이트 아이콘 설정
+     * @param iconElement 아이콘 요소
+     * @param hasFlashcard 플래시카드 보유 여부
      */
     static setHighlightIcon(iconElement: HTMLElement, hasFlashcard: boolean): void {
         const iconName = hasFlashcard ? this.ICONS.FLASHCARD : this.ICONS.HIGHLIGHT;
@@ -65,7 +65,7 @@ export class HighlightIconManager {
     }
     
     /**
-     * 获取图标名称
+     * 아이콘 이름 가져오기
      */
     static getIconName(type: 'flashcard' | 'file' | 'highlight' | 'message'): string {
         switch (type) {

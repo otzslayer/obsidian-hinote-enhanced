@@ -1,6 +1,6 @@
 export default {
 
-//通用翻译
+// 공통 번역
 
     "Ollama (Local)": "Ollama (local)",
     "Model": "Model",
@@ -14,7 +14,7 @@ export default {
     "Cloze card content": "Cloze card content",
     "Cloze card answer": "Cloze card answer",
   
-//AI 通用
+// AI 공통
 
     "Select the AI service provider": "Select the AI service provider.",
     "API Key": "API key",  
@@ -28,26 +28,26 @@ export default {
     "Please enter an API Key first": "Please enter an API Key first.",
     "Custom model unavailable. Please check the model ID and your access permissions.": "Custom model unavailable. Please check the model ID and your access permissions.",
 
-//OpenAI 设置
+// OpenAI 설정
 
     "OpenAI service": "OpenAI service",
     "No models available. Please check your API Key.": "No models available. Please check your API Key.",
 
-//Anthropic 设置
+// Anthropic 설정
 
     "Anthropic service": "Anthropic service",
     "Model ID can only contain letters, numbers, underscores, dots and hyphens.": "Model ID can only contain letters, numbers, underscores, dots and hyphens.",
 
-//Gemini 设置
+// Gemini 설정
 
     "Unable to create model selection dropdown menu.": "Unable to create model selection dropdown menu.",
     "Gemini service": "Gemini service",
 
-//Deepseek 设置
+// Deepseek 설정
 
     "Deepseek service": "Deepseek service",
 
-//Custom AI 设置
+// Custom AI 설정
 
     "Custom AI Service": "Custom AI Service",
     "Configure your own AI service provider. Supports OpenAI, Anthropic, and Gemini compatible APIs.": "Configure your own AI service provider. Supports OpenAI, Anthropic, and Gemini compatible APIs.",
@@ -74,12 +74,12 @@ export default {
     "Invalid JSON format. Headers must be an object.": "Invalid JSON format. Headers must be an object.",
     "Invalid JSON format": "Invalid JSON format",
 
-//批注展开/收起
+// 주석 펼치기/접기
 
     "Expand": "Expand",
     "Collapse": "Collapse",
 
-//Ollama 设置
+// Ollama 설정
 
     "Ollama service": "Ollama service",
     "Ollama server URL (default: http://localhost:11434)": "Ollama server URL (default: http://localhost:11434)",
@@ -94,7 +94,7 @@ export default {
     "No models available. Please load an available model first.": "No models available. Please load an available model first.",
     "No models available": "No models available",
 
-//Prompt 设置
+// Prompt 설정
 
     "Prompt settings": "Custom prompt",
     "Add Prompt": "Add prompt",
@@ -156,7 +156,7 @@ export default {
 
 //main
 
-    "Open HiNote window": "Open HiNote window",
+    "Open HiNote window": "Open HiNote Enhanced window",
 
 // Settings
     'General': 'Highlight',
@@ -248,13 +248,13 @@ export default {
     "Learning completed!": "Learning completed!",
     "Group deleted": "Group deleted",
     
-    // 搜索前缀提示
+    // 검색 접두사 힌트
     "search-prefix-all": "match all file highlights",
     "search-prefix-hicard": "match flashcards only",
     "search-prefix-comment": "match with comments only",
     "search-prefix-path": "match path of the file",
 
-    // 其他
+    // 기타
 
     "Open (DoubleClick)": "Open (double-click)",
 

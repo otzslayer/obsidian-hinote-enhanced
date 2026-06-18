@@ -1,12 +1,12 @@
 import { Platform } from 'obsidian';
 
 /**
- * 设备管理器
- * 职责：
- * 1. 检测设备类型（移动端、桌面端）
- * 2. 检测屏幕尺寸
- * 3. 提供响应式布局支持
- * 4. 统一管理设备相关状态
+ * 디바이스 매니저
+ * 담당:
+ * 1. 디바이스 유형 감지 (모바일, 데스크톱)
+ * 2. 화면 크기 감지
+ * 3. 반응형 레이아웃 지원 제공
+ * 4. 디바이스 관련 상태 통합 관리
  */
 export class DeviceManager {
     private isMobileView: boolean = false;
@@ -20,27 +20,27 @@ export class DeviceManager {
     }
 
     /**
-     * 设置设备变化回调
+     * 디바이스 변경 콜백 설정
      */
     setOnDeviceChange(callback: (deviceInfo: DeviceInfo) => void): void {
         this.onDeviceChangeCallback = callback;
     }
 
     /**
-     * 开始监听屏幕尺寸变化
+     * 화면 크기 변경 감지 시작
      */
     startWatching(element: HTMLElement): void {
         this.observedElement = element;
         this.updateDeviceInfo();
 
-        // 使用 ResizeObserver 监听元素尺寸变化
+        // ResizeObserver로 요소 크기 변경 감지
         this.resizeObserver = new ResizeObserver(() => {
             const oldIsMobile = this.isMobileView;
             const oldIsSmallScreen = this.isSmallScreen;
-            
+
             this.updateDeviceInfo();
-            
-            // 如果设备信息发生变化，触发回调
+
+            // 디바이스 정보가 변경된 경우 콜백 호출
             if (oldIsMobile !== this.isMobileView || oldIsSmallScreen !== this.isSmallScreen) {
                 if (this.onDeviceChangeCallback) {
                     this.onDeviceChangeCallback(this.getDeviceInfo());
@@ -52,7 +52,7 @@ export class DeviceManager {
     }
 
     /**
-     * 停止监听
+     * 감지 중지
      */
     stopWatching(): void {
         if (this.resizeObserver) {
@@ -62,7 +62,7 @@ export class DeviceManager {
     }
 
     /**
-     * 更新设备信息
+     * 디바이스 정보 업데이트
      */
     private updateDeviceInfo(): void {
         this.isMobileView = this.checkIfMobile();
@@ -70,14 +70,14 @@ export class DeviceManager {
     }
 
     /**
-     * 检测是否为移动设备
+     * 모바일 디바이스 여부 감지
      */
     private checkIfMobile(): boolean {
         return Platform.isMobile;
     }
 
     /**
-     * 检测是否为小屏幕设备（宽度小于768px）
+     * 소형 화면 디바이스 여부 감지 (너비 768px 미만)
      */
     private checkIfSmallScreen(): boolean {
         const elementWidth = this.observedElement?.getBoundingClientRect().width;
@@ -85,7 +85,7 @@ export class DeviceManager {
     }
 
     /**
-     * 获取当前设备信息
+     * 현재 디바이스 정보 가져오기
      */
     getDeviceInfo(): DeviceInfo {
         return {
@@ -97,35 +97,35 @@ export class DeviceManager {
     }
 
     /**
-     * 是否为移动设备
+     * 모바일 디바이스 여부
      */
     isMobile(): boolean {
         return this.isMobileView;
     }
 
     /**
-     * 是否为小屏幕
+     * 소형 화면 여부
      */
     isSmall(): boolean {
         return this.isSmallScreen;
     }
 
     /**
-     * 是否为桌面设备
+     * 데스크톱 디바이스 여부
      */
     isDesktop(): boolean {
         return !this.isMobileView;
     }
 
     /**
-     * 是否为大屏幕
+     * 대형 화면 여부
      */
     isLarge(): boolean {
         return !this.isSmallScreen;
     }
 
     /**
-     * 销毁设备管理器
+     * 디바이스 매니저 소멸
      */
     destroy(): void {
         this.stopWatching();
@@ -135,7 +135,7 @@ export class DeviceManager {
 }
 
 /**
- * 设备信息接口
+ * 디바이스 정보 인터페이스
  */
 export interface DeviceInfo {
     isMobile: boolean;

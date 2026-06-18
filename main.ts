@@ -18,7 +18,7 @@ export default class CommentPlugin extends Plugin {
 	private initManager: InitializationManager;
 	private windowManager: WindowManager;
 
-	// 公开服务实例供外部访问
+	// 외부 접근을 위한 서비스 인스턴스 공개
 	get services(): PluginServices | null { return this.initManager.currentServices; }
 	get highlightDecorator() { return this.requireInitializedServices().highlightDecorator; }
 	get fsrsManager() { return this.requireInitializedServices().fsrsManager; }
@@ -27,7 +27,7 @@ export default class CommentPlugin extends Plugin {
 	get dataManager() { return this.requireInitializedServices().dataManager; }
 	get canvasService() { return this.requireInitializedServices().canvasService; }
 	
-	// 架构层实例
+	// 아키텍처 레이어 인스턴스
 	get highlightRepository() { return this.requireInitializedServices().highlightRepository; }
 	get highlightManager() { return this.requireInitializedServices().highlightManager; }
 
@@ -44,11 +44,11 @@ export default class CommentPlugin extends Plugin {
 	}
 
 	async onload() {
-		// 加载设置
+		// 설정 로드
 		const loadedData = await this.loadData();
 		this.settings = migrateSettings(loadedData);
 
-		// 初始化管理器
+		// 관리자 초기화
 		this.initManager = new InitializationManager(this);
 		this.windowManager = createPluginWindowManager(this);
 
@@ -56,7 +56,7 @@ export default class CommentPlugin extends Plugin {
 		registerPluginRibbon(this, this.windowManager);
 		registerPluginCommands(this, this.windowManager);
 
-		// 添加设置标签页
+		// 설정 탭 추가
 		this.addSettingTab(new AISettingTab(this.app, this));
 
 		registerPluginVaultEvents(this);
@@ -64,7 +64,7 @@ export default class CommentPlugin extends Plugin {
 
 
 	onunload() {
-		// 清理初始化管理器
+		// 초기화 관리자 정리
 		if (this.initManager) {
 			void this.initManager.cleanup();
 		}

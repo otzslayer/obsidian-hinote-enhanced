@@ -2,8 +2,8 @@ import { TFile } from "obsidian";
 import { HighlightInfo } from '../../types/highlight';
 
 /**
- * HiNote 视图状态管理
- * 集中管理所有视图状态数据，避免分散在 HiNoteView 中
+ * HiNote 뷰 상태 관리
+ * 모든 뷰 상태 데이터를 중앙 집중 관리하여 HiNoteView에 분산되지 않도록 함
  */
 export class ViewState {
     currentFile: TFile | null = null;
@@ -17,14 +17,14 @@ export class ViewState {
     currentEditingHighlightId: string | null | undefined = null;
 
     /**
-     * 判断是否在全部高亮视图
+     * 전체 하이라이트 뷰 여부 판단
      */
     isInAllHighlightsView(): boolean {
         return this.currentFile === null;
     }
 
     /**
-     * 重置高亮数据
+     * 하이라이트 데이터 초기화
      */
     resetHighlights(): void {
         this.highlights = [];

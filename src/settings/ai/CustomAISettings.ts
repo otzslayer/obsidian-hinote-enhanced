@@ -33,12 +33,12 @@ export class CustomAISettings extends BaseAIServiceSettings {
         });
         const customSettings = this.getCustomSettings();
 
-        // 添加标题和说明
+        // 제목 및 설명 추가
         new Setting(settingsContainer)
             .setName(t('Custom AI Service'))
             .setHeading();
 
-        // 添加说明文本
+        // 설명 텍스트 추가
         const descEl = settingsContainer.createEl('div', {
             cls: 'setting-item-description custom-ai-description'
         });
@@ -49,7 +49,7 @@ export class CustomAISettings extends BaseAIServiceSettings {
             text: t('The API type will be automatically detected based on your URL.')
         });
 
-        // 服务商名称
+        // 서비스 제공자 이름
         new Setting(settingsContainer)
             .setName(t('Service Name'))
             .setDesc(t('Give your custom AI service a name'))
@@ -60,7 +60,7 @@ export class CustomAISettings extends BaseAIServiceSettings {
                     settings.name = value;
                 })));
 
-        // API 端点 URL
+        // API 엔드포인트 URL
         new Setting(settingsContainer)
             .setName(t('API Endpoint URL'))
             .setDesc(t('The base URL of your AI service API'))
@@ -87,7 +87,7 @@ export class CustomAISettings extends BaseAIServiceSettings {
                     .onChange((value) => this.updateCustomSettings(settings => {
                         settings.apiKey = value;
                     }));
-                // 设置为密码输入框
+                // 비밀번호 입력창으로 설정
                 text.inputEl.type = 'password';
                 return text;
             })
@@ -120,7 +120,7 @@ export class CustomAISettings extends BaseAIServiceSettings {
                 });
             });
 
-        // 模型名称
+        // 모델 이름
         new Setting(settingsContainer)
             .setName(t('Model'))
             .setDesc(t('The model identifier to use'))
@@ -131,10 +131,10 @@ export class CustomAISettings extends BaseAIServiceSettings {
                     settings.model = value;
                 })));
 
-        // 显示检测到的 API 类型（如果有）
+        // 감지된 API 유형 표시 (있는 경우)
         this.renderDetectedApiType(settingsContainer);
 
-        // 高级选项（可选的自定义请求头）
+        // 고급 옵션 (선택적 커스텀 헤더)
         const advancedSetting = new Setting(settingsContainer)
             .setName(t('Advanced Options'))
             .setDesc(t('Optional custom headers (JSON format)'));
@@ -221,10 +221,10 @@ export class CustomAISettings extends BaseAIServiceSettings {
 
     private async testConnection(): Promise<boolean> {
         try {
-            // 动态导入 CustomAIService
+            // CustomAIService 동적 임포트
             const { CustomAIService } = await import('../../services/ai/CustomAIService');
-            
-            // 创建临时的服务实例进行测试
+
+            // 테스트용 임시 서비스 인스턴스 생성
             const customSettings = this.getCustomSettings();
             
             const tempService = new CustomAIService(
@@ -235,10 +235,10 @@ export class CustomAISettings extends BaseAIServiceSettings {
                 customSettings.detectedApiType
             );
             
-            // 测试连接
+            // 연결 테스트
             const result = await tempService.testConnection();
-            
-            // 如果测试成功，保存检测到的 API 类型
+
+            // 테스트 성공 시 감지된 API 유형 저장
             if (result) {
                 const detectedType = tempService.getDetectedAPIType();
                 if (detectedType && customSettings) {

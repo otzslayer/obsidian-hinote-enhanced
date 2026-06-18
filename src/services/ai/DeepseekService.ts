@@ -2,8 +2,8 @@ import { AIServiceConfig, AIProviderType, AIModel } from './BaseAIService';
 import { OpenAICompatibleService } from './OpenAICompatibleService';
 
 /**
- * Deepseek AI 服务
- * 使用 OpenAI 兼容的 API 格式
+ * Deepseek AI 서비스
+ * OpenAI 호환 API 형식을 사용합니다
  */
 export class DeepseekService extends OpenAICompatibleService {
     constructor(

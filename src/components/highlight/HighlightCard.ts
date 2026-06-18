@@ -23,7 +23,7 @@ import {
 export class HighlightCard {
     private card: HTMLElement;
     private fileName: string | undefined;
-    private hasFlashcard: boolean = false; // 保存闪卡状态
+    private hasFlashcard: boolean = false; // 플래시카드 상태 저장
     private dragController: HighlightCardDragController;
     private flashcardController: HighlightCardFlashcardController;
     private fileNavigator: HighlightCardFileNavigator;
@@ -31,7 +31,7 @@ export class HighlightCard {
     private titleBarRenderer: HighlightCardTitleBarRenderer;
     private menuController = new HighlightCardMenuController();
     
-    // 管理器实例
+    // 매니저 인스턴스
     private deletionManager: HighlightDeletionManager;
 
     constructor(
@@ -47,7 +47,7 @@ export class HighlightCard {
         },
         private isInMainView: boolean = false,
         fileName?: string,
-        private selectionManager?: SelectionManager,  // SelectionManager 实例
+        private selectionManager?: SelectionManager,  // SelectionManager 인스턴스
         private registry: HighlightCardRegistry = defaultHighlightCardRegistry
     ) {
         this.fileName = fileName;
@@ -56,7 +56,7 @@ export class HighlightCard {
         this.options = options;
         this.fileName = this.highlight.filePath?.split('/').pop();
         
-        // 初始化管理器
+        // 매니저 초기화
         this.deletionManager = new HighlightDeletionManager(plugin);
         this.dragController = new HighlightCardDragController(plugin, () => this.highlight);
         this.selectionController = new HighlightCardSelectionController({
@@ -108,7 +108,7 @@ export class HighlightCard {
     private render() {
         this.card = createHighlightCardElement(this.container, this.highlight);
 
-        // 添加点击事件用于切换选中状态，支持多选
+        // 선택 상태 전환을 위한 클릭 이벤트 추가, 다중 선택 지원
         this.card.addEventListener("click", (e: MouseEvent) => {
             const target = e.target as HTMLElement;
             if (this.selectionController.shouldIgnoreCardClick(target)) {
@@ -132,18 +132,18 @@ export class HighlightCard {
     }
     
     /**
-     * 显示评论输入框
-     * 用于外部调用，直接触发评论输入框的显示
+     * 댓글 입력창 표시
+     * 외부에서 호출하여 댓글 입력창을 직접 표시하는 용도
      */
     public showCommentInput(): void {
-        // 清除所有卡片的不聚焦输入框
+        // 모든 카드의 포커스 해제 입력창 초기화
         this.registry.clearAllUnfocusedInputs();
         this.selectionController.showCommentInput();
     }
 
-    // 添加选中卡片的方法，支持多选和取消选择
+    // 카드 선택 메서드 추가, 다중 선택 및 선택 해제 지원
     private selectCard(event?: MouseEvent) {
-        // 先清除所有卡片上的不聚焦输入框
+        // 먼저 모든 카드의 포커스 해제 입력창 초기화
         this.registry.clearAllUnfocusedInputs();
         this.selectionController.selectCard(event);
     }
@@ -176,26 +176,26 @@ export class HighlightCard {
     }
 
     /**
-     * 复制高亮和批注内容
+     * 하이라이트 및 주석 내용 복사
      */
     private copyHighlightContent(): void {
         HighlightCardClipboard.copyHighlightContent(this.highlight, this.fileName);
     }
     
     /**
-     * 处理导出为图片功能
+     * 이미지로 내보내기 기능 처리
      */
     private handleExportAsImage(): void {
         this.options.onExport(this.highlight);
     }
 
     /**
-     * 切换更多操作下拉菜单的显示/隐藏状态
-     * @param dropdown 下拉菜单元素
-     * @param button 触发菜单的按钮元素
+     * 추가 액션 드롭다운 메뉴 표시/숨김 전환
+     * @param dropdown 드롭다운 메뉴 요소
+     * @param button 메뉴를 트리거하는 버튼 요소
      */
     private toggleMoreActionsDropdown(button: HTMLElement) {
-        // 检查闪卡状态
+        // 플래시카드 상태 확인
         this.hasFlashcard = this.checkHasFlashcard();
 
         this.menuController.show(button, this.hasFlashcard, {
@@ -207,67 +207,67 @@ export class HighlightCard {
     }
 
     /**
-     * 检查高亮是否已经创建了闪卡
-     * @returns 是否已创建闪卡
+     * 하이라이트에 플래시카드가 이미 생성되었는지 확인
+     * @returns 플래시카드 생성 여부
      */
     private checkHasFlashcard(): boolean {
         return this.flashcardController.checkHasFlashcard();
     }
     
     /**
-     * 处理创建/删除 HiCard 的逻辑
+     * HiCard 생성/삭제 로직 처리
      */
     private async handleCreateHiCard() {
         await this.flashcardController.toggleFlashcard();
     }
 
     /**
-     * 公共方法：为高亮删除闪卡
-     * 可以被外部调用，用于批量删除闪卡
-     * @param silent 是否静默模式（不显示通知，不触发事件）
-     * @returns 删除是否成功
+     * 공개 메서드: 하이라이트의 플래시카드 삭제
+     * 외부에서 호출 가능하며, 일괄 삭제에 사용
+     * @param silent 무음 모드 여부 (알림 미표시, 이벤트 미발생)
+     * @returns 삭제 성공 여부
      */
     public async deleteHiCardForHighlight(silent: boolean = false): Promise<boolean> {
         return this.flashcardController.deleteFlashcard(silent);
     }
 
     /**
-     * 公共方法：为高亮创建闪卡
-     * 可以被外部调用，用于批量创建闪卡
-     * @returns 创建是否成功
+     * 공개 메서드: 하이라이트의 플래시카드 생성
+     * 외부에서 호출 가능하며, 일괄 생성에 사용
+     * @returns 생성 성공 여부
      */
     public async createHiCardForHighlight(silent: boolean = false): Promise<boolean> {
         return this.flashcardController.createFlashcard(silent);
     }
 
     /**
-     * 更新删除闪卡后的图标显示
+     * 플래시카드 삭제 후 아이콘 표시 업데이트
      */
     private updateIconsAfterCardDeletion() {
         HighlightIconManager.updateCardIcons(this.card, false);
     }
 
     /**
-     * 更新创建闪卡后的图标显示
+     * 플래시카드 생성 후 아이콘 표시 업데이트
      */
     public updateIconsAfterCardCreation() {
         HighlightIconManager.updateCardIcons(this.card, true);
     }
 
     /**
-     * 处理删除高亮的逻辑
-     * 这个方法会删除编辑器中的高亮格式和批注数据
-     * @param skipConfirmation 是否跳过确认对话框，默认为 false
-     * @param skipNotice 是否跳过成功通知，默认为 false
+     * 하이라이트 삭제 로직 처리
+     * 이 메서드는 에디터의 하이라이트 형식과 주석 데이터를 삭제
+     * @param skipConfirmation 확인 대화상자 건너뛰기 여부, 기본값 false
+     * @param skipNotice 성공 알림 건너뛰기 여부, 기본값 false
      */
     public async handleDeleteHighlight(skipConfirmation: boolean = false, skipNotice: boolean = false) {
         try {
-            // 如果有闪卡，先删除闪卡
+            // 플래시카드가 있으면 먼저 삭제
             if (this.hasFlashcard) {
-                await this.deleteHiCardForHighlight(true); // 静默模式，不显示通知
+                await this.deleteHiCardForHighlight(true); // 무음 모드, 알림 미표시
             }
-            
-            // 委托给删除管理器
+
+            // 삭제 매니저에 위임
             const success = await this.deletionManager.deleteHighlight(
                 this.highlight,
                 skipConfirmation,
@@ -275,33 +275,33 @@ export class HighlightCard {
             );
             
             if (success) {
-                // 移除卡片
+                // 카드 제거
                 this.card.remove();
-                
+
                 this.registry.unregister(this);
             }
         } catch (error) {
-            console.error('删除高亮时出错:', error);
+            console.error('하이라이트 삭제 중 오류:', error);
             const message = error instanceof Error ? error.message : String(error);
-            new Notice(t(`删除高亮失败: ${message}`));
+            new Notice(t(`하이라이트 삭제 실패: ${message}`));
         }
     }
     
     /**
-     * 更新评论列表（只更新评论部分，不重新渲染整个卡片）
+     * 댓글 목록 업데이트 (댓글 부분만 업데이트하며 전체 카드를 다시 렌더링하지 않음)
      */
     public updateComments(updatedHighlight: HighlightInfo): void {
-        // 更新高亮数据
+        // 하이라이트 데이터 업데이트
         this.highlight = updatedHighlight;
-        
-        // 重置编辑状态，允许重新选中卡片
+
+        // 편집 상태 리셋, 카드 재선택 허용
         this.selectionController.resetEditing();
-        
-        // 查找评论列表容器
+
+        // 댓글 목록 컨테이너 탐색
         const commentsSection = this.card.querySelector('.hi-notes-section');
-        
+
         if (commentsSection) {
-            // 如果有评论列表，移除它
+            // 댓글 목록이 있으면 제거
             commentsSection.remove();
         }
         
@@ -315,17 +315,17 @@ export class HighlightCard {
             this.plugin.app,
             (comment) => {
                 this.selectionController.markEditing();
-                this.selectCard(); // 在进入编辑模式时选中卡片
+                this.selectCard(); // 편집 모드 진입 시 카드 선택
                 this.options.onCommentEdit(this.highlight, comment);
             }
         );
     }
     
     /**
-     * 销毁方法，用于清理事件监听器和从静态集合中移除实例
+     * 소멸 메서드, 이벤트 리스너 정리 및 정적 컬렉션에서 인스턴스 제거에 사용
      */
     public destroy(): void {
-        // 移除事件监听器
+        // 이벤트 리스너 제거
         this.selectionController.destroy();
         
         this.registry.unregister(this);

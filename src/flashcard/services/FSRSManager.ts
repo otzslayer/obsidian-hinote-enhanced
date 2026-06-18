@@ -105,29 +105,29 @@ export class FSRSManager {
             saveDebounced: () => this.saveStorageDebounced(),
             emitFlashcardChanged: () => this.plugin.eventManager.emitFlashcardChanged()
         });
-        // 初始化为空对象，稍后会被加载的数据替换
+        // 빈 객체로 초기화, 나중에 로드된 데이터로 교체됨
         this.storage = this.storageService.createDefaultStorage();
-        
-        // 自动保存更改
+
+        // 변경사항 자동 저장
         this.saveStorageDebounced = debounce(this.saveStorage.bind(this), 1000, true);
-        
-        // 异步加载存储数据
+
+        // 저장소 데이터 비동기 로드
         this.storageService.load().then(storage => {
-    
+
             this.storage = storage;
-            
-            // 在加载完成后初始化分组仓库
+
+            // 로드 완료 후 그룹 레포지토리 초기화
             this.groupRepository = this.createGroupRepository();
-            
-            // 注册事件监听
+
+            // 이벤트 리스너 등록
             this.eventSyncService.registerEventListeners();
         }).catch(error => {
             console.error('Loading storage data failed:', error);
-            
+
             // Even if it fails, initialize the group repository
             this.groupRepository = this.createGroupRepository();
-            
-            // 注册事件监听
+
+            // 이벤트 리스너 등록
             this.eventSyncService.registerEventListeners();
         });
     }
@@ -148,82 +148,82 @@ export class FSRSManager {
     private saveStorageDebounced: () => void;
 
     /**
-     * 添加卡片
-     * @param text 卡片正面文本
-     * @param answer 卡片背面文本
-     * @param filePath 关联的文件路径
-     * @param sourceId 来源ID（高亮或批注的ID）
-     * @param sourceType 来源类型
-     * @returns 添加的卡片
+     * 카드 추가
+     * @param text 카드 앞면 텍스트
+     * @param answer 카드 뒷면 텍스트
+     * @param filePath 연결된 파일 경로
+     * @param sourceId 출처 ID (하이라이트 또는 주석의 ID)
+     * @param sourceType 출처 유형
+     * @returns 추가된 카드
      */
     public addCard(text: string, answer: string, filePath?: string, sourceId?: string, sourceType?: 'highlight' | 'comment'): FlashcardState {
         return this.cardService.addCard(text, answer, filePath, sourceId, sourceType);
     }
     
     /**
-     * 统一的卡片学习入口，获取指定分组的卡片
-     * @param groupId 分组ID
-     * @returns 分组中的卡片列表
+     * 통합된 카드 학습 진입점, 지정된 그룹의 카드 가져오기
+     * @param groupId 그룹 ID
+     * @returns 그룹 내 카드 목록
      */
     public getCardsForStudy(groupId: string): FlashcardState[] {
         return this.studyService.getCardsForStudy(groupId);
     }
     
     /**
-     * 统一的学习进度跟踪方法
-     * 这是记录学习进度的唯一入口点
-     * @param cardId 卡片ID
-     * @param rating 评分
-     * @returns 更新后的卡片状态
+     * 통합된 학습 진도 추적 메서드
+     * 학습 진도를 기록하는 유일한 진입점
+     * @param cardId 카드 ID
+     * @param rating 평가 점수
+     * @returns 업데이트된 카드 상태
      */
     public trackStudyProgress(cardId: string, rating: FSRSRating): FlashcardState | null {
         return this.reviewService.trackStudyProgress(cardId, rating);
     }
     
     /**
-     * 获取卡片在不同评分下的预测结果
-     * @param cardId 卡片ID
-     * @returns 不同评分下的预测结果，如果卡片不存在则返回 null
+     * 카드의 다양한 평가 점수에 따른 예측 결과 가져오기
+     * @param cardId 카드 ID
+     * @returns 각 평가 점수별 예측 결과, 카드가 없으면 null 반환
      */
     public getCardPredictions(cardId: string): Record<FSRSRating, FlashcardState> | null {
         return this.reviewService.getCardPredictions(cardId);
     }
     
     /**
-     * 根据来源ID查找卡片
-     * @param sourceId 来源ID（高亮或批注的ID）
-     * @param sourceType 来源类型
-     * @returns 找到的卡片列表
+     * 출처 ID로 카드 검색
+     * @param sourceId 출처 ID (하이라이트 또는 주석의 ID)
+     * @param sourceType 출처 유형
+     * @returns 찾은 카드 목록
      */
     public findCardsBySourceId(sourceId: string, sourceType?: FlashcardSourceType): FlashcardState[] {
         return this.sourceCardService.findCardsBySourceId(sourceId, sourceType);
     }
     
     /**
-     * 根据来源ID删除卡片
-     * @param sourceId 来源ID（高亮或批注的ID）
-     * @param sourceType 来源类型
-     * @returns 删除的卡片数量
+     * 출처 ID로 카드 삭제
+     * @param sourceId 출처 ID (하이라이트 또는 주석의 ID)
+     * @param sourceType 출처 유형
+     * @returns 삭제된 카드 수량
      */
     public deleteCardsBySourceId(sourceId: string, sourceType?: FlashcardSourceType): number {
         return this.sourceCardService.deleteCardsBySourceId(sourceId, sourceType);
     }
     
     /**
-     * 根据来源ID更新卡片内容
-     * @param sourceId 来源ID
-     * @param sourceType 来源类型
-     * @param newText 新的文本内容
-     * @param newAnswer 新的答案内容
-     * @returns 更新的卡片数量
+     * 출처 ID로 카드 내용 업데이트
+     * @param sourceId 출처 ID
+     * @param sourceType 출처 유형
+     * @param newText 새 텍스트 내용
+     * @param newAnswer 새 답변 내용
+     * @returns 업데이트된 카드 수량
      */
     public updateCardsBySourceId(sourceId: string, sourceType: FlashcardSourceType, newText?: string, newAnswer?: string): number {
         return this.sourceCardService.updateCardsBySourceId(sourceId, sourceType, newText, newAnswer);
     }
 
     /**
-     * 获取所有卡片的总数（只统计自定义分组中的卡片）
-     * @returns 卡片总数
+     * 모든 카드의 총 수 가져오기 (커스텀 그룹 내 카드만 집계)
+     * @returns 카드 총 수
      */
     public getTotalCardsCount(): number {
         return this.cardService.getTotalCardsCount();
@@ -237,7 +237,7 @@ export class FSRSManager {
         return { ...this.storage.globalStats };
     }
 
-    // UI状态管理
+    // UI 상태 관리
     public getUIState(): HiCardState {
         return this.uiStateService.getUIState();
     }
@@ -247,33 +247,33 @@ export class FSRSManager {
     }
 
     /**
-     * 删除卡片
-     * @param cardId 卡片ID
-     * @returns 是否删除成功
+     * 카드 삭제
+     * @param cardId 카드 ID
+     * @returns 삭제 성공 여부
      */
     public deleteCard(cardId: string): boolean {
         return this.cardService.deleteCard(cardId);
     }
 
     /**
-     * 根据文件路径获取卡片
-     * @param filePath 文件路径
-     * @returns 该文件下的卡片列表
+     * 파일 경로로 카드 가져오기
+     * @param filePath 파일 경로
+     * @returns 해당 파일의 카드 목록
      */
     public getCardsByFile(filePath: string): FlashcardState[] {
         return this.cardService.getCardsByFile(filePath);
     }
 
     /**
-     * 获取插件实例（公共方法，供外部访问）
-     * @returns 插件实例
+     * 플러그인 인스턴스 가져오기 (외부 접근용 공개 메서드)
+     * @returns 플러그인 인스턴스
      */
     public getPlugin(): CommentPlugin {
         return this.plugin;
     }
     
     /**
-     * 公共保存方法，供外部调用
+     * 외부 호출용 공개 저장 메서드
      * @returns Promise<void>
      */
     public async saveStoragePublic(): Promise<void> {
@@ -285,8 +285,8 @@ export class FSRSManager {
     }
 
     /**
-     * 重置今天的学习统计。
-     * @returns 如果找到并移除了今天的统计数据，返回 true。
+     * 오늘의 학습 통계 초기화.
+     * @returns 오늘의 통계 데이터를 찾아 제거했으면 true 반환.
      */
     public async resetTodayStats(): Promise<boolean> {
         const reset = this.dailyStatsService.resetTodayStats();
@@ -301,130 +301,130 @@ export class FSRSManager {
     }
 
     /**
-     * 检查今天是否还能学习新卡片
-     * @param groupId 可选的分组ID，如果提供则使用分组特定的设置
+     * 오늘 새 카드를 더 학습할 수 있는지 확인
+     * @param groupId 선택적 그룹 ID, 제공 시 그룹별 설정 사용
      */
     public canLearnNewCardsToday(groupId?: string): boolean {
         return this.dailyStatsService.canLearnNewCardsToday(groupId);
     }
 
     /**
-     * 检查今天是否还能复习卡片
-     * @param groupId 可选的分组ID，如果提供则使用分组特定的设置
+     * 오늘 카드를 더 복습할 수 있는지 확인
+     * @param groupId 선택적 그룹 ID, 제공 시 그룹별 설정 사용
      */
     public canReviewCardsToday(groupId?: string): boolean {
         return this.dailyStatsService.canReviewCardsToday(groupId);
     }
 
     /**
-     * 获取今天剩余的新卡片学习数量
-     * @param groupId 可选的分组ID，如果提供则使用分组特定的设置
+     * 오늘 남은 새 카드 학습 수량 가져오기
+     * @param groupId 선택적 그룹 ID, 제공 시 그룹별 설정 사용
      */
     public getRemainingNewCardsToday(groupId?: string): number {
         return this.dailyStatsService.getRemainingNewCardsToday(groupId);
     }
 
     /**
-     * 获取今天剩余的复习卡片数量
-     * @param groupId 可选的分组ID，如果提供则使用分组特定的设置
+     * 오늘 남은 복습 카드 수량 가져오기
+     * @param groupId 선택적 그룹 ID, 제공 시 그룹별 설정 사용
      */
     public getRemainingReviewsToday(groupId?: string): number {
         return this.dailyStatsService.getRemainingReviewsToday(groupId);
     }
     /**
-     * 创建新分组
-     * @param group 分组数据（不含ID）
-     * @returns 创建的分组
+     * 새 그룹 생성
+     * @param group 그룹 데이터 (ID 제외)
+     * @returns 생성된 그룹
      */
     public async createCardGroup(group: Omit<CardGroup, 'id'>): Promise<CardGroup> {
         return this.groupService.createCardGroup(group);
     }
     
     /**
-     * 更新分组
-     * @param groupId 分组ID
-     * @param updates 要更新的字段
-     * @returns 是否更新成功
+     * 그룹 업데이트
+     * @param groupId 그룹 ID
+     * @param updates 업데이트할 필드
+     * @returns 업데이트 성공 여부
      */
     public async updateCardGroup(groupId: string, updates: Partial<Omit<CardGroup, 'id'>>): Promise<boolean> {
         return this.groupService.updateCardGroup(groupId, updates);
     }
     
     /**
-     * 删除分组
-     * @param groupId 分组ID
-     * @param deleteCards 是否同时删除分组内的卡片
-     * @returns 是否删除成功
+     * 그룹 삭제
+     * @param groupId 그룹 ID
+     * @param deleteCards 그룹 내 카드도 함께 삭제 여부
+     * @returns 삭제 성공 여부
      */
     public async deleteCardGroup(groupId: string, deleteCards = false): Promise<boolean> {
         return this.groupService.deleteCardGroup(groupId);
     }
     
     /**
-     * 获取分组中的所有卡片（根据过滤条件）
-     * @param group 分组对象
-     * @returns 符合条件的卡片列表
+     * 그룹의 모든 카드 가져오기 (필터 조건 기반)
+     * @param group 그룹 객체
+     * @returns 조건에 맞는 카드 목록
      */
     public getCardsInGroup(group: CardGroup): FlashcardState[] {
         return this.groupService.getCardsInGroup(group);
     }
     
     /**
-     * 将卡片添加到分组
-     * @param cardId 卡片ID
-     * @param groupId 分组ID
-     * @returns 是否添加成功
+     * 그룹에 카드 추가
+     * @param cardId 카드 ID
+     * @param groupId 그룹 ID
+     * @returns 추가 성공 여부
      */
     public addCardToGroup(cardId: string, groupId: string): boolean {
         return this.groupService.addCardToGroup(cardId, groupId);
     }
     
     /**
-     * 从分组中移除卡片
-     * @param cardId 卡片ID
-     * @param groupId 分组ID
-     * @returns 是否移除成功
+     * 그룹에서 카드 제거
+     * @param cardId 카드 ID
+     * @param groupId 그룹 ID
+     * @returns 제거 성공 여부
      */
     public removeCardFromGroup(cardId: string, groupId: string): boolean {
         return this.groupService.removeCardFromGroup(cardId, groupId);
     }
     
     /**
-     * 获取分组的学习进度
-     * @param groupId 分组ID
-     * @returns 分组的学习进度
+     * 그룹의 학습 진도 가져오기
+     * @param groupId 그룹 ID
+     * @returns 그룹의 학습 진도
      */
     public getGroupProgress(groupId: string): FlashcardProgress | null {
         return this.groupService.getGroupProgress(groupId);
     }
     
     /**
-     * 获取分组中的所有卡片
-     * @param groupId 分组ID
-     * @returns 分组中的卡片列表
+     * 그룹의 모든 카드 가져오기
+     * @param groupId 그룹 ID
+     * @returns 그룹 내 카드 목록
      */
     public getCardsByGroupId(groupId: string): FlashcardState[] {
         return this.groupService.getCardsByGroupId(groupId);
     }
     
     /**
-     * 获取所有卡片的数组
-     * @returns 所有卡片的数组
+     * 모든 카드 배열 가져오기
+     * @returns 모든 카드의 배열
      */
     public getAllCards(): FlashcardState[] {
         return this.cardService.getAllCards();
     }
     
     /**
-     * 获取所有分组
-     * @returns 所有分组列表
+     * 모든 그룹 가져오기
+     * @returns 전체 그룹 목록
      */
     public getCardGroups(): CardGroup[] {
         return this.groupService.getCardGroups();
     }
     /**
-     * 清理所有分组中的无效卡片引用
-     * 这个方法会移除分组中指向不存在卡片的引用
+     * 모든 그룹의 유효하지 않은 카드 참조 정리
+     * 이 메서드는 그룹에서 존재하지 않는 카드를 가리키는 참조를 제거
      */
     public cleanupInvalidCardReferences(): number {
         return this.groupService.cleanupInvalidCardReferences();

@@ -135,7 +135,7 @@ export class HighlightListController {
                 this.renderHighlights(filteredHighlights);
             }
         } catch (error) {
-            console.error('[高亮搜索] 搜索过程中出错:', error);
+            console.error('[하이라이트 검색] 검색 중 오류:', error);
         }
     }
 

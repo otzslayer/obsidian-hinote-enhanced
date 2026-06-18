@@ -1,7 +1,7 @@
 import { requestUrl, RequestUrlParam, RequestUrlResponse } from 'obsidian';
 
 /**
- * HTTP 请求配置接口
+ * HTTP 요청 설정 인터페이스
  */
 export interface HTTPRequestConfig {
     url: string;
@@ -16,12 +16,12 @@ interface HTTPErrorBody {
 }
 
 /**
- * 基础 HTTP 客户端
- * 为所有 AI 服务提供统一的 HTTP 请求处理
+ * 기본 HTTP 클라이언트
+ * 모든 AI 서비스에 통일된 HTTP 요청 처리를 제공합니다
  */
 export class BaseHTTPClient {
     /**
-     * 发送 HTTP 请求
+     * HTTP 요청 전송
      */
     async request<T = unknown>(config: HTTPRequestConfig): Promise<T> {
         try {
@@ -35,12 +35,12 @@ export class BaseHTTPClient {
 
             const response: RequestUrlResponse = await requestUrl(requestConfig);
 
-            // 检查响应状态
+            // 응답 상태 확인
             if (response.status < 200 || response.status >= 300) {
                 throw this.createHTTPError(response);
             }
 
-            // 解析 JSON 响应
+            // JSON 응답 파싱
             return response.json as T;
         } catch (error) {
             throw this.handleError(error);
@@ -48,7 +48,7 @@ export class BaseHTTPClient {
     }
 
     /**
-     * 测试连接
+     * 연결 테스트
      */
     async testConnection(config: HTTPRequestConfig): Promise<boolean> {
         try {
@@ -67,13 +67,13 @@ export class BaseHTTPClient {
     }
 
     /**
-     * 创建 HTTP 错误
+     * HTTP 오류 생성
      */
     private createHTTPError(response: RequestUrlResponse): Error {
         let errorMessage = `HTTP ${response.status}`;
         
         try {
-            // 尝试解析错误响应
+            // 오류 응답 파싱 시도
             const errorData = response.json as HTTPErrorBody | undefined;
             if (errorData?.error) {
                 if (typeof errorData.error === 'string') {
@@ -85,7 +85,7 @@ export class BaseHTTPClient {
                 errorMessage = response.text;
             }
         } catch {
-            // 如果无法解析 JSON，使用原始文本
+            // JSON을 파싱할 수 없는 경우 원본 텍스트 사용
             if (response.text) {
                 errorMessage = response.text;
             }
@@ -95,7 +95,7 @@ export class BaseHTTPClient {
     }
 
     /**
-     * 统一的错误处理
+     * 통합 오류 처리
      */
     private handleError(error: unknown): Error {
         if (error instanceof Error) {
@@ -110,7 +110,7 @@ export class BaseHTTPClient {
     }
 
     /**
-     * 构建标准的 JSON 请求头
+     * 표준 JSON 요청 헤더 생성
      */
     static buildJSONHeaders(additionalHeaders?: Record<string, string>): Record<string, string> {
         return {
@@ -120,7 +120,7 @@ export class BaseHTTPClient {
     }
 
     /**
-     * 构建带认证的请求头
+     * 인증이 포함된 요청 헤더 생성
      */
     static buildAuthHeaders(apiKey: string, authType: 'Bearer' | 'ApiKey' = 'Bearer'): Record<string, string> {
         if (authType === 'Bearer') {

@@ -5,8 +5,8 @@ import CommentPlugin from '../../../../main';
 import { t } from '../../../i18n';
 
 /**
- * 高亮闪卡管理器
- * 负责高亮相关的闪卡创建、删除和状态检查
+ * 하이라이트 플래시카드 매니저
+ * 하이라이트 관련 플래시카드 생성, 삭제 및 상태 확인 담당
  */
 export class HighlightFlashcardManager {
     private plugin: CommentPlugin;
@@ -16,23 +16,23 @@ export class HighlightFlashcardManager {
     }
     
     /**
-     * 检查高亮是否已创建闪卡
+     * 하이라이트에 플래시카드가 생성되었는지 확인
      */
     checkHasFlashcard(highlightId: string): boolean {
         const fsrsManager = this.plugin.fsrsManager;
         if (!fsrsManager || !highlightId) return false;
-        
-        // 通过 sourceId 查找闪卡
+
+        // sourceId로 플래시카드 검색
         const cards = fsrsManager.findCardsBySourceId(highlightId, 'highlight');
         return cards && cards.length > 0;
     }
     
     /**
-     * 为高亮创建闪卡
-     * @param highlight 高亮信息
-     * @param fileName 文件名（可选）
-     * @param silent 是否静默模式（不显示通知）
-     * @returns 创建是否成功
+     * 하이라이트에 플래시카드 생성
+     * @param highlight 하이라이트 정보
+     * @param fileName 파일명 (선택)
+     * @param silent 무음 모드 여부 (알림 표시 안 함)
+     * @returns 생성 성공 여부
      */
     async createFlashcard(
         highlight: HighlightInfo,
@@ -42,14 +42,14 @@ export class HighlightFlashcardManager {
         try {
             const fsrsManager = this.plugin.fsrsManager;
             if (!fsrsManager) {
-                if (!silent) new Notice(t('FSRS 管理器未初始化'));
+                if (!silent) new Notice(t('FSRS 관리자가 초기화되지 않았습니다'));
                 return false;
             }
 
-            // 确保高亮有 ID
+            // 하이라이트 ID 확인
             if (!highlight.id) {
-                console.warn('高亮缺少 ID，正在生成...');
-                // 使用 IdGenerator 生成稳定的 ID
+                console.warn('하이라이트에 ID가 없습니다. 생성 중...');
+                // IdGenerator로 안정적인 ID 생성
                 const IdGenerator = (await import('../../../utils/IdGenerator')).IdGenerator;
                 highlight.id = IdGenerator.generateHighlightId(
                     highlight.filePath || '',
@@ -58,11 +58,11 @@ export class HighlightFlashcardManager {
                 );
             }
             
-            // 如果高亮有文件路径，需要先保存到存储中
+            // 하이라이트에 파일 경로가 있으면 먼저 저장소에 저장
             if (highlight.filePath) {
                 const file = this.plugin.app.vault.getAbstractFileByPath(highlight.filePath);
                 if (file instanceof TFile) {
-                    // 创建 HiNote 对象
+                    // HiNote 객체 생성
                     const hiNote: HiNote = {
                         id: highlight.id,
                         text: highlight.text,
@@ -81,16 +81,16 @@ export class HighlightFlashcardManager {
                         isCloze: highlight.isCloze
                     };
                     
-                    // 保存到 HighlightManager
+                    // HighlightManager에 저장
                     await this.plugin.highlightManager.addHighlight(file, hiNote);
                 }
             }
             
-            // 构建闪卡内容
+            // 플래시카드 내용 구성
             const text = highlight.text;
             const answer = this.buildFlashcardAnswer(highlight);
-            
-            // 创建闪卡
+
+            // 플래시카드 생성
             const card = fsrsManager.addCard(
                 text, 
                 answer, 
@@ -104,17 +104,17 @@ export class HighlightFlashcardManager {
                 return false;
             }
             
-            // 触发事件，让 FSRSManager 来处理保存
+            // 이벤트 발생, FSRSManager가 저장 처리
             this.plugin.eventManager.emitFlashcardChanged();
-            
-            // 只在非静默模式下显示成功消息
+
+            // 무음 모드가 아닌 경우에만 성공 메시지 표시
             if (!silent) {
                 new Notice(t('Flashcard created successfully!'));
             }
             
             return true;
         } catch (error) {
-            console.error('创建闪卡时出错:', error);
+            console.error('플래시카드 생성 중 오류:', error);
             if (!silent) new Notice(t(`Failed to create flashcard: ${error.message}`));
             return false;
         }
@@ -151,10 +151,10 @@ export class HighlightFlashcardManager {
     }
     
     /**
-     * 删除高亮的闪卡
-     * @param highlight 高亮信息
-     * @param silent 是否静默模式（不显示通知，不触发事件）
-     * @returns 删除结果 { success: boolean, shouldDeleteHighlight: boolean }
+     * 하이라이트의 플래시카드 삭제
+     * @param highlight 하이라이트 정보
+     * @param silent 무음 모드 여부 (알림 표시 안 함, 이벤트 미발생)
+     * @returns 삭제 결과 { success: boolean, shouldDeleteHighlight: boolean }
      */
     async deleteFlashcard(
         highlight: HighlightInfo,
@@ -163,21 +163,21 @@ export class HighlightFlashcardManager {
         try {
             const fsrsManager = this.plugin.fsrsManager;
             if (!fsrsManager) {
-                if (!silent) new Notice(t('FSRS 管理器未初始化'));
+                if (!silent) new Notice(t('FSRS 관리자가 초기화되지 않았습니다'));
                 return { success: false, shouldDeleteHighlight: false };
             }
 
-            // 根据 sourceId 删除闪卡
+            // sourceId로 플래시카드 삭제
             const deletedCount = fsrsManager.deleteCardsBySourceId(highlight.id || '', 'highlight');
-            
+
             if (deletedCount > 0) {
-                // 清理可能残留的无效卡片引用
+                // 남아있을 수 있는 유효하지 않은 카드 참조 정리
                 fsrsManager.cleanupInvalidCardReferences();
-                
-                // 检查是否有批注，决定是否删除高亮
+
+                // 댓글 존재 여부 확인 후 하이라이트 삭제 결정
                 const hasComments = highlight.comments && highlight.comments.length > 0;
                 const shouldDeleteHighlight = !hasComments;
-                
+
                 if (!silent) {
                     if (shouldDeleteHighlight) {
                         new Notice(t('Flashcard and highlight deleted'));
@@ -185,8 +185,8 @@ export class HighlightFlashcardManager {
                         new Notice(t('Flashcard deleted, highlight and comments preserved'));
                     }
                 }
-                
-                // 触发闪卡变化事件（在批量删除时不触发）
+
+                // 플래시카드 변경 이벤트 발생 (일괄 삭제 시에는 미발생)
                 if (!silent) {
                     this.plugin.eventManager.emitFlashcardChanged();
                 }
@@ -197,7 +197,7 @@ export class HighlightFlashcardManager {
                 return { success: false, shouldDeleteHighlight: false };
             }
         } catch (error) {
-            console.error('删除闪卡时出错:', error);
+            console.error('플래시카드 삭제 중 오류:', error);
             if (!silent) new Notice(t(`Failed to delete flashcard: ${error.message}`));
             return { success: false, shouldDeleteHighlight: false };
         }

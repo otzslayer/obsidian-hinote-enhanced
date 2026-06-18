@@ -19,7 +19,7 @@ export class FlashcardEventSyncService {
         const { plugin } = this.options;
 
         if (!plugin.eventManager) {
-            console.error("事件管理器不存在，无法注册事件监听器");
+            console.error("이벤트 매니저가 없어 이벤트 리스너를 등록할 수 없음");
             return;
         }
 

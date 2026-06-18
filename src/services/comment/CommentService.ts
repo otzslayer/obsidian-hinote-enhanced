@@ -2,34 +2,36 @@ import { TFile, App, Notice } from 'obsidian';
 import { HighlightInfo, CommentItem } from '../../types/highlight';
 import { HighlightManager } from '../HighlightManager';
 import { IdGenerator } from '../../utils/IdGenerator';
+import { InlineCommentWriter } from './inline/InlineCommentWriter';
 import CommentPlugin from '../../../main';
 import { t } from '../../i18n';
 
 /**
- * 评论服务
- * 负责评论的添加、更新、删除等业务逻辑
- * 
- * 职责：
- * - 评论的 CRUD 操作
- * - 虚拟高亮的管理
- * - 闪卡关联检查
- * - 文件查找逻辑
+ * 댓글 서비스
+ * 댓글의 추가, 업데이트, 삭제 등 비즈니스 로직을 담당합니다
+ *
+ * 역할:
+ * - 댓글 CRUD 작업
+ * - 가상 하이라이트 관리
+ * - 플래시카드 연관 확인
+ * - 파일 검색 로직
  */
 export class CommentService {
     private app: App;
     private plugin: CommentPlugin;
     private highlightManager: HighlightManager;
-    
-    // 回调函数
+    private inlineWriter: InlineCommentWriter;
+
+    // 콜백 함수
     private onRefreshView: (() => Promise<void>) | null = null;
     private onHighlightsUpdate: ((highlights: HighlightInfo[]) => void) | null = null;
     private onCardUpdate: ((highlight: HighlightInfo) => void) | null = null;
     private onCardRemove: ((highlight: HighlightInfo) => void) | null = null;
-    
-    // 当前状态
+
+    // 현재 상태
     private currentFile: TFile | null = null;
     private highlights: HighlightInfo[] = [];
-    
+
     constructor(
         app: App,
         plugin: CommentPlugin,
@@ -38,10 +40,11 @@ export class CommentService {
         this.app = app;
         this.plugin = plugin;
         this.highlightManager = highlightManager;
+        this.inlineWriter = new InlineCommentWriter(app);
     }
     
     /**
-     * 设置回调函数
+     * 콜백 함수를 설정합니다
      */
     setCallbacks(callbacks: {
         onRefreshView?: () => Promise<void>;
@@ -64,7 +67,7 @@ export class CommentService {
     }
     
     /**
-     * 更新状态
+     * 상태를 업데이트합니다
      */
     updateState(state: {
         currentFile?: TFile | null;
@@ -79,7 +82,7 @@ export class CommentService {
     }
     
     /**
-     * 添加评论
+     * 댓글을 추가합니다
      */
     async addComment(highlight: HighlightInfo, content: string): Promise<void> {
         const file = await this.getFileForHighlight(highlight);
@@ -88,11 +91,10 @@ export class CommentService {
             return;
         }
 
-        // 确保高亮有 ID
         if (!highlight.id) {
             highlight.id = IdGenerator.generateHighlightId(
                 file.path,
-                highlight.position || 0, 
+                highlight.position || 0,
                 highlight.text
             );
         }
@@ -101,117 +103,110 @@ export class CommentService {
             highlight.comments = [];
         }
 
+        const now = Date.now();
+        const timestamp = formatTimestamp(now);
+        const result = await this.inlineWriter.addComment(file, highlight, content, timestamp);
+        if (!result.success) {
+            new Notice(t("Failed to save comment: ") + (result.reason ?? ''));
+            return;
+        }
+
+        // Update in-memory model so UI reflects the change immediately.
         const newComment: CommentItem = {
             id: IdGenerator.generateCommentId(),
             content,
-            createdAt: Date.now(),
-            updatedAt: Date.now()
+            createdAt: now,
+            updatedAt: now,
         };
-
         highlight.comments.push(newComment);
-        highlight.updatedAt = Date.now();
+        highlight.updatedAt = now;
 
-        await this.highlightManager.addHighlight(file, highlight);
-
-        // 只更新单个卡片，而不是刷新整个视图
         if (this.onCardUpdate) {
             this.onCardUpdate(highlight);
         } else if (this.onRefreshView) {
-            // 降级方案：如果没有 onCardUpdate，则刷新整个视图
             await this.onRefreshView();
         }
     }
     
     /**
-     * 更新评论
+     * 댓글을 업데이트합니다
      */
     async updateComment(highlight: HighlightInfo, commentId: string, content: string): Promise<void> {
         const file = await this.getFileForHighlight(highlight);
         if (!file || !highlight.comments) return;
 
         const comment = highlight.comments.find(c => c.id === commentId);
-        if (comment) {
-            const oldContent = comment.content;
-            
-            comment.content = content;
-            comment.updatedAt = Date.now();
-            highlight.updatedAt = Date.now();
-            await this.highlightManager.addHighlight(file, highlight);
+        if (!comment) return;
 
-            // 通过 EventManager 触发批注更新事件，用于闪卡同步
-            if (highlight.id) {
-                this.plugin.eventManager.emitCommentUpdate(file.path, oldContent, content, highlight.id);
-            }
+        const oldContent = comment.content;
+        const now = Date.now();
+        const timestamp = formatTimestamp(now);
 
-            // 只更新单个卡片，而不是刷新整个视图
-            if (this.onCardUpdate) {
-                this.onCardUpdate(highlight);
-            } else if (this.onRefreshView) {
-                // 降级方案：如果没有 onCardUpdate，则刷新整个视图
-                await this.onRefreshView();
-            }
-        }
-    }
-    
-    /**
-     * 删除评论
-     */
-    async deleteComment(highlight: HighlightInfo, commentId: string): Promise<void> {
-        const file = await this.getFileForHighlight(highlight);
-        if (!file || !highlight.comments) return;
-        let removedHighlight = false;
-
-        // 过滤掉要删除的批注
-        highlight.comments = highlight.comments.filter(c => c.id !== commentId);
-        highlight.updatedAt = Date.now();
-
-        // 检查高亮是否没有评论了
-        if (highlight.comments.length === 0) {
-            // 检查高亮是否关联了闪卡
-            const hasFlashcard = highlight.id ? this.checkHasFlashcard(highlight.id) : false;
-            
-            // 如果是虚拟高亮或者没有关联闪卡，则删除整个高亮
-            if (highlight.isVirtual || !hasFlashcard) {
-                // 从 HighlightManager 中删除高亮
-                await this.highlightManager.removeHighlight(file, highlight);
-                removedHighlight = true;
-                
-                // 从当前高亮列表中移除
-                this.highlights = this.highlights.filter(h => {
-                    // 如果有 ID，通过 ID 比较
-                    if (h.id && highlight.id) {
-                        return h.id !== highlight.id;
-                    }
-                    // 如果没有 ID，通过位置和文本比较
-                    return !(h.position === highlight.position && h.text === highlight.text);
-                });
-                
-                // 通知外部更新高亮列表
-                if (this.onHighlightsUpdate) {
-                    this.onHighlightsUpdate(this.highlights);
-                }
-            } else {
-                // 有关联闪卡，只更新评论
-                await this.highlightManager.addHighlight(file, highlight);
-            }
-        } else {
-            // 还有其他评论，只更新评论
-            await this.highlightManager.addHighlight(file, highlight);
+        const result = await this.inlineWriter.updateComment(file, highlight, commentId, content, timestamp);
+        if (!result.success) {
+            new Notice(t("Failed to update comment: ") + (result.reason ?? ''));
+            return;
         }
 
-        // 只更新单个卡片，而不是刷新整个视图
-        if (removedHighlight && this.onCardRemove) {
-            this.onCardRemove(highlight);
-        } else if (this.onCardUpdate) {
+        // Update in-memory model.
+        comment.content = content;
+        comment.updatedAt = now;
+        highlight.updatedAt = now;
+
+        if (highlight.id) {
+            this.plugin.eventManager.emitCommentUpdate(file.path, oldContent, content, highlight.id);
+        }
+
+        if (this.onCardUpdate) {
             this.onCardUpdate(highlight);
         } else if (this.onRefreshView) {
-            // 降级方案：如果没有 onCardUpdate，则刷新整个视图
             await this.onRefreshView();
         }
     }
     
     /**
-     * 删除虚拟高亮（当取消添加评论时）
+     * 댓글을 삭제합니다
+     */
+    async deleteComment(highlight: HighlightInfo, commentId: string): Promise<void> {
+        const file = await this.getFileForHighlight(highlight);
+        if (!file || !highlight.comments) return;
+
+        const result = await this.inlineWriter.deleteComment(file, highlight, commentId);
+        if (!result.success) {
+            new Notice(t("Failed to delete comment: ") + (result.reason ?? ''));
+            return;
+        }
+
+        // Update in-memory model.
+        highlight.comments = highlight.comments.filter(c => c.id !== commentId);
+        highlight.updatedAt = Date.now();
+
+        let removedHighlight = false;
+        if (highlight.comments.length === 0) {
+            const hasFlashcard = highlight.id ? this.checkHasFlashcard(highlight.id) : false;
+            if (!hasFlashcard) {
+                removedHighlight = true;
+                this.highlights = this.highlights.filter(h => {
+                    if (h.id && highlight.id) return h.id !== highlight.id;
+                    return !(h.position === highlight.position && h.text === highlight.text);
+                });
+                if (this.onHighlightsUpdate) {
+                    this.onHighlightsUpdate(this.highlights);
+                }
+            }
+        }
+
+        if (removedHighlight && this.onCardRemove) {
+            this.onCardRemove(highlight);
+        } else if (this.onCardUpdate) {
+            this.onCardUpdate(highlight);
+        } else if (this.onRefreshView) {
+            await this.onRefreshView();
+        }
+    }
+    
+    /**
+     * 가상 하이라이트를 삭제합니다 (댓글 추가를 취소할 때)
      */
     async deleteVirtualHighlight(highlight: HighlightInfo): Promise<void> {
         if (!highlight.isVirtual || (highlight.comments && highlight.comments.length > 0)) {
@@ -222,15 +217,15 @@ export class CommentService {
         if (file) {
             await this.highlightManager.removeHighlight(file, highlight);
             this.highlights = this.highlights.filter(h => {
-                // 如果有 ID，通过 ID 比较
+                // ID가 있으면 ID로 비교합니다
                 if (h.id && highlight.id) {
                     return h.id !== highlight.id;
                 }
-                // 如果没有 ID，通过位置和文本比较
+                // ID가 없으면 위치와 텍스트로 비교합니다
                 return !(h.position === highlight.position && h.text === highlight.text);
             });
             
-            // 通知外部更新高亮列表
+            // 외부에 하이라이트 목록 업데이트를 알립니다
             if (this.onHighlightsUpdate) {
                 this.onHighlightsUpdate(this.highlights);
             }
@@ -244,21 +239,21 @@ export class CommentService {
     }
     
     /**
-     * 获取高亮对应的文件
+     * 하이라이트에 해당하는 파일을 가져옵니다
      */
     private async getFileForHighlight(highlight: HighlightInfo): Promise<TFile | null> {
-        // 如果有当前文件，使用当前文件
+        // 현재 파일이 있으면 현재 파일을 사용합니다
         if (this.currentFile) {
             return this.currentFile;
         }
-        // 如果是全部高亮视图，使用 highlight.filePath 获取文件
+        // 전체 하이라이트 뷰인 경우 highlight.filePath로 파일을 가져옵니다
         if (highlight.filePath) {
             const file = this.app.vault.getAbstractFileByPath(highlight.filePath);
             if (file instanceof TFile) {
                 return file;
             }
         }
-        // 如果通过 filePath 找不到，尝试通过 fileName
+        // filePath로 찾지 못하면 fileName으로 시도합니다
         if (highlight.fileName) {
             const files = this.app.vault.getFiles();
             const file = files.find(f => f.basename === highlight.fileName || f.name === highlight.fileName);
@@ -270,15 +265,22 @@ export class CommentService {
     }
     
     /**
-     * 检查高亮是否已经创建了闪卡
+     * 하이라이트에 플래시카드가 이미 생성되었는지 확인합니다
      */
     private checkHasFlashcard(highlightId: string): boolean {
         const fsrsManager = this.plugin.fsrsManager;
         if (!fsrsManager || !highlightId) {
             return false;
         }
-        
+
         const cards = fsrsManager.findCardsBySourceId(highlightId, 'highlight');
         return cards && cards.length > 0;
     }
+}
+
+/** Format a Unix ms timestamp as "YYYY-MM-DD HH:mm". */
+function formatTimestamp(ms: number): string {
+    const d = new Date(ms);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }

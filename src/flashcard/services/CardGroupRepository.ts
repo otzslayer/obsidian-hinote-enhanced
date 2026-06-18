@@ -20,7 +20,7 @@ interface LegacyHiCardState {
 }
 
 /**
- * 闪卡分组仓库类，负责管理闪卡分组数据
+ * 플래시카드 그룹 레포지토리 클래스, 플래시카드 그룹 데이터 관리 담당
  */
 export class CardGroupRepository {
     private storage: FSRSStorage;
@@ -30,38 +30,38 @@ export class CardGroupRepository {
     }
     
     /**
-     * 获取所有分组
-     * @returns 所有分组列表
+     * 모든 그룹 가져오기
+     * @returns 전체 그룹 목록
      */
     public getCardGroups(): CardGroup[] {
         return this.storage.cardGroups || [];
     }
     
     /**
-     * 根据ID获取分组
-     * @param groupId 分组ID
-     * @returns 找到的分组或null
+     * ID로 그룹 가져오기
+     * @param groupId 그룹 ID
+     * @returns 찾은 그룹 또는 null
      */
     public getGroupById(groupId: string): CardGroup | null {
         return this.storage.cardGroups.find((g: CardGroup) => g.id === groupId) || null;
     }
     
     /**
-     * 创建新分组
-     * @param group 分组数据（不含ID）
-     * @returns 创建的分组
+     * 새 그룹 생성
+     * @param group 그룹 데이터 (ID 제외)
+     * @returns 생성된 그룹
      */
     public async createCardGroup(group: Omit<CardGroup, 'id'>): Promise<CardGroup> {
-        
-        // 确保 cardGroups 数组已初始化
+
+        // cardGroups 배열 초기화 확인
         if (!Array.isArray(this.storage.cardGroups)) {
             this.storage.cardGroups = [];
         }
-        
-        // 生成唯一ID
+
+        // 고유 ID 생성
         const id = IdGenerator.generateGroupId();
-        
-        // 创建新分组
+
+        // 새 그룹 생성
         const newGroup: CardGroup = {
             id,
             name: group.name,
@@ -75,174 +75,174 @@ export class CardGroupRepository {
             cardIds: []
         };
         
-        // 添加到存储
+        // 저장소에 추가
         this.storage.cardGroups.push(newGroup);
-        
-        // 如果有筛选条件，自动添加符合条件的卡片
+
+        // 필터 조건이 있으면 해당하는 카드 자동 추가
         if (group.filter && group.filter.trim().length > 0) {
             this.updateGroupCardIds(newGroup.id);
         }
-        
-        // 直接保存一次，确保分组数据被保存
+
+        // 직접 한 번 저장하여 그룹 데이터 보장
         try {
             await this.options.saveStorage();
         } catch (error) {
-            console.error('保存分组数据时出错:', error);
+            console.error('그룹 데이터 저장 중 오류:', error);
         }
-        
-        // 触发事件
+
+        // 이벤트 발생
         this.options.emitFlashcardChanged();
         
         return newGroup;
     }
     
     /**
-     * 更新分组
-     * @param groupId 分组ID
-     * @param updates 要更新的字段
-     * @returns 是否更新成功
+     * 그룹 업데이트
+     * @param groupId 그룹 ID
+     * @param updates 업데이트할 필드
+     * @returns 업데이트 성공 여부
      */
     public async updateCardGroup(groupId: string, updates: Partial<CardGroup>): Promise<boolean> {
-        
+
         const index = this.storage.cardGroups.findIndex((g: CardGroup) => g.id === groupId);
         if (index === -1) {
             return false;
         }
-        
-        // 更新分组
+
+        // 그룹 업데이트
         this.storage.cardGroups[index] = {
             ...this.storage.cardGroups[index],
             ...updates
-            // 移除 lastUpdated 字段，因为 FlashcardState 类型中没有这个字段
+            // lastUpdated 필드 제거 (FlashcardState 타입에 없는 필드)
         };
-        
-        // 如果更新了筛选条件，自动更新卡片列表
+
+        // 필터 조건이 업데이트된 경우 카드 목록 자동 업데이트
         if (updates.filter) {
             this.updateGroupCardIds(groupId);
         }
-        
-        // 触发事件
+
+        // 이벤트 발생
         this.options.emitFlashcardChanged();
         
         return true;
     }
     
     /**
-     * 删除分组
-     * @param groupId 分组ID
-     * @param deleteCards 是否同时删除分组内的卡片
-     * @returns 是否删除成功
+     * 그룹 삭제
+     * @param groupId 그룹 ID
+     * @param deleteCards 그룹 내 카드도 함께 삭제 여부
+     * @returns 삭제 성공 여부
      */
     public async deleteCardGroup(groupId: string, deleteCards = false): Promise<boolean> {
         const index = this.storage.cardGroups.findIndex((g: CardGroup) => g.id === groupId);
         if (index === -1) return false;
-        
-        // 保存被删除的分组，以便出错时恢复
+
+        // 삭제된 그룹 저장 (오류 시 복원용)
         const deletedGroup = this.storage.cardGroups[index];
-        
-        // 如果当前UI状态使用了这个分组，重置UI状态
+
+        // 현재 UI 상태가 해당 그룹을 사용 중이면 UI 상태 초기화
         const uiState = this.storage.uiState as LegacyHiCardState;
-        
-        // 清理UI状态中的分组信息
+
+        // UI 상태의 그룹 정보 초기화
         if (uiState.currentGroupId === groupId) {
             uiState.currentGroupId = '';
-            uiState.currentGroupName = ''; // 保持向后兼容
+            uiState.currentGroupName = ''; // 하위 호환성 유지
             uiState.currentIndex = 0;
             uiState.isFlipped = false;
             uiState.completionMessage = null;
         }
-        
-        // 清理分组完成消息
+
+        // 그룹 완료 메시지 초기화
         if (uiState.groupCompletionMessages && groupId in uiState.groupCompletionMessages) {
             delete uiState.groupCompletionMessages[groupId];
         }
-        
-        // 清理分组学习进度（使用 groupId 作为键）
+
+        // 그룹 학습 진도 초기화 (groupId를 키로 사용)
         if (uiState.groupProgress && groupId in uiState.groupProgress) {
             delete uiState.groupProgress[groupId];
         }
-        
-        // 获取该分组内的所有卡片
+
+        // 해당 그룹의 모든 카드 가져오기
         const cardsInGroup = [...(deletedGroup.cardIds || [])];
-        
-        // 仅解除卡片与分组的关联，不再删除卡片
+
+        // 카드와 그룹의 연결만 해제, 카드 삭제 없음
         for (const cardId of cardsInGroup) {
             this.removeCardFromGroup(cardId, groupId);
         }
-        
-        // 删除分组
+
+        // 그룹 삭제
         this.storage.cardGroups.splice(index, 1);
-        
-        // 触发事件
+
+        // 이벤트 발생
         this.options.emitFlashcardChanged();
         
         return true;
     }
     
     /**
-     * 将卡片添加到分组
-     * @param cardId 卡片ID
-     * @param groupId 分组ID
-     * @returns 是否添加成功
+     * 그룹에 카드 추가
+     * @param cardId 카드 ID
+     * @param groupId 그룹 ID
+     * @returns 추가 성공 여부
      */
     public addCardToGroup(cardId: string, groupId: string): boolean {
-        // 查找分组
+        // 그룹 검색
         const group = this.storage.cardGroups.find((g: CardGroup) => g.id === groupId);
         if (!group) return false;
-        
-        // 查找卡片
+
+        // 카드 검색
         const card = this.storage.cards[cardId];
         if (!card) return false;
-        
-        // 确保分组有cardIds数组
+
+        // 그룹에 cardIds 배열 확인
         if (!group.cardIds) {
             group.cardIds = [];
         }
-        
-        // 确保卡片有groupIds数组
+
+        // 카드에 groupIds 배열 확인
         if (!card.groupIds) {
             card.groupIds = [];
         }
-        
-        // 如果卡片已经在分组中，直接返回成功
+
+        // 카드가 이미 그룹에 있으면 성공 반환
         if (group.cardIds.includes(cardId)) {
             return true;
         }
-        
-        // 将卡片添加到分组
+
+        // 그룹에 카드 추가
         group.cardIds.push(cardId);
-        
-        // 将分组添加到卡片的分组列表
+
+        // 카드의 그룹 목록에 그룹 추가
         if (!card.groupIds.includes(groupId)) {
             card.groupIds.push(groupId);
         }
-        
+
         return true;
     }
-    
+
     /**
-     * 从分组中移除卡片
-     * @param cardId 卡片ID
-     * @param groupId 分组ID
-     * @returns 是否移除成功
+     * 그룹에서 카드 제거
+     * @param cardId 카드 ID
+     * @param groupId 그룹 ID
+     * @returns 제거 성공 여부
      */
     public removeCardFromGroup(cardId: string, groupId: string): boolean {
-        // 查找分组
+        // 그룹 검색
         const group = this.storage.cardGroups.find((g: CardGroup) => g.id === groupId);
         if (!group || !group.cardIds) return false;
-        
-        // 查找卡片
+
+        // 카드 검색
         const card = this.storage.cards[cardId];
         if (!card) return false;
-        
-        // 从分组中移除卡片
+
+        // 그룹에서 카드 제거
         group.cardIds = group.cardIds.filter((id: string) => id !== cardId);
-        
-        // 从卡片的分组列表中移除分组
+
+        // 카드의 그룹 목록에서 그룹 제거
         if (card.groupIds) {
             card.groupIds = card.groupIds.filter((id: string) => id !== groupId);
         }
-        
+
         return true;
     }
 
@@ -276,47 +276,47 @@ export class CardGroupRepository {
     }
     
     /**
-     * 获取分组中的所有卡片
-     * @param groupId 分组ID
-     * @returns 分组中的卡片列表
+     * 그룹의 모든 카드 가져오기
+     * @param groupId 그룹 ID
+     * @returns 그룹 내 카드 목록
      */
     public getCardsByGroupId(groupId: string): FlashcardState[] {
-        
+
         const group = this.getGroupById(groupId);
         if (!group) {
-            console.error(`[getCardsByGroupId] 错误: 未找到分组: ${groupId}`);
+            console.error(`[getCardsByGroupId] 오류: 그룹을 찾을 수 없음: ${groupId}`);
             return [];
         }
-        
-        // 如果分组有 cardIds 数组，直接返回这些卡片
+
+        // 그룹에 cardIds 배열이 있으면 해당 카드 직접 반환
         if (group.cardIds && group.cardIds.length > 0) {
-            
+
             const filteredCards = group.cardIds
                 .filter((id: string) => {
                     const exists = !!this.storage.cards[id];
                     if (!exists) {
-                        console.warn(`[getCardsByGroupId] 卡片不存在: ${id}`);
+                        console.warn(`[getCardsByGroupId] 카드 없음: ${id}`);
                     }
                     return exists;
                 })
                 .map((id: string) => this.storage.cards[id]);
-            
+
             return filteredCards;
         }
-        
-        // 如果没有卡片ID，但有筛选条件，则根据筛选条件获取卡片
+
+        // 카드 ID는 없지만 필터 조건이 있으면 필터 조건으로 카드 가져오기
         if (group.filter && group.filter.trim().length > 0) {
             const allCards = Object.values(this.storage.cards);
             return allCards.filter((card: FlashcardState) => this.matchesGroupFilter(card, group.filter));
         }
-        
+
         return [];
     }
-    
+
     /**
-     * 获取分组的学习进度
-     * @param groupId 分组ID
-     * @returns 分组的学习进度
+     * 그룹의 학습 진도 가져오기
+     * @param groupId 그룹 ID
+     * @returns 그룹의 학습 진도
      */
     public getGroupProgress(groupId: string): FlashcardProgress | null {
         const group = this.getGroupById(groupId);
@@ -334,7 +334,7 @@ export class CardGroupRepository {
     }
     
     /**
-     * 计算分组的记忆保持率
+     * 그룹의 기억 유지율 계산
      * @private
      */
     private calculateGroupRetention(cards: FlashcardState[]): number {
@@ -346,9 +346,9 @@ export class CardGroupRepository {
     }
     
     /**
-     * 获取卡片所属的分组
-     * @param cardId 卡片ID
-     * @returns 卡片所属的分组列表
+     * 카드가 속한 그룹 가져오기
+     * @param cardId 카드 ID
+     * @returns 카드가 속한 그룹 목록
      */
     public getGroupsByCardId(cardId: string): CardGroup[] {
         const card = this.storage.cards[cardId];
@@ -360,28 +360,28 @@ export class CardGroupRepository {
     }
     
     /**
-     * 更新分组的卡片列表，根据筛选条件自动添加符合条件的卡片
-     * @param groupId 分组ID
-     * @returns 是否更新成功
+     * 그룹의 카드 목록 업데이트, 필터 조건에 맞는 카드 자동 추가
+     * @param groupId 그룹 ID
+     * @returns 업데이트 성공 여부
      */
     public updateGroupCardIds(groupId: string): boolean {
         const group = this.getGroupById(groupId);
         if (!group || !group.filter || group.filter.trim().length === 0) {
             return false;
         }
-        
+
         const allCards = Object.values(this.storage.cards || {});
         const matchedCards = allCards.filter((card: FlashcardState) => this.matchesGroupFilter(card, group.filter));
-        
-        // 获取匹配卡片的ID列表
+
+        // 매칭된 카드의 ID 목록 가져오기
         const matchedCardIds = matchedCards.map(card => card.id);
-        
-        // 更新分组的cardIds数组
+
+        // 그룹의 cardIds 배열 업데이트
         if (!group.cardIds) {
             group.cardIds = [];
         }
-        
-        // 将符合条件的卡片ID添加到分组中
+
+        // 조건에 맞는 카드 ID를 그룹에 추가
         let updated = false;
         for (const cardId of matchedCardIds) {
             if (!group.cardIds.includes(cardId)) {
@@ -389,12 +389,12 @@ export class CardGroupRepository {
                 updated = true;
             }
         }
-        
+
         if (updated) {
-            // 触发保存
+            // 저장 트리거
             this.options.saveStorageDebounced();
         }
-        
+
         return updated;
     }
 

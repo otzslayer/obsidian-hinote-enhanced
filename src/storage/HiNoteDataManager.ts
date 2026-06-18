@@ -16,12 +16,12 @@ import {
 import { FlashcardDataStore } from './FlashcardDataStore';
 
 /**
- * HiNote数据管理器 - 存储层（已重构）
- * 职责：
- * 1. 纯粹的文件系统操作
- * 2. 数据序列化/反序列化
- * 3. 文件路径映射管理
- * 4. 不包含业务逻辑
+ * HiNote 데이터 관리자 - 저장소 레이어 (리팩토링됨)
+ * 책임:
+ * 1. 순수한 파일 시스템 작업
+ * 2. 데이터 직렬화/역직렬화
+ * 3. 파일 경로 매핑 관리
+ * 4. 비즈니스 로직 미포함
  */
 export class HiNoteDataManager {
     private app: App;
@@ -32,14 +32,14 @@ export class HiNoteDataManager {
 
     constructor(app: App) {
         this.app = app;
-        // 对于Obsidian，我们直接使用相对路径，不需要获取绝对路径
+        // Obsidian에서는 상대 경로를 직접 사용하므로 절대 경로를 가져올 필요 없음
         this.vaultPath = '';
         this.fileMappingStore = new FileMappingStore(app, this.vaultPath, this.CURRENT_VERSION);
         this.flashcardDataStore = new FlashcardDataStore(app, this.vaultPath);
     }
 
     /**
-     * 初始化数据管理器
+     * 데이터 관리자 초기화
      */
     async initialize(): Promise<void> {
         await this.ensureDirectoryStructure();
@@ -47,37 +47,37 @@ export class HiNoteDataManager {
     }
 
     /**
-     * 确保目录结构存在
+     * 디렉토리 구조가 존재하는지 확인
      */
     private async ensureDirectoryStructure(): Promise<void> {
         await ensureHiNoteDirectoryStructure(this.app, this.vaultPath);
     }
 
     /**
-     * 加载文件映射
+     * 파일 매핑 로드
      */
     private async loadFileMapping(): Promise<void> {
         await this.fileMappingStore.load();
     }
 
     /**
-     * 保存文件映射
+     * 파일 매핑 저장
      */
     private async saveFileMapping(): Promise<void> {
         await this.fileMappingStore.save();
     }
 
     /**
-     * 获取文件的安全存储路径
+     * 파일의 안전한 저장 경로 반환
      */
     private getStoragePathForFile(filePath: string): string {
         return this.fileMappingStore.getStoragePathForFile(filePath);
     }
 
     /**
-     * 获取文件的所有高亮数据
-     * @param filePath 文件路径
-     * @returns 高亮数组
+     * 파일의 모든 하이라이트 데이터 반환
+     * @param filePath 파일 경로
+     * @returns 하이라이트 배열
      */
     async getFileHighlights(filePath: string): Promise<HiNote[]> {
         const storagePath = this.getStoragePathForFile(filePath);
@@ -86,36 +86,36 @@ export class HiNoteDataManager {
             const content = await this.app.vault.adapter.read(storagePath);
             const data: OptimizedHighlightData = JSON.parse(content);
             
-            // 验证数据格式
+            // 데이터 형식 검증
             const validation = DataValidator.validateHighlightData(data);
             if (!validation.valid) {
-                console.warn(`文件 ${filePath} 的高亮数据验证失败:`, validation.errors);
+                console.warn(`파일 ${filePath}의 하이라이트 데이터 유효성 검사 실패:`, validation.errors);
                 return [];
             }
 
-            // 转换为旧格式以保持兼容性
+            // 호환성 유지를 위해 구 형식으로 변환
             return Object.entries(data.highlights).map(([id, highlight]) => 
                 convertToLegacyHighlight(id, highlight, filePath)
             );
         } catch {
-            // 文件不存在或读取失败
+            // 파일이 없거나 읽기 실패
             return [];
         }
     }
 
     /**
-     * 保存文件的高亮数据
-     * @param filePath 文件路径
-     * @param highlights 高亮数组
+     * 파일의 하이라이트 데이터 저장
+     * @param filePath 파일 경로
+     * @param highlights 하이라이트 배열
      */
     async saveFileHighlights(filePath: string, highlights: HiNote[]): Promise<void> {
         const storagePath = this.getStoragePathForFile(filePath);
         
-        // 转换为优化格式
+        // 최적화된 형식으로 변환
         const optimizedHighlights: { [id: string]: OptimizedHighlight } = {};
-        
+
         for (const highlight of highlights) {
-            if (!highlight.id) continue; // 跳过没有 ID 的高亮
+            if (!highlight.id) continue; // ID가 없는 하이라이트 건너뜀
             const optimized = convertToOptimizedHighlight(highlight);
             optimizedHighlights[highlight.id] = optimized;
         }
@@ -130,8 +130,8 @@ export class HiNoteDataManager {
     }
 
     /**
-     * 删除文件的所有高亮数据
-     * @param filePath 文件路径
+     * 파일의 모든 하이라이트 데이터 삭제
+     * @param filePath 파일 경로
      */
     async deleteFileHighlights(filePath: string): Promise<void> {
         const storagePath = this.getStoragePathForFile(filePath);
@@ -141,45 +141,45 @@ export class HiNoteDataManager {
             this.fileMappingStore.delete(filePath);
             await this.saveFileMapping();
         } catch {
-            // 文件可能不存在，忽略错误
+            // 파일이 없을 수 있으므로 오류 무시
         }
     }
 
     /**
-     * 处理文件重命名
-     * @param oldPath 旧路径
-     * @param newPath 新路径
+     * 파일 이름 변경 처리
+     * @param oldPath 이전 경로
+     * @param newPath 새 경로
      */
     async handleFileRename(oldPath: string, newPath: string): Promise<void> {
         const oldStoragePath = this.getStoragePathForFile(oldPath);
         const newStoragePath = this.getStoragePathForFile(newPath);
 
         try {
-            // 检查旧文件是否存在
+            // 이전 파일 존재 여부 확인
             const content = await this.app.vault.adapter.read(oldStoragePath);
-            
-            // 写入新位置
+
+            // 새 위치에 쓰기
             await this.app.vault.adapter.write(newStoragePath, content);
-            
-            // 删除旧文件
+
+            // 이전 파일 삭제
             await this.app.vault.adapter.remove(oldStoragePath);
-            
-            // 更新映射
+
+            // 매핑 업데이트
             this.fileMappingStore.delete(oldPath);
             await this.saveFileMapping();
         } catch {
-            // 旧文件可能不存在，忽略错误
+            // 이전 파일이 없을 수 있으므로 오류 무시
         }
     }
 
     /**
-     * 获取所有高亮文件列表
+     * 모든 하이라이트 파일 목록 반환
      */
     async getAllHighlightFiles(): Promise<string[]> {
-        // 首先从文件映射获取
+        // 먼저 파일 매핑에서 가져오기
         const mappedFiles = this.fileMappingStore.getMappedFiles();
-        
-        // 如果映射为空，尝试扫描高亮目录
+
+        // 매핑이 비어있으면 하이라이트 디렉토리 스캔 시도
         if (mappedFiles.length === 0) {
             const detectedFiles = await detectHighlightFilesFromStorage(
                 this.app,
@@ -191,7 +191,7 @@ export class HiNoteDataManager {
                 
             if (detectedFiles.length > 0) {
                 this.saveFileMapping().catch(err =>
-                    console.warn('保存文件映射失败:', err)
+                    console.warn('파일 매핑 저장 실패:', err)
                 );
             }
 
@@ -203,14 +203,14 @@ export class HiNoteDataManager {
 
 
     /**
-     * 获取闪卡数据
+     * 플래시카드 데이터 반환
      */
     async getFlashcardData(): Promise<FSRSStorage | null> {
         return this.flashcardDataStore.load();
     }
 
     /**
-     * 保存闪卡数据
+     * 플래시카드 데이터 저장
      */
     async saveFlashcardData(data: FSRSStorage): Promise<void> {
         await this.flashcardDataStore.save(data);

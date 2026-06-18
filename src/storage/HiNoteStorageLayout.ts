@@ -13,7 +13,7 @@ export async function ensureHiNoteDirectoryStructure(app: App, vaultPath: string
         try {
             await app.vault.adapter.mkdir(dir);
         } catch {
-            // 目录可能已存在，忽略错误
+            // 디렉토리가 이미 존재할 수 있으므로 오류 무시
         }
     }
 }
@@ -39,7 +39,7 @@ export async function detectHighlightFilesFromStorage(
 
         return detectedFiles;
     } catch (error) {
-        console.warn('扫描高亮目录失败:', error);
+        console.warn('하이라이트 디렉토리 스캔 실패:', error);
         return [];
     }
 }

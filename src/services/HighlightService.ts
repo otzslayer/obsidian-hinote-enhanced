@@ -1,44 +1,38 @@
 import { App, TFile } from "obsidian";
 import { HighlightInfo } from '../types/highlight';
-import { HighlightInfo as HiNote } from '../types/highlight';
-import { HighlightRepository } from '../repositories/HighlightRepository';
 import type { PluginSettings } from '../types/settings';
 import {
     HighlightBatchOps,
     HighlightExtractor,
     HighlightIndexer,
-    HighlightMatcher
 } from './highlight';
 
 /**
- * 高亮服务 - Facade 门面模式
- * 
- * 将所有高亮相关功能委托给专门的子模块：
- * - HighlightExtractor: 提取高亮文本、文件排除判断、颜色提取、文件内容缓存
- * - HighlightMatcher: 高亮与评论的匹配合并逻辑
- * - HighlightIndexer: 全局索引构建、搜索、文件事件监听
- * - HighlightBatchOps: 批量删除高亮标记
- * 
- * 所有外部调用方仍通过 HighlightService 访问，无需修改导入路径。
+ * 하이라이트 서비스 - Facade 패턴
+ *
+ * 모든 하이라이트 관련 기능을 전담 하위 모듈에 위임합니다:
+ * - HighlightExtractor: 하이라이트 텍스트 추출, 파일 제외 판단, 색상 추출, 파일 내용 캐싱
+ * - HighlightMatcher: 하이라이트와 댓글의 매칭 및 병합 로직
+ * - HighlightIndexer: 전역 인덱스 구축, 검색, 파일 이벤트 감지
+ * - HighlightBatchOps: 하이라이트 마크 일괄 삭제
+ *
+ * 모든 외부 호출자는 여전히 HighlightService를 통해 접근하며, 임포트 경로를 변경할 필요가 없습니다.
  */
 export class HighlightService {
     private extractor: HighlightExtractor;
-    private matcher: HighlightMatcher;
     private indexer: HighlightIndexer;
     private batchOps: HighlightBatchOps;
 
     constructor(
         private app: App,
         getSettings?: () => PluginSettings | undefined,
-        getHighlightRepository?: () => HighlightRepository | undefined
     ) {
         this.extractor = new HighlightExtractor(app, getSettings);
-        this.matcher = new HighlightMatcher(getHighlightRepository);
         this.indexer = new HighlightIndexer(app, this.extractor);
         this.batchOps = new HighlightBatchOps(app, this.extractor);
     }
 
-    // ==================== 生命周期 ====================
+    // ==================== 생명주기 ====================
     
     async initialize(): Promise<void> {
         return this.indexer.initialize();
@@ -48,7 +42,7 @@ export class HighlightService {
         this.indexer.destroy();
     }
 
-    // ==================== 提取 (委托给 HighlightExtractor) ====================
+    // ==================== 추출 (HighlightExtractor에 위임) ====================
     
     shouldProcessFile(file: TFile): boolean {
         return this.extractor.shouldProcessFile(file);
@@ -70,7 +64,7 @@ export class HighlightService {
         return this.extractor.createBlockIdForHighlight(file, position, length);
     }
 
-    // ==================== 索引与搜索 (委托给 HighlightIndexer) ====================
+    // ==================== 인덱스 및 검색 (HighlightIndexer에 위임) ====================
     
     public getAllHighlightsFromCache(): HighlightInfo[] | null {
         return this.indexer.getAllHighlightsFromCache();
@@ -80,21 +74,7 @@ export class HighlightService {
         return this.indexer.searchHighlightsFromIndex(searchTerm);
     }
 
-    // ==================== 匹配与合并 (委托给 HighlightMatcher) ====================
-    
-    public findMatchingHighlight(file: TFile, highlight: HiNote, highlightRepository: HighlightRepository): HiNote | null {
-        return this.matcher.findMatchingHighlight(file, highlight, highlightRepository);
-    }
-
-    public mergeHighlightsWithComments(
-        highlights: HighlightInfo[],
-        storedComments: HiNote[],
-        file: TFile
-    ): HighlightInfo[] {
-        return this.matcher.mergeHighlightsWithComments(highlights, storedComments, file);
-    }
-
-    // ==================== 批量操作 (委托给 HighlightBatchOps) ====================
+    // ==================== 일괄 작업 (HighlightBatchOps에 위임) ====================
     
     public async batchRemoveHighlightMarks(highlights: Array<{ text: string; position?: number; filePath: string; originalLength?: number }>): Promise<{ success: number; failed: number }> {
         return this.batchOps.batchRemoveHighlightMarks(highlights);

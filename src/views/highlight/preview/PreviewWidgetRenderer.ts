@@ -1,60 +1,58 @@
 import { TFile, MarkdownPostProcessorContext } from "obsidian";
 import { HighlightInfo as HiNote } from "../../../types/highlight";
-import { HighlightRepository } from "../../../repositories/HighlightRepository";
 import { HighlightService } from '../../../services/HighlightService';
 import { CommentWidgetHelper } from '../../../components/comment';
 import { PreviewHighlightResolver } from "./PreviewHighlightResolver";
 import type { HiNotePluginContext } from "../../../types/plugin";
 
 /**
- * 阅读模式下的批注小部件渲染器
- * 负责在阅读模式（Preview Mode）中渲染批注图标和工具提示
+ * 읽기 모드 주석 위젯 렌더러
+ * 읽기 모드 (Preview Mode)에서 주석 아이콘과 툴팁 렌더링 담당
  */
 export class PreviewWidgetRenderer {
     private highlightResolver: PreviewHighlightResolver;
 
     constructor(
         private plugin: HiNotePluginContext,
-        private highlightRepository: HighlightRepository,
         private highlightService: HighlightService
     ) {
-        this.highlightResolver = new PreviewHighlightResolver(this.highlightRepository);
+        this.highlightResolver = new PreviewHighlightResolver();
     }
 
     /**
-     * 处理阅读模式下的高亮渲染
-     * 在 Markdown Post Processor 中调用
+     * 읽기 모드에서 하이라이트 렌더링 처리
+     * Markdown Post Processor에서 호출
      */
     async processPreview(element: HTMLElement, context: MarkdownPostProcessorContext): Promise<void> {
         const file = this.plugin.app.vault.getAbstractFileByPath(context.sourcePath);
         if (!(file instanceof TFile)) return;
 
-        // 检查是否应该处理该文件
+        // 해당 파일을 처리해야 하는지 확인
         if (!this.highlightService.shouldProcessFile(file)) return;
 
-        // 查找高亮元素
+        // 하이라이트 요소 검색
         const marks = element.querySelectorAll('mark, span.highlight');
         if (marks.length === 0) return;
 
-        // 获取该文件的所有高亮数据
+        // 해당 파일의 모든 하이라이트 데이터 가져오기
         const content = await this.plugin.app.vault.cachedRead(file);
         const rawHighlights = this.highlightService.extractHighlights(content, file);
 
         if (rawHighlights.length === 0) return;
 
-        // 预处理高亮：获取评论并计算行号
+        // 하이라이트 전처리: 댓글 가져오기 및 줄 번호 계산
         const highlightsWithComments = this.highlightResolver.enrichHighlightsWithComments(rawHighlights, file, content);
 
         if (highlightsWithComments.length === 0) return;
 
-        // 遍历 DOM 元素进行匹配
+        // DOM 요소 순회하여 매칭
         marks.forEach((mark) => {
             if (mark.hasAttribute('data-hi-note-processed')) return;
-            
+
             const text = mark.textContent;
             if (!text) return;
 
-            // 查找匹配的高亮
+            // 매칭되는 하이라이트 검색
             const match = this.highlightResolver.findMatchingHighlight(
                 text, 
                 mark, 
@@ -71,32 +69,32 @@ export class PreviewWidgetRenderer {
     }
 
     /**
-     * 渲染阅读模式下的批注小部件
+     * 읽기 모드 주석 위젯 렌더링
      */
     private renderPreviewWidget(mark: HTMLElement, highlight: HiNote): void {
         const widget = mark.createSpan({ cls: 'hi-note-widget hi-note-preview-widget' });
         const hasComments = !!(highlight.comments && highlight.comments.length > 0);
-        
-        // 使用辅助类创建按钮
+
+        // 보조 클래스로 버튼 생성
         const button = CommentWidgetHelper.createButton(widget, hasComments);
         const iconContainer = button.querySelector('.hi-note-icon-container') as HTMLElement;
-        
+
         if (hasComments && highlight.comments) {
-            // 添加评论数量
+            // 댓글 수 추가
             CommentWidgetHelper.addCommentCount(iconContainer, highlight.comments.length);
 
-            // 创建工具提示
+            // 툴팁 생성
             const tooltip = CommentWidgetHelper.createTooltip(this.plugin.app, highlight);
-            
-            // 设置工具提示事件
+
+            // 툴팁 이벤트 설정
             CommentWidgetHelper.setupTooltipEvents(button, widget, tooltip);
-            
-            // 设置点击事件
-            CommentWidgetHelper.setupClickEvent(button, tooltip, () => 
+
+            // 클릭 이벤트 설정
+            CommentWidgetHelper.setupClickEvent(button, tooltip, () =>
                 CommentWidgetHelper.openCommentPanel(this.plugin.app, highlight, this.plugin.eventManager)
             );
-            
-            // 创建清理观察器
+
+            // 정리 옵저버 생성
             CommentWidgetHelper.createCleanupObserver(widget, tooltip);
         }
     }

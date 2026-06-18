@@ -10,7 +10,7 @@ import {
 } from "./renderers";
 
 /**
- * 闪卡渲染器，负责所有UI渲染相关的功能
+ * 플래시카드 렌더러, 모든 UI 렌더링 관련 기능 담당
  */
 export class FlashcardRenderer {
     private component: FlashcardComponentContext;
@@ -36,14 +36,14 @@ export class FlashcardRenderer {
     }
     
     /**
-     * 渲染激活界面
+     * 활성화 화면 렌더링
      */
     public renderActivation() {
         this.activationRenderer.render();
     }
     
     /**
-     * 切换侧边栏和内容区域的显示状态
+     * 사이드바와 콘텐츠 영역 표시 상태 전환
      */
     public toggleSidebar() {
         this.showingSidebar = !this.showingSidebar;
@@ -51,14 +51,14 @@ export class FlashcardRenderer {
     }
     
     /**
-     * 获取当前侧边栏的显示状态
+     * 현재 사이드바 표시 상태 가져오기
      */
     public isShowingSidebar(): boolean {
         return this.showingSidebar;
     }
     
     /**
-     * 显示侧边栏
+     * 사이드바 표시
      */
     public showSidebar() {
         this.showingSidebar = true;
@@ -73,14 +73,14 @@ export class FlashcardRenderer {
     }
     
     /**
-     * 返回上一级
-     * 在卡片内容页面时，返回到分组列表
-     * 在分组列表页面时，返回到文件列表
+     * 이전 단계로 돌아가기
+     * 카드 내용 페이지에 있을 때는 그룹 목록으로 돌아가기
+     * 그룹 목록 페이지에 있을 때는 파일 목록으로 돌아가기
      */
     public goBack() {
         if (this.isMobileView && this.isSmallScreen) {
             if (!this.showingSidebar) {
-                // 如果当前显示卡片内容，返回到分组列表
+                // 현재 카드 내용을 표시 중이면 그룹 목록으로 돌아가기
                 this.showingSidebar = true;
                 this.render();
             }
@@ -88,7 +88,7 @@ export class FlashcardRenderer {
     }
     
     /**
-     * 渲染主界面
+     * 메인 화면 렌더링
      */
     public render() {
         if (!this.component.getIsActive()) {

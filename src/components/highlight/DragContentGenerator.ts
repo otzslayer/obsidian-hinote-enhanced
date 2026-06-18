@@ -9,12 +9,12 @@ export class DragContentGenerator {
     ) {}
 
     /**
-     * 同步生成拖拽时的格式化内容
+     * 드래그 시 서식 지정된 내용을 동기적으로 생성
      */
     public generateSync(): string {
         const lines: string[] = [];
 
-        // 使用与 ExportService 相同的格式
+        // ExportService와 동일한 형식 사용
         if (this.highlight.isVirtual) {
             const fileName = this.highlight.filePath?.split('/').pop()?.replace('.md', '') || 'File';
             lines.push(`> [!note] [[${fileName}]]`);
@@ -24,12 +24,12 @@ export class DragContentGenerator {
             
             let hasAddedContent = false;
             
-            // 如果有 blockId，尝试创建引用
+            // blockId가 있으면 인용 생성 시도
             if (this.highlight.blockId) {
-                // 优先使用高亮中的 filePath
+                // 하이라이트의 filePath를 우선 사용
                 let filePath = this.highlight.filePath;
-                
-                // 如果高亮中没有 filePath，尝试获取当前文件的路径
+
+                // 하이라이트에 filePath가 없으면 현재 파일 경로 가져오기 시도
                 if (!filePath) {
                     const currentFile = this.plugin.app.workspace.getActiveFile();
                     if (currentFile) {
@@ -70,14 +70,14 @@ export class DragContentGenerator {
                 }
             }
             
-            // 如果没有成功添加块引用，使用原文本
+            // 블록 인용 추가에 실패한 경우 원본 텍스트 사용
             if (!hasAddedContent && this.highlight.text) {
                 lines.push(`> ${this.highlight.text}`);
                 lines.push("> ");
             }
         }
 
-        // 添加评论
+        // 댓글 추가
         if (this.highlight.comments && this.highlight.comments.length > 0) {
             for (const comment of this.highlight.comments) {
                 lines.push(...this.formatComment(comment, false));
@@ -88,27 +88,27 @@ export class DragContentGenerator {
     }
 
     /**
-     * 异步生成完整的格式化内容，只使用已有的 Block ID
+     * 기존 Block ID만 사용하여 전체 서식 지정된 내용을 비동기적으로 생성
      */
     public async generate(): Promise<string> {
-        // 简化后的实现与同步方法相同，不再尝试创建 Block ID
+        // 단순화된 구현으로 동기 메서드와 동일하며, Block ID 생성 시도 불필요
         return this.generateSync();
     }
 
     /**
-     * 格式化评论内容
+     * 댓글 내용 서식 지정
      */
     private formatComment(comment: CommentItem, isVirtual: boolean): string[] {
         const lines: string[] = [];
         const indentation = isVirtual ? '>' : '>>';
 
         if (!isVirtual) {
-            // 使用新的模板格式：时间戳在标题中
+            // 새 템플릿 형식 사용: 타임스탬프를 제목에 포함
             const date = comment.updatedAt ? window.moment(comment.updatedAt).format("YYYY-MM-DD HH:mm:ss") : '';
             lines.push(`>> [!note]+ ${date}`);
         }
 
-        // 处理多行内容，确保每行都有正确的缩进
+        // 여러 줄 내용 처리, 각 줄에 올바른 들여쓰기 보장
         const commentLines = comment.content
             .split('\n')
             .map(line => {

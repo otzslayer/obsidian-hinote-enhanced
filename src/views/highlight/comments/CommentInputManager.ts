@@ -4,18 +4,18 @@ import { defaultHighlightCardRegistry } from '../../../components/highlight';
 import CommentPlugin from '../../../../main';
 
 /**
- * 评论输入管理器
- * 负责管理评论输入框的显示和交互
+ * 댓글 입력 매니저
+ * 댓글 입력창의 표시 및 상호작용 관리 담당
  */
 export class CommentInputManager {
     private plugin: CommentPlugin;
-    
-    // 回调函数
+
+    // 콜백 함수
     private onCommentSave: ((highlight: HighlightInfo, content: string, existingComment?: CommentItem) => Promise<void>) | null = null;
     private onCommentDelete: ((highlight: HighlightInfo, commentId: string) => Promise<void>) | null = null;
     private onCommentCancel: ((highlight: HighlightInfo) => Promise<void>) | null = null;
     
-    // 当前编辑状态
+    // 현재 편집 상태
     private currentEditingHighlightId: string | undefined;
     
     constructor(plugin: CommentPlugin) {
@@ -23,7 +23,7 @@ export class CommentInputManager {
     }
     
     /**
-     * 设置回调函数
+     * 콜백 함수 설정
      */
     setCallbacks(callbacks: {
         onCommentSave?: (highlight: HighlightInfo, content: string, existingComment?: CommentItem) => Promise<void>;
@@ -42,7 +42,7 @@ export class CommentInputManager {
     }
     
     /**
-     * 显示评论输入框
+     * 댓글 입력창 표시
      */
     showCommentInput(
         card: HTMLElement, 
@@ -77,14 +77,14 @@ export class CommentInputManager {
     }
     
     /**
-     * 获取当前编辑的高亮 ID
+     * 현재 편집 중인 하이라이트 ID 가져오기
      */
     getCurrentEditingHighlightId(): string | undefined {
         return this.currentEditingHighlightId;
     }
     
     /**
-     * 清除当前编辑状态
+     * 현재 편집 상태 초기화
      */
     clearEditingState(): void {
         this.currentEditingHighlightId = undefined;

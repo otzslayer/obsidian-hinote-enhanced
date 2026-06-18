@@ -2,26 +2,34 @@ import { Plugin } from 'obsidian';
 import { WindowManager } from '../plugin/WindowManager';
 import { registerOpenCommentPanelCommand } from './openCommentPanel';
 import { registerOpenMainWindowCommand } from './openMainWindow';
+import { registerAddCommentCommand } from './addComment';
+import { InlineMigrationRunner } from '../migration/InlineMigrationRunner';
 
 /**
- * 注册所有命令
- * 这是命令注册的统一入口
+ * 모든 명령 등록
+ * 명령 등록의 통합 진입점
  */
 export function registerCommands(
     plugin: Plugin,
     windowManager: WindowManager,
     ensureInitialized: () => Promise<void>
 ): void {
-    // 注册打开评论面板命令（右侧边栏）
+    // 댓글 패널 열기 명령 등록 (오른쪽 사이드바)
     registerOpenCommentPanelCommand(plugin, windowManager, ensureInitialized);
-    
-    // 注册在主窗口打开评论面板命令
+
+    // 메인 창에서 댓글 패널 열기 명령 등록
     registerOpenMainWindowCommand(plugin, windowManager, ensureInitialized);
+
+    // 인라인 댓글 추가 명령 등록 (Mod+Shift+C)
+    registerAddCommentCommand(plugin);
+
+    // 일회성 마이그레이션 명령 등록
+    new InlineMigrationRunner(plugin.app).registerCommand(plugin);
 }
 
 /**
- * 获取窗口管理器实例
- * 用于 main.ts 中的 ribbon 按钮
+ * 창 관리자 인스턴스 반환
+ * main.ts의 리본 버튼에서 사용
  */
 export function createWindowManager(plugin: Plugin): WindowManager {
     return new WindowManager(plugin.app);

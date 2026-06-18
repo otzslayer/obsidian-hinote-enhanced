@@ -9,11 +9,11 @@ export class HighlightCardClipboard {
             navigator.clipboard.writeText(content).then(() => {
                 new Notice('Copied');
             }).catch(error => {
-                console.error('复制内容失败:', error);
+                console.error('내용 복사 실패:', error);
                 new Notice('Failed to copy content');
             });
         } catch (error) {
-            console.error('复制高亮内容时出错:', error);
+            console.error('하이라이트 내용 복사 중 오류:', error);
             new Notice('Failed to copy content');
         }
     }

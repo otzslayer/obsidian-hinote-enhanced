@@ -5,7 +5,7 @@ interface AnthropicResponse {
 }
 
 /**
- * Anthropic Claude AI 服务
+ * Anthropic Claude AI 서비스
  */
 export class AnthropicService extends BaseAIService {
     private apiAddress: string;

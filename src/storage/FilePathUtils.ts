@@ -1,37 +1,37 @@
 /**
- * 文件路径处理工具类
+ * 파일 경로 처리 유틸리티 클래스
  */
 export class FilePathUtils {
     /**
-     * 将文件路径转换为安全的文件名
-     * @param filePath 原始文件路径
-     * @returns 安全的文件名
+     * 파일 경로를 안전한 파일명으로 변환
+     * @param filePath 원본 파일 경로
+     * @returns 안전한 파일명
      */
     static toSafeFileName(filePath: string): string {
         return filePath
-            .replace(/[/\\:*?"<>|]/g, '_')  // 替换特殊字符
-            .replace(/\s+/g, '_')           // 替换空格
-            .toLowerCase()                  // 转小写
+            .replace(/[/\\:*?"<>|]/g, '_')  // 특수 문자 대체
+            .replace(/\s+/g, '_')           // 공백 대체
+            .toLowerCase()                  // 소문자로 변환
             + '.json';
     }
 
     /**
-     * 从安全文件名恢复原始路径（需要配合映射文件）
-     * @param safeFileName 安全文件名
-     * @returns 恢复的原始路径（近似）
+     * 안전한 파일명에서 원본 경로 복원 (매핑 파일과 함께 사용 필요)
+     * @param safeFileName 안전한 파일명
+     * @returns 복원된 원본 경로 (근사치)
      */
     static fromSafeFileName(safeFileName: string): string {
-        // 移除 .json 后缀并将下划线转回空格
-        // 注意：这是近似恢复，无法完全还原特殊字符
+        // .json 접미사 제거 후 언더스코어를 공백으로 되돌림
+        // 참고: 이는 근사 복원이며 특수 문자를 완전히 복원할 수 없음
         return safeFileName
             .replace(/\.json$/, '')
             .replace(/_/g, ' ');
     }
 
     /**
-     * 生成文件路径的哈希值（备用方案）
-     * @param filePath 文件路径
-     * @returns MD5哈希值
+     * 파일 경로의 해시값 생성 (대안 방법)
+     * @param filePath 파일 경로
+     * @returns MD5 해시값
      */
     static generateHash(filePath: string): string {
         let hash = 0;
@@ -43,47 +43,47 @@ export class FilePathUtils {
     }
 
     /**
-     * 验证文件路径是否安全
-     * @param filePath 文件路径
-     * @returns 是否安全
+     * 파일 경로가 안전한지 검증
+     * @param filePath 파일 경로
+     * @returns 안전 여부
      */
     static isSafePath(filePath: string): boolean {
-        // 检查是否包含危险字符
+        // 위험한 문자 포함 여부 확인
         const dangerousChars = /[/\\:*?"<>|]/;
         return !dangerousChars.test(filePath);
     }
 
     /**
-     * 获取.hinote目录路径
-     * @param vaultPath Vault根目录路径
-     * @returns .hinote目录路径
+     * .hinote 디렉토리 경로 반환
+     * @param vaultPath Vault 루트 디렉토리 경로
+     * @returns .hinote 디렉토리 경로
      */
     static getHiNoteDir(vaultPath: string): string {
         return `${vaultPath}/.hinote`;
     }
 
     /**
-     * 获取高亮数据目录路径
-     * @param vaultPath Vault根目录路径
-     * @returns 高亮数据目录路径
+     * 하이라이트 데이터 디렉토리 경로 반환
+     * @param vaultPath Vault 루트 디렉토리 경로
+     * @returns 하이라이트 데이터 디렉토리 경로
      */
     static getHighlightsDir(vaultPath: string): string {
         return `${this.getHiNoteDir(vaultPath)}/highlights`;
     }
 
     /**
-     * 获取闪卡数据目录路径
-     * @param vaultPath Vault根目录路径
-     * @returns 闪卡数据目录路径
+     * 플래시카드 데이터 디렉토리 경로 반환
+     * @param vaultPath Vault 루트 디렉토리 경로
+     * @returns 플래시카드 데이터 디렉토리 경로
      */
     static getFlashcardsDir(vaultPath: string): string {
         return `${this.getHiNoteDir(vaultPath)}/flashcards`;
     }
 
     /**
-     * 获取元数据目录路径
-     * @param vaultPath Vault根目录路径
-     * @returns 元数据目录路径
+     * 메타데이터 디렉토리 경로 반환
+     * @param vaultPath Vault 루트 디렉토리 경로
+     * @returns 메타데이터 디렉토리 경로
      */
     static getMetadataDir(vaultPath: string): string {
         return `${this.getHiNoteDir(vaultPath)}/metadata`;

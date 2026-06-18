@@ -1,12 +1,12 @@
 import type { AISettings } from '../../types/ai';
 
 /**
- * AI 服务类型定义
- * 统一的 AI 服务接口和类型
+ * AI 서비스 타입 정의
+ * 통일된 AI 서비스 인터페이스 및 타입
  */
 
 /**
- * AI 服务提供商枚举
+ * AI 서비스 공급자 열거형
  */
 export enum AIProviderType {
     OPENAI = 'openai',
@@ -19,7 +19,7 @@ export enum AIProviderType {
 }
 
 /**
- * AI 消息接口
+ * AI 메시지 인터페이스
  */
 export interface AIMessage {
     role: 'user' | 'assistant' | 'system';
@@ -27,7 +27,7 @@ export interface AIMessage {
 }
 
 /**
- * AI 模型接口
+ * AI 모델 인터페이스
  */
 export interface AIModel {
     id: string;
@@ -36,7 +36,7 @@ export interface AIModel {
 }
 
 /**
- * AI 服务配置
+ * AI 서비스 설정
  */
 export interface AIServiceConfig {
     apiKey: string;
@@ -48,7 +48,7 @@ export interface AIServiceConfig {
 }
 
 /**
- * AI 错误代码
+ * AI 오류 코드
  */
 export enum AIErrorCode {
     NOT_CONFIGURED = 'NOT_CONFIGURED',
@@ -61,7 +61,7 @@ export enum AIErrorCode {
 }
 
 /**
- * AI 服务错误类
+ * AI 서비스 오류 클래스
  */
 export class AIServiceError extends Error {
     constructor(
@@ -73,14 +73,14 @@ export class AIServiceError extends Error {
         super(message);
         this.name = 'AIServiceError';
         
-        // 保持错误堆栈
+        // 오류 스택 유지
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, AIServiceError);
         }
     }
 
     /**
-     * 创建未配置错误
+     * 미설정 오류 생성
      */
     static notConfigured(provider: AIProviderType, detail?: string): AIServiceError {
         const message = detail 
@@ -90,7 +90,7 @@ export class AIServiceError extends Error {
     }
 
     /**
-     * 创建连接失败错误
+     * 연결 실패 오류 생성
      */
     static connectionFailed(provider: AIProviderType, originalError?: Error): AIServiceError {
         return new AIServiceError(
@@ -102,7 +102,7 @@ export class AIServiceError extends Error {
     }
 
     /**
-     * 创建无效响应错误
+     * 잘못된 응답 오류 생성
      */
     static invalidResponse(provider: AIProviderType, detail?: string): AIServiceError {
         const message = detail
@@ -112,7 +112,7 @@ export class AIServiceError extends Error {
     }
 
     /**
-     * 创建 API 错误
+     * API 오류 생성
      */
     static apiError(provider: AIProviderType, message: string, originalError?: Error): AIServiceError {
         return new AIServiceError(message, provider, AIErrorCode.API_ERROR, originalError);
@@ -120,62 +120,62 @@ export class AIServiceError extends Error {
 }
 
 /**
- * AI 服务接口
- * 所有 AI 服务必须实现此接口
+ * AI 서비스 인터페이스
+ * 모든 AI 서비스는 이 인터페이스를 구현해야 합니다
  */
 export interface IAIService {
     /**
-     * 多轮对话
+     * 다중 대화
      */
     chat(messages: AIMessage[]): Promise<string>;
 
     /**
-     * 单轮生成
+     * 단일 생성
      */
     generateResponse(prompt: string): Promise<string>;
 
     /**
-     * 测试连接
+     * 연결 테스트
      */
     testConnection(): Promise<boolean>;
 
     /**
-     * 更新模型
+     * 모델 업데이트
      */
     updateModel(model: string): void;
 
     /**
-     * 列出可用模型
+     * 사용 가능한 모델 목록 조회
      */
     listModels(): Promise<AIModel[]>;
 
     /**
-     * 获取提供商类型
+     * 공급자 유형 가져오기
      */
     getProviderType(): AIProviderType;
 
     /**
-     * 检查是否已配置
+     * 설정 완료 여부 확인
      */
     isConfigured(): boolean;
 }
 
 /**
- * AI 服务工厂接口
+ * AI 서비스 팩토리 인터페이스
  */
 export interface IAIServiceFactory {
     /**
-     * 创建服务实例
+     * 서비스 인스턴스 생성
      */
     create(settings: AISettings): IAIService;
 
     /**
-     * 检查是否支持该提供商
+     * 해당 공급자 지원 여부 확인
      */
     supports(provider: AIProviderType): boolean;
 
     /**
-     * 获取提供商类型
+     * 공급자 유형 가져오기
      */
     getProviderType(): AIProviderType;
 }

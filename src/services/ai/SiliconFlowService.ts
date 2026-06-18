@@ -9,8 +9,8 @@ interface SiliconFlowModelsResponse {
 }
 
 /**
- * SiliconFlow AI 服务
- * 使用 OpenAI 兼容的 API 格式
+ * SiliconFlow AI 서비스
+ * OpenAI 호환 API 형식을 사용합니다
  */
 export class SiliconFlowService extends OpenAICompatibleService {
     constructor(settings: AISettings) {
@@ -47,7 +47,7 @@ export class SiliconFlowService extends OpenAICompatibleService {
     }
 
     /**
-     * 列出可用的模型
+     * 사용 가능한 모델 목록 조회
      */
     async listModels(): Promise<AIModel[]> {
         try {

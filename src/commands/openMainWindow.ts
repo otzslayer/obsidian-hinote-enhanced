@@ -3,7 +3,7 @@ import { t } from '../i18n';
 import { WindowManager } from '../plugin/WindowManager';
 
 /**
- * 在主窗口打开评论面板命令
+ * 메인 창에서 댓글 패널을 여는 명령
  */
 export async function openMainWindow(
     plugin: Plugin,
@@ -15,7 +15,7 @@ export async function openMainWindow(
 }
 
 /**
- * 注册命令
+ * 명령 등록
  */
 export function registerOpenMainWindowCommand(
     plugin: Plugin,

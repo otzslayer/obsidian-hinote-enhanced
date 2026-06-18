@@ -1,7 +1,5 @@
 import { MarkdownPostProcessorContext, TFile } from "obsidian";
 import { HighlightInfo as HiNote } from "../../../types/highlight";
-import { HighlightRepository } from "../../../repositories/HighlightRepository";
-import { HighlightCommentResolver } from "../../../services/highlight";
 
 export type PreviewHighlight = HiNote & { line: number };
 
@@ -22,16 +20,13 @@ const BLOCK_TAGS = new Set([
 ]);
 
 /**
- * 解析阅读模式下可渲染的高亮数据。
+ * 읽기 모드에서 렌더링 가능한 하이라이트 데이터 파싱.
  *
- * Preview renderer 只应该关心 DOM 渲染；这里集中处理存储匹配、评论补全和行号计算。
+ * Preview renderer는 DOM 렌더링만 담당하며, 여기서는 저장소 매칭, 댓글 보완, 줄 번호 계산을 집중 처리.
  */
 export class PreviewHighlightResolver {
-    private commentResolver: HighlightCommentResolver;
+    constructor() {}
 
-    constructor(highlightRepository: HighlightRepository) {
-        this.commentResolver = new HighlightCommentResolver(highlightRepository);
-    }
 
     enrichHighlightsWithComments(
         rawHighlights: HiNote[],
@@ -67,8 +62,9 @@ export class PreviewHighlightResolver {
         ) || null;
     }
 
-    private enrichHighlight(highlight: HiNote, file: TFile): HiNote {
-        return this.commentResolver.resolveHighlight(file, highlight);
+    private enrichHighlight(highlight: HiNote, _file: TFile): HiNote {
+        // Comments are already populated inline by extractHighlights — return as-is.
+        return { ...highlight, comments: highlight.comments ?? [] };
     }
 
     private getSectionInfo(

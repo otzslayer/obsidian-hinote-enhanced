@@ -1,34 +1,34 @@
 export interface ReviewLog {
     timestamp: number;
-    rating: number;     // 1-4 分别对应 Again/Hard/Good/Easy
-    elapsed: number;    // 距离上次复习的天数
+    rating: number;     // 1-4는 각각 Again/Hard/Good/Easy에 대응
+    elapsed: number;    // 마지막 복습 이후 경과 일수
 }
 
 export interface FlashcardState {
-    id: string;           // 卡片唯一标识符
-    difficulty: number;   // 卡片难度
-    stability: number;    // 记忆稳定性
-    retrievability: number; // 可提取性
-    lastReview: number;   // 上次复习时间戳
-    nextReview: number;   // 下次复习时间戳
+    id: string;           // 카드 고유 식별자
+    difficulty: number;   // 카드 난이도
+    stability: number;    // 기억 안정성
+    retrievability: number; // 인출 가능성
+    lastReview: number;   // 마지막 복습 타임스탬프
+    nextReview: number;   // 다음 복습 타임스탬프
     reviewHistory: ReviewLog[];
-    text: string;         // 卡片正面内容
-    answer: string;       // 卡片背面内容
-    filePath?: string;    // 关联的文件路径
-    createdAt: number;    // 卡片创建时间戳
-    updatedAt?: number;   // 最后更新时间戳
-    reviews: number;      // 总复习次数
-    lapses: number;       // 遗忘次数
-    groupIds?: string[];  // 卡片所属的分组ID列表
-    sourceId?: string;    // 来源ID（高亮或批注的ID）
-    sourceType?: 'highlight' | 'comment'; // 来源类型
+    text: string;         // 카드 앞면 내용
+    answer: string;       // 카드 뒷면 내용
+    filePath?: string;    // 연결된 파일 경로
+    createdAt: number;    // 카드 생성 타임스탬프
+    updatedAt?: number;   // 마지막 업데이트 타임스탬프
+    reviews: number;      // 총 복습 횟수
+    lapses: number;       // 망각 횟수
+    groupIds?: string[];  // 카드가 속한 그룹 ID 목록
+    sourceId?: string;    // 출처 ID (하이라이트 또는 주석의 ID)
+    sourceType?: 'highlight' | 'comment'; // 출처 유형
 }
 
 export interface FlashcardProgress {
-    due: number;        // 今天待复习数量
-    newCards: number;   // 新卡片数量
-    learned: number;    // 已学习数量
-    retention: number;  // 记忆保持率
+    due: number;        // 오늘 복습할 수량
+    newCards: number;   // 새 카드 수량
+    learned: number;    // 학습 완료 수량
+    retention: number;  // 기억 유지율
 }
 
 export interface FSRSGlobalStats {
@@ -39,19 +39,19 @@ export interface FSRSGlobalStats {
 }
 
 export interface CardGroup {
-    id: string;           // 分组唯一标识符
-    name: string;         // 分组名称
-    filter: string;       // 过滤条件，支持文件名和标签
-    createdTime: number;  // 创建时间
-    sortOrder: number;    // 排序顺序
-    isReversed?: boolean; // 是否反转卡片正反面（评论作为问题）
+    id: string;           // 그룹 고유 식별자
+    name: string;         // 그룹 이름
+    filter: string;       // 필터 조건, 파일명 및 태그 지원
+    createdTime: number;  // 생성 시간
+    sortOrder: number;    // 정렬 순서
+    isReversed?: boolean; // 카드 앞뒷면 반전 여부 (댓글을 질문으로)
     settings?: {
-        newCardsPerDay?: number;     // 每日新卡片数量限制
-        reviewsPerDay?: number;      // 每日复习数量限制
-        useGlobalSettings?: boolean; // 是否使用全局设置
+        newCardsPerDay?: number;     // 일일 새 카드 수량 제한
+        reviewsPerDay?: number;      // 일일 복습 수량 제한
+        useGlobalSettings?: boolean; // 전역 설정 사용 여부
     };
-    cardIds?: string[];    // 该分组包含的卡片ID列表
-    lastUpdated?: number;  // 上次更新时间戳
+    cardIds?: string[];    // 해당 그룹에 포함된 카드 ID 목록
+    lastUpdated?: number;  // 마지막 업데이트 타임스탬프
 }
 
 export interface GroupProgressState {
@@ -68,24 +68,24 @@ export interface HiCardState {
 }
 
 export interface DailyStats {
-    date: number;             // 日期时间戳 (当天的0点)
-    newCardsLearned: number;  // 当天学习的新卡片数量
-    cardsReviewed: number;    // 当天复习的卡片数量
-    reviewCount: number;      // 当天评分总数
-    newCount: number;         // 当天新卡片数
-    againCount: number;       // Again 评分数量
-    hardCount: number;        // Hard 评分数量
-    goodCount: number;        // Good 评分数量
-    easyCount: number;        // Easy 评分数量
+    date: number;             // 날짜 타임스탬프 (당일 자정 0시)
+    newCardsLearned: number;  // 당일 학습한 새 카드 수량
+    cardsReviewed: number;    // 당일 복습한 카드 수량
+    reviewCount: number;      // 당일 총 평가 횟수
+    newCount: number;         // 당일 새 카드 수
+    againCount: number;       // Again 평가 수량
+    hardCount: number;        // Hard 평가 수량
+    goodCount: number;        // Good 평가 수량
+    easyCount: number;        // Easy 평가 수량
 }
 
 export interface FSRSStorage {
     version: string;
     cards: { [id: string]: FlashcardState };
     globalStats: FSRSGlobalStats;
-    cardGroups: CardGroup[];  // 用户自定义的卡片分组
-    uiState: HiCardState;     // 保存UI状态
-    dailyStats: DailyStats[]; // 每日学习统计数据
+    cardGroups: CardGroup[];  // 사용자 정의 카드 그룹
+    uiState: HiCardState;     // UI 상태 저장
+    dailyStats: DailyStats[]; // 일일 학습 통계 데이터
 }
 
 export const FSRS_RATING = {
@@ -98,19 +98,19 @@ export const FSRS_RATING = {
 export type FSRSRating = typeof FSRS_RATING[keyof typeof FSRS_RATING];
 
 export interface FSRSParameters {
-    request_retention: number;   // 目标记忆保持率
-    maximum_interval: number;    // 最大间隔天数
-    w: number[];                // FSRS 算法参数
-    newCardsPerDay: number;     // 每日新卡片学习上限
-    reviewsPerDay: number;      // 每日复习卡片上限
+    request_retention: number;   // 목표 기억 유지율
+    maximum_interval: number;    // 최대 간격 일수
+    w: number[];                // FSRS 알고리즘 파라미터
+    newCardsPerDay: number;     // 일일 새 카드 학습 상한
+    reviewsPerDay: number;      // 일일 복습 카드 상한
 }
 
 export const DEFAULT_FSRS_PARAMETERS: FSRSParameters = {
     request_retention: 0.9,
     maximum_interval: 36500,
-    newCardsPerDay: 20,         // 默认每天学习20张新卡片
-    reviewsPerDay: 100,         // 默认每天复习100张卡片
-    // FSRS-5 需要 21 个参数（从 ts-fsrs v5 开始）
+    newCardsPerDay: 20,         // 기본 하루 20장 새 카드 학습
+    reviewsPerDay: 100,         // 기본 하루 100장 카드 복습
+    // FSRS-5는 21개의 파라미터 필요 (ts-fsrs v5부터)
     w: [0.4872, 1.4003, 3.7145, 13.8206, 5.1618, 1.2298, 0.8975, 0.031, 1.6474, 
         0.1367, 1.0461, 2.1072, 0.0793, 0.3246, 1.587, 0.2272, 2.8755, 0.0, 0.0, 0.0, 0.0]
 };

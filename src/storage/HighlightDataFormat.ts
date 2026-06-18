@@ -1,7 +1,7 @@
 import { HighlightInfo as HiNote, CommentItem } from '../types/highlight';
 
 /**
- * 新的优化数据格式
+ * 새로운 최적화 데이터 형식
  */
 export interface OptimizedHighlightData {
     version: string;
@@ -41,7 +41,7 @@ export interface FileMappingData {
 }
 
 /**
- * 转换为旧格式（保持兼容性）
+ * 구 형식으로 변환 (하위 호환성 유지)
  */
 export function convertToLegacyHighlight(
     id: string,
@@ -73,7 +73,7 @@ export function convertToLegacyHighlight(
 }
 
 /**
- * 转换为优化格式
+ * 최적화 형식으로 변환
  */
 export function convertToOptimizedHighlight(highlight: HiNote): OptimizedHighlight {
     const now = Date.now();

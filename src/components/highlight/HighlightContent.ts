@@ -6,7 +6,7 @@ export class HighlightContent extends Component {
     private container: HTMLElement;
     private textContainer: HTMLElement;
 
-    // 添加静态属性来跟踪预览元素
+    // 미리보기 요소 추적을 위한 정적 속성 추가
     private static dragPreview: HTMLElement | null = null;
 
     constructor(
@@ -31,37 +31,37 @@ export class HighlightContent extends Component {
     }
 
     private async renderText() {
-        // 高亮文本容器
+        // 하이라이트 텍스트 컨테이너
         this.textContainer = this.container.createEl("div", {
             cls: "highlight-text-container"
         });
 
-        // 添加竖线装饰
+        // 세로선 장식 추가
         const decorator = this.textContainer.createEl("div", {
             cls: "highlight-text-decorator"
         });
 
-        // 如果有背景色，应用到装饰器
+        // 배경색이 있으면 장식에 적용
         if (this.highlight.backgroundColor) {
             decorator.style.backgroundColor = this.highlight.backgroundColor;
         }
 
-        // 高亮文本
+        // 하이라이트 텍스트
         const textEl = this.textContainer.createEl("div", {
             cls: "highlight-text"
         });
 
-        // 创建文本内容元素，如果是虚拟高亮则使用 displayText
+        // 텍스트 콘텐츠 요소 생성, 가상 하이라이트인 경우 displayText 사용
         const textContent = textEl.createEl("div", {
             cls: `highlight-text-content ${this.highlight.isVirtual ? 'virtual-highlight' : ''} markdown-rendered`
         });
 
-        // 处理文本中的换行符，添加空值检查
+        // 텍스트의 줄바꿈 처리, 빈 값 검사 추가
         const text = this.highlight.text || '';
         
         try {
-            // 使用 Obsidian 的 MarkdownRenderer.render 方法渲染 Markdown 内容
-            // 使用新的 Component 实例代替 this，避免继承复杂的样式规则
+            // Obsidian의 MarkdownRenderer.render 메서드를 사용해 Markdown 내용 렌더링
+            // 복잡한 스타일 규칙 상속을 피하기 위해 this 대신 새 Component 인스턴스 사용
             const markdownComponent = new Component();
             await MarkdownRenderer.render(
                 this.app,
@@ -71,39 +71,39 @@ export class HighlightContent extends Component {
                 markdownComponent
             );
             
-            // 添加自定义样式类以修复可能的样式问题
+            // 스타일 문제를 수정하기 위한 커스텀 스타일 클래스 추가
             const lists = textContent.querySelectorAll('ul, ol');
             lists.forEach(list => {
                 list.addClass('highlight-markdown-list');
             });
-            
-            // 激活内部链接
+
+            // 내부 링크 활성화
             await this.activateInternalLinks(textContent, this.highlight.filePath || '');
         } catch (error) {
             console.error('Error rendering markdown in highlight:', error);
-            
-            // 如果渲染失败，回退到纯文本渲染
+
+            // 렌더링 실패 시 일반 텍스트 렌더링으로 대체
             const lines = text.split('\n');
             lines.forEach((line: string, index: number) => {
                 const p = textContent.createEl("p", {
                     text: line,
                     cls: "highlight-text-line"
                 });
-                
-                // 如果不是最后一行，添加换行
+
+                // 마지막 줄이 아니면 줄바꿈 추가
                 if (index < lines.length - 1) {
                     p.addClass('highlight-text-line-spacing');
                 }
             });
         }
 
-        // 如果不是全局搜索结果且不在主视图中，添加点击事件
+        // 전역 검색 결과가 아니고 메인 뷰가 아닌 경우 클릭 이벤트 추가
         if (!this.highlight.isGlobalSearch && !this.isInMainView) {
-            // 设置提示文本为“跳转到高亮”
+            // 툴팁 텍스트를 "하이라이트로 이동"으로 설정
             textContent.setAttribute('aria-label', t('Jump to highlight'));
-            
+
             textContent.addEventListener("mousedown", (e) => {
-                // 如果点击的是链接，不触发高亮点击事件
+                // 링크를 클릭한 경우 하이라이트 클릭 이벤트 미발생
                 if ((e.target as HTMLElement).closest('a')) {
                     return;
                 }
@@ -112,44 +112,44 @@ export class HighlightContent extends Component {
                 void this.onHighlightClick(this.highlight);
             });
         } else {
-            // 全局搜索结果或主视图添加特殊样式类
+            // 전역 검색 결과 또는 메인 뷰에 특수 스타일 클래스 추가
             textContent.addClass('global-search-highlight');
-            
-            // 移除可能存在的提示文本
+
+            // 존재할 수 있는 툴팁 텍스트 제거
             textContent.removeAttribute('aria-label');
-            
-            // 添加提示性鼠标样式
+
+            // 커서 스타일 힌트 추가
             textContent.setCssProps({ cursor: 'default' });
         }
     }
     
     /**
-     * 激活内部链接，添加悬停预览和点击跳转功能
-     * @param element 包含链接的元素
-     * @param sourcePath 源文件路径
+     * 내부 링크를 활성화하여 호버 미리보기 및 클릭 이동 기능 추가
+     * @param element 링크를 포함하는 요소
+     * @param sourcePath 소스 파일 경로
      */
     private async activateInternalLinks(element: HTMLElement, sourcePath: string) {
-        // 查找所有内部链接元素
+        // 모든 내부 링크 요소 탐색
         const internalLinks = element.querySelectorAll('a.internal-link');
-        
+
         internalLinks.forEach(link => {
-            // 获取链接目标
+            // 링크 대상 가져오기
             const target = link.getAttribute('data-href') || link.getAttribute('href');
             if (!target) return;
-            
-            // 添加点击事件
+
+            // 클릭 이벤트 추가
             link.addEventListener('click', (event) => {
                 event.preventDefault();
                 event.stopPropagation();
-                
-                // 打开链接
+
+                // 링크 열기
                 const targetFile = this.app.metadataCache.getFirstLinkpathDest(target, sourcePath);
                 if (targetFile) {
                     void this.app.workspace.openLinkText(target, sourcePath, false);
                 }
             });
-            
-            // 添加悬停预览
+
+            // 호버 미리보기 추가
             link.addEventListener('mouseenter', (event) => {
                 this.app.workspace.trigger('hover-link', {
                     event,
@@ -161,21 +161,21 @@ export class HighlightContent extends Component {
                 });
             });
         });
-        
-        // 查找所有标签
+
+        // 모든 태그 탐색
         const tags = element.querySelectorAll('a.tag');
-        
+
         tags.forEach(tag => {
-            // 获取标签文本
+            // 태그 텍스트 가져오기
             const tagText = tag.getAttribute('href');
             if (!tagText) return;
-            
-            // 添加点击事件
+
+            // 클릭 이벤트 추가
             tag.addEventListener('click', (event) => {
                 event.preventDefault();
                 event.stopPropagation();
-                
-                // 打开标签搜索
+
+                // 태그 검색 열기
                 this.app.workspace.trigger('search:open', tagText);
             });
         });

@@ -10,11 +10,11 @@ import { BatchHighlightDeletionOperations } from "./BatchHighlightDeletionOperat
 import { BatchExportOperations } from "./BatchExportOperations";
 
 /**
- * 批量操作处理器
- * 负责处理选中高亮的批量操作，包括：
- * - 批量导出
- * - 批量创建/删除闪卡
- * - 批量删除高亮
+ * 일괄 작업 핸들러
+ * 선택된 하이라이트에 대한 일괄 작업 처리 담당:
+ * - 일괄 내보내기
+ * - 일괄 플래시카드 생성/삭제
+ * - 일괄 하이라이트 삭제
  */
 export class BatchOperationsHandler {
     private plugin: CommentPlugin;
@@ -27,7 +27,7 @@ export class BatchOperationsHandler {
     private flashcardOperations: BatchFlashcardOperations | null = null;
     private deletionOperations: BatchHighlightDeletionOperations | null = null;
     
-    // 回调函数
+    // 콜백 함수
     private getSelectedHighlightsCallback: () => Set<HighlightInfo>;
     
     constructor(
@@ -45,7 +45,7 @@ export class BatchOperationsHandler {
     }
     
     /**
-     * 设置回调函数
+     * 콜백 함수 설정
      */
     setCallbacks(
         getSelectedHighlights: () => Set<HighlightInfo>,
@@ -74,45 +74,45 @@ export class BatchOperationsHandler {
     }
     
     /**
-     * 显示多选操作按钮
+     * 다중 선택 작업 버튼 표시
      */
     async showMultiSelectActions(selectedCount: number) {
         if (selectedCount <= 1) {
             this.hideMultiSelectActions();
             return;
         }
-        
-        // 如果已经存在，先移除
+
+        // 이미 존재하는 경우 먼저 제거
         this.hideMultiSelectActions();
-        
-        // 创建多选操作容器
+
+        // 다중 선택 작업 컨테이너 생성
         if (!this.multiSelectActionsContainer) {
             this.multiSelectActionsContainer = this.containerEl.createEl('div', {
                 cls: 'multi-select-actions'
             });
         }
-        
+
         this.multiSelectActionsContainer.show();
         this.multiSelectActionsContainer.empty();
-        
-        // 添加标题
+
+        // 제목 추가
         this.multiSelectActionsContainer.createEl('div', {
             cls: 'selected-count',
             text: `selected ${selectedCount}`
         });
-        
-        // 添加导出按钮
+
+        // 내보내기 버튼 추가
         this.createExportButton();
-        
-        // 添加闪卡相关按钮
+
+        // 플래시카드 관련 버튼 추가
         await this.createFlashcardButtons();
-        
-        // 添加删除按钮
+
+        // 삭제 버튼 추가
         this.createDeleteButton();
     }
     
     /**
-     * 隐藏多选操作按钮
+     * 다중 선택 작업 버튼 숨김
      */
     hideMultiSelectActions() {
         if (this.multiSelectActionsContainer) {
@@ -122,7 +122,7 @@ export class BatchOperationsHandler {
     }
     
     /**
-     * 创建导出按钮
+     * 내보내기 버튼 생성
      */
     private createExportButton() {
         if (!this.multiSelectActionsContainer) return;
@@ -138,21 +138,21 @@ export class BatchOperationsHandler {
     }
     
     /**
-     * 创建闪卡相关按钮
+     * 플래시카드 관련 버튼 생성
      */
     private async createFlashcardButtons() {
         if (!this.multiSelectActionsContainer) return;
-        
+
         const fsrsManager = this.plugin.fsrsManager;
         if (!fsrsManager) {
             this.createDefaultFlashcardButton();
             return;
         }
-        
-        // 检查选中的高亮中有多少已经创建了闪卡
+
+        // 선택된 하이라이트 중 플래시카드가 생성된 항목 수 확인
         const selectedHighlights = this.getSelectedHighlightsCallback();
         let existingFlashcardCount = 0;
-        
+
         for (const highlight of selectedHighlights) {
             if (highlight.id) {
                 const existingCards = fsrsManager.findCardsBySourceId(highlight.id, 'highlight');
@@ -161,8 +161,8 @@ export class BatchOperationsHandler {
                 }
             }
         }
-        
-        // 根据已有闪卡的数量决定显示哪个按钮
+
+        // 기존 플래시카드 수에 따라 표시할 버튼 결정
         if (existingFlashcardCount === 0) {
             this.createFlashcardCreateButton();
         } else if (existingFlashcardCount === selectedHighlights.size) {
@@ -173,7 +173,7 @@ export class BatchOperationsHandler {
     }
     
     /**
-     * 创建默认闪卡按钮
+     * 기본 플래시카드 버튼 생성
      */
     private createDefaultFlashcardButton() {
         if (!this.multiSelectActionsContainer) return;
@@ -189,18 +189,18 @@ export class BatchOperationsHandler {
     }
     
     /**
-     * 创建闪卡创建按钮
+     * 플래시카드 생성 버튼 생성
      */
     private createFlashcardCreateButton() {
         if (!this.multiSelectActionsContainer) return;
-        
+
         const createButton = this.multiSelectActionsContainer.createEl('div', {
             cls: 'multi-select-action-button'
         });
         createButton.setAttribute('aria-label', t('Create HiCard'));
         setIcon(createButton, 'book-plus');
-        
-        // 检查许可证状态
+
+        // 라이선스 상태 확인
         void this.licenseManager.isActivated().then(isActivated => {
             if (isActivated) {
                 return this.licenseManager.isFeatureEnabled('flashcard').then(isEnabled => {
@@ -229,7 +229,7 @@ export class BatchOperationsHandler {
     }
     
     /**
-     * 创建闪卡删除按钮
+     * 플래시카드 삭제 버튼 생성
      */
     private createFlashcardDeleteButton() {
         if (!this.multiSelectActionsContainer) return;
@@ -245,7 +245,7 @@ export class BatchOperationsHandler {
     }
     
     /**
-     * 创建闪卡管理按钮
+     * 플래시카드 관리 버튼 생성
      */
     private createFlashcardManageButton() {
         if (!this.multiSelectActionsContainer) return;
@@ -261,7 +261,7 @@ export class BatchOperationsHandler {
     }
     
     /**
-     * 创建删除按钮
+     * 삭제 버튼 생성
      */
     private createDeleteButton() {
         if (!this.multiSelectActionsContainer) return;
@@ -277,7 +277,7 @@ export class BatchOperationsHandler {
     }
     
     /**
-     * 清理资源
+     * 리소스 정리
      */
     destroy() {
         this.hideMultiSelectActions();

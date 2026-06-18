@@ -14,28 +14,28 @@ export interface AIServiceSettings {
 }
 
 /**
- * AI 服务提供商配置
- * 子类通过实现此接口来定义自己的特有参数
+ * AI 서비스 제공자 설정
+ * 서브클래스는 이 인터페이스를 구현하여 자체 특수 파라미터를 정의
  */
 export interface AIProviderConfig {
-    /** 设置键名，如 'openai', 'anthropic' 等 */
+    /** 설정 키 이름, 예: 'openai', 'anthropic' 등 */
     settingsKey: Exclude<keyof AISettings, 'provider' | 'prompts'>;
-    /** 服务显示名称，如 'OpenAI service' */
+    /** 서비스 표시 이름, 예: 'OpenAI service' */
     serviceName: string;
-    /** 预设模型列表 */
+    /** 기본 모델 목록 */
     defaultModels: AIModel[];
-    /** API Key 占位符，如 'sk-...' */
+    /** API Key 플레이스홀더, 예: 'sk-...' */
     apiKeyPlaceholder: string;
-    /** Provider URL 占位符，如 'https://api.openai.com/v1' */
+    /** Provider URL 플레이스홀더, 예: 'https://api.openai.com/v1' */
     providerUrlPlaceholder: string;
-    /** Provider URL 的设置键名（有些用 apiAddress，有些用 baseUrl） */
+    /** Provider URL 설정 키 이름 (일부는 apiAddress, 일부는 baseUrl 사용) */
     providerUrlKey?: string;
-    /** 默认设置对象（用于初始化） */
+    /** 기본 설정 객체 (초기화용) */
     defaultSettings: ProviderSettingsRecord;
 }
 
 /**
- * 标准模型状态
+ * 표준 모델 상태
  */
 export interface StandardModelState {
     selectedModel: AIModel;
@@ -56,10 +56,10 @@ export abstract class BaseAIServiceSettings implements AIServiceSettings {
 
     abstract display(containerEl: HTMLElement): void;
 
-    // ==================== 标准 AI 设置公共方法 ====================
+    // ==================== 표준 AI 설정 공통 메서드 ====================
 
     /**
-     * 获取指定提供商的设置对象，不存在则用默认值初始化
+     * 지정된 제공자의 설정 객체 가져오기, 없으면 기본값으로 초기화
      */
     protected getProviderSettings(config: AIProviderConfig): ProviderSettingsRecord {
         const aiSettings = this.plugin.settings.ai as unknown as Record<string, ProviderSettingsRecord | undefined>;
@@ -79,8 +79,8 @@ export abstract class BaseAIServiceSettings implements AIServiceSettings {
     }
 
     /**
-     * 标准的模型状态初始化逻辑
-     * 处理预设模型和自定义模型的恢复
+     * 표준 모델 상태 초기화 로직
+     * 기본 모델 및 커스텀 모델 복원 처리
      */
     protected initializeStandardModelState(config: AIProviderConfig): StandardModelState {
         const settings = this.getProviderSettings(config);
@@ -108,7 +108,7 @@ export abstract class BaseAIServiceSettings implements AIServiceSettings {
     }
 
     /**
-     * 标准的模型状态保存逻辑
+     * 표준 모델 상태 저장 로직
      */
     protected async saveStandardModelState(config: AIProviderConfig, modelState: StandardModelState): Promise<void> {
         const settings = this.getProviderSettings(config);
@@ -126,8 +126,8 @@ export abstract class BaseAIServiceSettings implements AIServiceSettings {
     }
 
     /**
-     * 渲染标准的 API Key 输入 + Check 按钮
-     * onCheck 回调应返回 boolean：true 表示成功，false 表示失败
+     * 표준 API Key 입력 + Check 버튼 렌더링
+     * onCheck 콜백은 boolean 반환: true는 성공, false는 실패
      */
     protected renderApiKeySetting(
         container: HTMLElement,
@@ -164,9 +164,9 @@ export abstract class BaseAIServiceSettings implements AIServiceSettings {
     }
 
     /**
-     * 在按钮中显示状态图标
-     * @param buttonEl 按钮 DOM 元素
-     * @param status 状态类型
+     * 버튼에 상태 아이콘 표시
+     * @param buttonEl 버튼 DOM 요소
+     * @param status 상태 유형
      */
     protected showButtonStatus(
         buttonEl: HTMLButtonElement,
@@ -201,7 +201,7 @@ export abstract class BaseAIServiceSettings implements AIServiceSettings {
     }
 
     /**
-     * 延迟后恢复按钮为默认状态
+     * 지연 후 버튼을 기본 상태로 복원
      */
     protected resetButtonAfterDelay(buttonEl: HTMLButtonElement, text: string, delayMs: number): void {
         window.setTimeout(() => {
@@ -213,8 +213,8 @@ export abstract class BaseAIServiceSettings implements AIServiceSettings {
     }
 
     /**
-     * 渲染标准的模型下拉框 + 自定义模型输入
-     * 返回 { modelSelectEl, customModelContainer } 供子类保存引用
+     * 표준 모델 드롭다운 + 커스텀 모델 입력 렌더링
+     * 서브클래스가 참조를 저장하도록 { modelSelectEl, customModelContainer } 반환
      */
     protected renderModelSelector(
         container: HTMLElement,
@@ -257,7 +257,7 @@ export abstract class BaseAIServiceSettings implements AIServiceSettings {
                 return dropdown;
             });
 
-        // 创建自定义模型输入容器
+        // 커스텀 모델 입력 컨테이너 생성
         refs.customModelContainer = modelSetting.settingEl.createDiv('custom-model-container');
         refs.customModelContainer.addClass('custom-model-container');
 
@@ -267,7 +267,7 @@ export abstract class BaseAIServiceSettings implements AIServiceSettings {
             dropdownEl.insertBefore(refs.customModelContainer, dropdownEl.firstChild);
         }
 
-        // 添加自定义模型输入框
+        // 커스텀 모델 입력창 추가
         const textComponent = new Setting(refs.customModelContainer)
             .addText(text => text
                 .setPlaceholder('model-id')
@@ -303,7 +303,7 @@ export abstract class BaseAIServiceSettings implements AIServiceSettings {
     }
 
     /**
-     * 显示自定义模型输入框
+     * 커스텀 모델 입력창 표시
      */
     protected async showStandardCustomModelInput(
         config: AIProviderConfig,
@@ -337,7 +337,7 @@ export abstract class BaseAIServiceSettings implements AIServiceSettings {
     }
 
     /**
-     * 隐藏自定义模型输入框
+     * 커스텀 모델 입력창 숨김
      */
     protected hideStandardCustomModelInput(
         refs: { customModelContainer: HTMLDivElement | null }
@@ -348,7 +348,7 @@ export abstract class BaseAIServiceSettings implements AIServiceSettings {
     }
 
     /**
-     * 渲染标准的 Provider URL 输入
+     * 표준 Provider URL 입력 렌더링
      */
     protected renderProviderUrlSetting(
         container: HTMLElement,

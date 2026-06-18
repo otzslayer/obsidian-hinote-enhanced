@@ -4,11 +4,11 @@ import { ExportService } from "../../../services/ExportService";
 import { t } from "../../../i18n";
 
 /**
- * 导出管理器
- * 职责：
- * 1. 管理导出按钮的创建和事件
- * 2. 处理导出为笔记的逻辑
- * 3. 处理导出为图片的逻辑
+ * 내보내기 매니저
+ * 담당:
+ * 1. 내보내기 버튼 생성 및 이벤트 관리
+ * 2. 노트로 내보내기 로직 처리
+ * 3. 이미지로 내보내기 로직 처리
  */
 export class ExportManager {
     private exportButton: HTMLElement | null = null;
@@ -19,9 +19,9 @@ export class ExportManager {
     ) {}
 
     /**
-     * 创建导出按钮
-     * @param container 按钮容器
-     * @param getCurrentFile 获取当前文件的回调
+     * 내보내기 버튼 생성
+     * @param container 버튼 컨테이너
+     * @param getCurrentFile 현재 파일을 가져오는 콜백
      */
     createExportButton(
         container: HTMLElement,
@@ -34,7 +34,7 @@ export class ExportManager {
         setIcon(this.exportButton, "file-symlink");
         this.exportButton.setAttribute("aria-label", t("Export as notes"));
 
-        // 添加导出按钮点击事件
+        // 내보내기 버튼 클릭 이벤트 추가
         this.exportButton.addEventListener("click", () => {
             void this.handleExportClick(getCurrentFile());
         });
@@ -43,8 +43,8 @@ export class ExportManager {
     }
 
     /**
-     * 处理导出按钮点击
-     * @param currentFile 当前文件
+     * 내보내기 버튼 클릭 처리
+     * @param currentFile 현재 파일
      */
     private async handleExportClick(currentFile: TFile | null): Promise<void> {
         if (!currentFile) {
@@ -55,8 +55,8 @@ export class ExportManager {
         try {
             const newFile = await this.exportService.exportHighlightsToNote(currentFile);
             new Notice(t("Successfully exported highlights to: ") + newFile.path);
-            
-            // 打开新创建的文件
+
+            // 새로 생성된 파일 열기
             const leaf = this.app.workspace.getLeaf();
             await leaf.openFile(newFile);
         } catch (error) {
@@ -65,12 +65,12 @@ export class ExportManager {
     }
 
     /**
-     * 导出高亮为图片
-     * @param highlight 要导出的高亮
+     * 하이라이트를 이미지로 내보내기
+     * @param highlight 내보낼 하이라이트
      */
     async exportHighlightAsImage(highlight: HighlightInfo & { comments?: CommentItem[] }): Promise<void> {
         try {
-            // 动态导入 html2canvas
+            // html2canvas 동적 임포트
             const html2canvas = (await import('html2canvas')).default;
             const { ExportPreviewModal } = await import('../../../templates/ExportModal');
             new ExportPreviewModal(this.app, highlight, html2canvas).open();
@@ -81,7 +81,7 @@ export class ExportManager {
     }
 
     /**
-     * 销毁导出管理器
+     * 내보내기 매니저 소멸
      */
     destroy(): void {
         if (this.exportButton) {

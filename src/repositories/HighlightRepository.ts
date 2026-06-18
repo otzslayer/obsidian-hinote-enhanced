@@ -4,11 +4,11 @@ import { HiNoteDataManager } from '../storage/HiNoteDataManager';
 import { IHighlightRepository } from './IHighlightRepository';
 
 /**
- * 高亮数据仓储实现
- * 职责：
- * 1. 管理高亮数据的内存缓存
- * 2. 协调数据持久化操作
- * 3. 提供统一的数据访问接口
+ * 하이라이트 데이터 저장소 구현체
+ * 책임:
+ * 1. 하이라이트 데이터의 메모리 캐시 관리
+ * 2. 데이터 영속성 작업 조율
+ * 3. 통합된 데이터 접근 인터페이스 제공
  */
 export class HighlightRepository implements IHighlightRepository {
     private cache: Map<string, HiNote[]> = new Map();
@@ -24,7 +24,7 @@ export class HighlightRepository implements IHighlightRepository {
     }
 
     /**
-     * 从存储层加载所有高亮到缓存
+     * 저장소 레이어에서 모든 하이라이트를 캐시로 로드
      */
     private async loadAllHighlightsToCache(): Promise<void> {
         try {
@@ -40,12 +40,12 @@ export class HighlightRepository implements IHighlightRepository {
                 void this.loadFileHighlightsAsync(filePath);
             }
         } catch (error) {
-            console.error('[HighlightRepository] 加载高亮文件列表失败:', error);
+            console.error('[HighlightRepository] 하이라이트 파일 목록 로드 실패:', error);
         }
     }
 
     /**
-     * 异步加载单个文件的高亮数据
+     * 단일 파일의 하이라이트 데이터를 비동기로 로드
      */
     private async loadFileHighlightsAsync(filePath: string): Promise<void> {
         try {
@@ -56,7 +56,7 @@ export class HighlightRepository implements IHighlightRepository {
                 this.cache.delete(filePath);
             }
         } catch (error) {
-            console.warn(`[HighlightRepository] 加载文件 ${filePath} 的高亮数据失败:`, error);
+            console.warn(`[HighlightRepository] 파일 ${filePath}의 하이라이트 데이터 로드 실패:`, error);
         }
     }
 

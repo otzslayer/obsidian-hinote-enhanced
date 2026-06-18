@@ -2,8 +2,8 @@ import { HighlightInfo } from "../../types/highlight";
 import { t } from "../../i18n";
 
 /**
- * 不聚焦的批注输入框组件
- * 显示在高亮卡片的激活状态下，点击后才会转换为真正的输入框
+ * 포커스 해제된 주석 입력창 컴포넌트
+ * 하이라이트 카드의 활성 상태에서 표시되며, 클릭 시 실제 입력창으로 전환
  */
 export class UnfocusedCommentInput {
     private container: HTMLElement;
@@ -17,12 +17,12 @@ export class UnfocusedCommentInput {
     }
 
     private render() {
-        // 创建不聚焦的输入框容器
+        // 포커스 해제된 입력창 컨테이너 생성
         this.container = this.parent.createEl("div", {
             cls: "unfocused-comment-input"
         });
 
-        // 创建输入提示区域
+        // 입력 힌트 영역 생성
         const inputArea = this.container.createEl("div", {
             cls: "unfocused-input-area",
             attr: {
@@ -30,7 +30,7 @@ export class UnfocusedCommentInput {
             }
         });
 
-        // 添加点击事件，点击后调用 onClick 回调
+        // 클릭 이벤트 추가, 클릭 시 onClick 콜백 호출
         inputArea.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -39,14 +39,14 @@ export class UnfocusedCommentInput {
     }
 
     /**
-     * 移除不聚焦的输入框
+     * 포커스 해제된 입력창 제거
      */
     public remove() {
         this.container.remove();
     }
-    
+
     /**
-     * 隐藏不聚焦的输入框
+     * 포커스 해제된 입력창 숨기기
      */
     public hide() {
         this.container.setCssProps({ display: 'none' });
