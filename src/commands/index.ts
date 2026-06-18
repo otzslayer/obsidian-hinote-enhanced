@@ -2,7 +2,6 @@ import { Plugin } from 'obsidian';
 import { WindowManager } from '../plugin/WindowManager';
 import { registerOpenCommentPanelCommand } from './openCommentPanel';
 import { registerOpenMainWindowCommand } from './openMainWindow';
-import { registerAddCommentCommand } from './addComment';
 import { InlineMigrationRunner } from '../migration/InlineMigrationRunner';
 
 /**
@@ -19,9 +18,6 @@ export function registerCommands(
 
     // 메인 창에서 댓글 패널 열기 명령 등록
     registerOpenMainWindowCommand(plugin, windowManager, ensureInitialized);
-
-    // 인라인 댓글 추가 명령 등록 (Mod+Shift+C)
-    registerAddCommentCommand(plugin);
 
     // 일회성 마이그레이션 명령 등록
     new InlineMigrationRunner(plugin.app).registerCommand(plugin);

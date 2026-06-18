@@ -36,6 +36,13 @@ describe('insertComment', () => {
         expect(result).toBe(`==power=={>>first ^${FIXED_TS}^<<}{>>second ^${FIXED_TS}^<<} text`);
     });
 
+    it('inserts on the correct highlight when a LATER highlight already has a comment', () => {
+        const note = `==A== mid ==B=={>>onB ^${FIXED_TS}^<<} end`;
+        const match = mkMatch('A', note);
+        const result = insertComment(note, match, 'onA', FIXED_TS);
+        expect(result).toBe(`==A=={>>onA ^${FIXED_TS}^<<} mid ==B=={>>onB ^${FIXED_TS}^<<} end`);
+    });
+
     it('does not alter surrounding text', () => {
         const note = 'before ==hl== after';
         const match = mkMatch('hl', note);
