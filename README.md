@@ -1,175 +1,182 @@
 <div align="center">
-	<h1>HiNote - Highlight Text with Comments</h1>
-	<img src="https://img.shields.io/github/downloads/CatMuse/HiNote/total" alt="GitHub Downloads (all assets, all releases)" />
-	<img src="https://img.shields.io/github/v/release/CatMuse/HiNote" alt="GitHub release (latest by date)" />
-	<img src="https://img.shields.io/github/last-commit/CatMuse/HiNote" alt="GitHub last commit" />
-	<img src="https://img.shields.io/github/issues/CatMuse/HiNote" alt="GitHub issues" />
-	<img src="https://img.shields.io/github/stars/CatMuse/HiNote?style=social" alt="GitHub stars" />
+	<h1>HiNote Enhanced — 하이라이트 텍스트에 코멘트 추가하기</h1>
+	<img src="https://img.shields.io/github/downloads/otzslayer/obsidian-hinote-enhanced/total" alt="GitHub Downloads (all assets, all releases)" />
+	<img src="https://img.shields.io/github/v/release/otzslayer/obsidian-hinote-enhanced" alt="GitHub release (latest by date)" />
+	<img src="https://img.shields.io/github/last-commit/otzslayer/obsidian-hinote-enhanced" alt="GitHub last commit" />
+	<img src="https://img.shields.io/github/issues/otzslayer/obsidian-hinote-enhanced" alt="GitHub issues" />
+	<img src="https://img.shields.io/github/stars/otzslayer/obsidian-hinote-enhanced?style=social" alt="GitHub stars" />
 </div>
 
 ---
 
-[简体中文](./README-ZH.md) | English
+한국어 | [English](./README_en.md)
 
-This AI-programmed Obsidian plugin can automatically extract highlighted text from notes, allowing users to add comments, generate AI comments, and engage in dialogue with the highlighted text. Users can highlight text in various formats, export it as knowledge card images or create new notes, while enjoying additional extended features in the main view.
+---
 
->  This plugin is developed with AI assistance and is currently in Beta testing. Please use it with caution and back up your data regularly.
+> **이 플러그인은 [CatMuse/HiNote](https://github.com/CatMuse/HiNote)의 Fork입니다.**
+> 원본 저장소의 기능을 기반으로 추가 개선 및 기능을 적용하고 있습니다.
 
-👇🏻 Click the image to view the video tutorial
+---
+
+AI로 개발된 Obsidian 플러그인으로, 노트의 하이라이트된 텍스트를 자동으로 추출하여 코멘트 추가, AI 코멘트 생성, 하이라이트 텍스트와의 대화가 가능합니다. 다양한 형식으로 텍스트를 하이라이트하고, 지식 카드 이미지로 내보내거나 새 노트를 생성할 수 있으며, 메인 뷰에서 다양한 확장 기능을 활용할 수 있습니다.
+
+> 이 플러그인은 AI의 도움을 받아 개발되었으며, 현재 베타 테스트 중입니다. 주의해서 사용하고 데이터를 정기적으로 백업해 주세요.
+
+👇🏻 이미지를 클릭하면 비디오 튜토리얼을 볼 수 있습니다
 
 [![HiNote Plugin Tutorial](https://img.youtube.com/vi/c1mxMGi1ZEk/maxresdefault.jpg)](https://www.youtube.com/watch?v=c1mxMGi1ZEk)
 
 ---
 
-## ✨ Key Features
+## ✨ 주요 기능
 
-🎯 Auto-extract highlights in multiple formats | 📝 Add comments and notes to highlights | 🤖 AI-assisted comments and intelligent dialogue | 📸 Export as beautiful knowledge cards | 📝 Generate new notes linked to source | 🧠 Spaced repetition learning system (Pro)
+🎯 다양한 형식의 하이라이트 자동 추출 | 📝 하이라이트에 코멘트 및 메모 추가 | 🤖 AI 보조 코멘트 및 스마트 대화 | 📸 아름다운 지식 카드로 내보내기 | 📝 소스와 연결된 새 노트 생성 | 🧠 간격 반복 학습 시스템 (Pro)
 
-> 💡 **Tip:** [Upgrade to Pro](https://hinote.vip) to unlock the FSRS-powered flashcard system for efficient memorization of your highlights
-
----
-
-## Highlighted text retrieval
-
-When you open a note with highlighted text, the sidebar automatically displays the highlighted text in card format. The following three formats of highlight tags are supported: `==`, `<mark>`, and `<span>`. Custom formats can also be defined using regular expressions.
-
-![Highlighted text retrieval](./doc/highlighted-text-retrieval.jpg)
+> 💡 **팁:** [Pro로 업그레이드](https://hinote.vip)하면 FSRS 기반 플래시카드 시스템을 잠금 해제하여 하이라이트를 효율적으로 암기할 수 있습니다
 
 ---
 
-## Highlighted comments
+## 하이라이트 텍스트 추출
 
-The highlight comment feature allows you to quickly engage with highlighted text, preventing your ideas from slipping away. Simply click on the Widgets in the editing area or directly click the add comment button on the card to open the input box.
+하이라이트된 텍스트가 있는 노트를 열면, 사이드바에 자동으로 카드 형식으로 하이라이트 텍스트가 표시됩니다. `==`, `<mark>`, `<span>` 세 가지 형식의 하이라이트 태그가 지원됩니다. 정규식을 사용해 커스텀 형식을 정의할 수도 있습니다.
 
-The note comment feature allows you to add your thoughts to the entire document without relying on any highlighted text. Click the add file comment on the right side of the search bar to open the input box at the top of the highlight list.
+![하이라이트 텍스트 추출](./doc/highlighted-text-retrieval.jpg)
 
-> **Inline storage & Obsidian Sync**: Comments are stored directly inside your Markdown notes as `{>>comment text ^YYYY-MM-DD HH:mm^<<}` blocks placed immediately after the highlighted text. Because comments live in `.md` files, **Obsidian Sync synchronises them natively** without any extra configuration.
+---
+
+## 하이라이트 코멘트
+
+하이라이트 코멘트 기능을 사용하면 하이라이트된 텍스트에 빠르게 생각을 기록해 아이디어를 놓치지 않을 수 있습니다. 편집 영역의 위젯을 클릭하거나 카드의 코멘트 추가 버튼을 직접 클릭하면 입력창이 열립니다.
+
+노트 코멘트 기능을 사용하면 하이라이트에 의존하지 않고 문서 전체에 생각을 추가할 수 있습니다. 검색창 오른쪽의 파일 코멘트 추가 버튼을 클릭하면 하이라이트 목록 상단에 입력창이 열립니다.
+
+> **인라인 저장 및 Obsidian Sync**: 코멘트는 `{>>코멘트 텍스트 ^YYYY-MM-DD HH:mm^<<}` 형식으로 하이라이트 텍스트 바로 뒤에 Markdown 노트 내부에 직접 저장됩니다. 코멘트가 `.md` 파일 안에 있으므로 **Obsidian Sync가 별도 설정 없이 자동으로 동기화**합니다.
 >
-> Flashcard data (Pro) continues to be stored in the `.hinote` folder and is unaffected by this change.
+> 플래시카드 데이터 (Pro)는 계속 `.hinote` 폴더에 저장되며, 이 변경 사항의 영향을 받지 않습니다.
 
 ---
 
-## Inline comment storage & sync
+## 인라인 코멘트 저장 및 동기화
 
-### How comments are stored
+### 코멘트 저장 방식
 
-HiNote embeds comments directly in your note's Markdown source as [CriticMarkup](https://criticmarkup.com/) comment blocks:
+HiNote는 [CriticMarkup](https://criticmarkup.com/) 코멘트 블록으로 노트의 Markdown 소스에 코멘트를 직접 임베드합니다:
 
 ```
-==highlighted text=={>>Your comment ^2024-01-15 10:30^<<}
+==하이라이트 텍스트=={>>내 코멘트 ^2024-01-15 10:30^<<}
 ```
 
-- The block is placed **immediately after** the highlight marker.
-- The `^YYYY-MM-DD HH:mm^` token at the end is the timestamp; it is updated each time the comment is edited.
-- AI-generated comments are prefixed with `🤖 ` inside the block.
-- File-level comments (not tied to a specific highlight) are stored in the note's `frontmatter` under the `comments` key as a list of `{text, ts}` objects.
+- 블록은 하이라이트 마커 **바로 뒤**에 위치합니다.
+- 끝의 `^YYYY-MM-DD HH:mm^` 토큰은 타임스탬프로, 코멘트를 편집할 때마다 업데이트됩니다.
+- AI가 생성한 코멘트는 블록 내부에 `🤖 ` 접두사가 붙습니다.
+- 파일 수준 코멘트(특정 하이라이트에 연결되지 않은 것)는 `comments` 키 아래 `{text, ts}` 객체 목록으로 노트의 `frontmatter`에 저장됩니다.
 
-### Keyboard shortcut
+### 키보드 단축키
 
-| Action | Default shortcut |
-|--------|-----------------|
-| Add comment to selection | `Mod+Shift+C` |
+| 동작 | 기본 단축키 |
+|------|------------|
+| 선택 영역에 코멘트 추가 | `Mod+Shift+C` |
 
-The shortcut can be rebound in **Settings → Hotkeys**.
+단축키는 **설정 → 단축키**에서 변경할 수 있습니다.
 
 ### Obsidian Sync
 
-Comments travel with the `.md` file — no additional sync setup required. Concurrent offline edits follow the same conflict-resolution flow as any other Markdown note.
+코멘트는 `.md` 파일과 함께 이동하며, 별도의 동기화 설정이 필요 없습니다. 오프라인 동시 편집 시 충돌 해결은 다른 Markdown 노트와 동일한 방식으로 처리됩니다.
 
-### Known limitations
+### 알려진 제한 사항
 
-| Situation | Behaviour |
-|-----------|-----------|
-| **Source mode** | `{>>...<<}` raw syntax is visible. HiNote cannot hide decorations in source mode. |
-| **Plugin disabled** | Raw `{>>...<<}` blocks remain in the file but are harmless plain text. |
-| **CriticMarkup plugin installed** | Both plugins may apply styling to `{>>...<<}` blocks, resulting in double decoration. |
-| **Orphan comments** | A `{>>...<<}` block whose preceding highlight marker has been deleted is tagged as an *orphan*. HiNote never auto-deletes orphans; they appear in the sidebar as a separate group. Remove them manually when no longer needed. |
+| 상황 | 동작 |
+|------|------|
+| **소스 모드** | `{>>...<<}` 원시 문법이 표시됩니다. HiNote는 소스 모드에서 데코레이션을 숨길 수 없습니다. |
+| **플러그인 비활성화** | `{>>...<<}` 블록이 파일에 남아 있지만 일반 텍스트로서 무해합니다. |
+| **CriticMarkup 플러그인 설치** | 두 플러그인 모두 `{>>...<<}` 블록에 스타일을 적용하여 이중 데코레이션이 발생할 수 있습니다. |
+| **고아 코멘트** | 이전 하이라이트 마커가 삭제된 `{>>...<<}` 블록은 *고아*로 태그됩니다. HiNote는 고아를 자동으로 삭제하지 않으며, 사이드바에 별도 그룹으로 표시됩니다. 더 이상 필요하지 않으면 수동으로 제거해 주세요. |
 
-### Migrating existing comments
+### 기존 코멘트 마이그레이션
 
-If you have comments stored in the legacy `.hinote/highlights/` sidecar format, run the one-shot migration command:
+레거시 `.hinote/highlights/` 사이드카 형식에 저장된 코멘트가 있다면, 일회성 마이그레이션 명령을 실행하세요:
 
-1. Open the **Command Palette** (`Mod+P`).
-2. Search for **"Migrate comments to inline storage"**.
-3. Review the dry-run report and click **Apply Migration**.
+1. **명령 팔레트**(`Mod+P`)를 엽니다.
+2. **"Migrate comments to inline storage"**를 검색합니다.
+3. 드라이런 리포트를 검토하고 **Apply Migration**을 클릭합니다.
 
-The old `.hinote/highlights/` folder is **never deleted automatically** — it serves as a backup after migration.
-
----
-
-## Export as image
-
-Export your highlighted text and comments to create beautifully designed knowledge cards for easy sharing.
-
-![Export as image](./doc/export-image.jpg)
+기존 `.hinote/highlights/` 폴더는 **마이그레이션 후 자동으로 삭제되지 않습니다** — 마이그레이션 후 백업 역할을 합니다.
 
 ---
 
-## Export as note
+## 이미지로 내보내기
 
-Export all your highlighted text and comments as a new note, displayed in Callout format. Each highlight and comment can be linked back to the source note through block references (Block ID).
+하이라이트된 텍스트와 코멘트를 내보내 공유하기 쉬운 아름다운 지식 카드를 만들 수 있습니다.
 
-![Export as note](./doc/export-as-file.jpg)
-
----
-
-## Extended features of the main view
-
-Drag the right sidebar window to the main view to unlock more features, such as a list of notes with highlighted text, all highlighted cards, and HiCard.
-
-- Notes List: Displays all notes in the knowledge base that contain highlighted text, with the number of highlights indicated.
-- All Highlights: Shows all highlighted cards in the knowledge base, allowing you to focus more on the highlighted content.
-- HiCard: Implements the functionality to generate FlashCards from your highlighted text and comments, assisting you in memorizing and learning (Pro feature)
-
-![Main view](./doc/main-view.jpg)
+![이미지로 내보내기](./doc/export-image.jpg)
 
 ---
 
-## AI Comment
+## 노트로 내보내기
 
-AI can assist you in thinking and add the generated content as a comment below the highlighted text.
+모든 하이라이트 텍스트와 코멘트를 Callout 형식의 새 노트로 내보낼 수 있습니다. 각 하이라이트와 코멘트는 블록 참조(Block ID)를 통해 소스 노트로 다시 연결할 수 있습니다.
 
-First, you need to configure the AI provider, API Key, and model in the plugin's settings menu. Currently supported providers include OpenAI, Gemini, Anthropic, Deepseek, SiliconFlow, and Ollama.
-
-Next, configure your custom Prompt. Here, you can use two fields to obtain the highlighted text and comment content: `{{highlight}}` and `{{comment}}`.
-
-Finally, you can use your custom Prompt in the AI button on the highlighted card. Or you can input your custom Prompt in the comment input box and directly click the Tab key to trigger the AI service.
-
-![AI Comment](./doc/ai-comment.jpg)
+![노트로 내보내기](./doc/export-as-file.jpg)
 
 ---
 
-## Pro Features
+## 메인 뷰의 확장 기능
 
-HiNote offers additional premium features that enhance your note-taking and learning experience:
+오른쪽 사이드바 창을 메인 뷰로 드래그하면 하이라이트된 텍스트가 있는 노트 목록, 모든 하이라이트 카드, HiCard 등 더 많은 기능을 사용할 수 있습니다.
 
-### Flashcard System
+- **노트 목록**: 하이라이트 텍스트가 있는 모든 노트를 하이라이트 수와 함께 표시합니다.
+- **전체 하이라이트**: 지식 베이스의 모든 하이라이트 카드를 표시하여 하이라이트 내용에 더 집중할 수 있습니다.
+- **HiCard**: 하이라이트 텍스트와 코멘트에서 플래시카드를 생성하는 기능으로, 암기와 학습을 도와줍니다 (Pro 기능)
 
-The Flashcard feature is available in the Pro version of HiNote. This advanced spaced repetition system helps you memorize your highlighted content more effectively:
+![메인 뷰](./doc/main-view.jpg)
 
-- Convert your highlights into flashcards with just one click
-- Utilize the FSRS (Free Spaced Repetition Scheduler) algorithm for optimal learning efficiency
-- Customize review schedules to match your learning style
+---
 
-To access these premium features, you'll need to [upgrade to Pro](https://hinote.vip).
+## AI 코멘트
+
+AI가 생각을 보조하고 생성된 내용을 하이라이트 텍스트 아래 코멘트로 추가할 수 있습니다.
+
+먼저, 플러그인 설정 메뉴에서 AI 제공자, API 키, 모델을 설정해야 합니다. 현재 지원되는 제공자는 OpenAI, Gemini, Anthropic, Deepseek, SiliconFlow, Ollama입니다.
+
+다음으로, 커스텀 프롬프트를 설정합니다. 여기서 `{{highlight}}`와 `{{comment}}`를 사용해 하이라이트 텍스트와 코멘트 내용을 가져올 수 있습니다.
+
+마지막으로, 하이라이트 카드의 AI 버튼에서 커스텀 프롬프트를 사용하거나, 코멘트 입력창에 직접 입력하고 Tab 키를 눌러 AI 서비스를 실행할 수 있습니다.
+
+![AI 코멘트](./doc/ai-comment.jpg)
+
+---
+
+## Pro 기능
+
+HiNote는 노트 작성 및 학습 경험을 향상시키는 추가 프리미엄 기능을 제공합니다:
+
+### 플래시카드 시스템
+
+플래시카드 기능은 HiNote Pro 버전에서 사용 가능합니다. 이 고급 간격 반복 시스템은 하이라이트된 내용을 더 효과적으로 암기하는 데 도움을 줍니다:
+
+- 클릭 한 번으로 하이라이트를 플래시카드로 변환
+- 최적의 학습 효율을 위한 FSRS(Free Spaced Repetition Scheduler) 알고리즘 활용
+- 학습 스타일에 맞게 복습 일정 커스터마이즈
+
+이 프리미엄 기능을 이용하려면 [Pro로 업그레이드](https://hinote.vip)해야 합니다.
 
 ![HiCard](./doc/hi-card.jpg)
 
-![HiCard Settings](./doc/hicard-setting.jpg)
+![HiCard 설정](./doc/hicard-setting.jpg)
 
 [![HiNote Pro](./doc/hinote-pro.jpg)](https://www.hinote.vip/en.html)
 
 ---
 
-## Support
+## 지원
 
-If you find this plugin useful and would like to support its development:
+이 플러그인이 유용하다면 개발을 지원해 주세요:
 
-- [Buy me a coffee on Ko-fi](https://ko-fi.com/catmuse)
-- Give the project a ⭐ star to show your support!
+- [Ko-fi에서 커피 사주기](https://ko-fi.com/catmuse)
+- 프로젝트에 ⭐ 스타를 눌러 지지를 표현해 주세요!
 
 ---
 
-## License
+## 라이선스
 
-This plugin is released under the MIT License. The basic features are free and open-source, while some advanced features require a Pro license.
+이 플러그인은 MIT 라이선스 하에 배포됩니다. 기본 기능은 무료 오픈소스이며, 일부 고급 기능은 Pro 라이선스가 필요합니다.
