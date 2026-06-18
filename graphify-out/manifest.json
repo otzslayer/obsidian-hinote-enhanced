@@ -1,0 +1,1192 @@
+{
+  "/home/jay/workspaces/obsidian-hinote-enhanced/.claude/settings.json": {
+    "mtime": 1781742894.5599504,
+    "ast_hash": "e1073342e958ac9f00716938c8f165e3",
+    "semantic_hash": "e1073342e958ac9f00716938c8f165e3"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/.claude/settings.local.json": {
+    "mtime": 1781743445.6903636,
+    "ast_hash": "0e38603e85a2c3ff6e7c4513f9034c4f",
+    "semantic_hash": "0e38603e85a2c3ff6e7c4513f9034c4f"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/esbuild.config.mjs": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "f6104afdb27e236e33ca39d31e75b6b1",
+    "semantic_hash": "f6104afdb27e236e33ca39d31e75b6b1"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/main.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "77f3639fb06d4eabb4d440381e551515",
+    "semantic_hash": "77f3639fb06d4eabb4d440381e551515"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/manifest.json": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "166f01f39c70be00d329018a0db0f43c",
+    "semantic_hash": "166f01f39c70be00d329018a0db0f43c"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/package.json": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "c28149ebb9178899b3dceb605b0f677f",
+    "semantic_hash": "c28149ebb9178899b3dceb605b0f677f"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/commands/index.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "ac2da12a246dd7ab5c1ce30cb4e6347e",
+    "semantic_hash": "ac2da12a246dd7ab5c1ce30cb4e6347e"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/commands/openCommentPanel.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "c6e352c7a0e73683e885cbba2b9cf310",
+    "semantic_hash": "c6e352c7a0e73683e885cbba2b9cf310"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/commands/openMainWindow.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "14dc8dd6ef096b6e7d49905757ac6219",
+    "semantic_hash": "14dc8dd6ef096b6e7d49905757ac6219"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/AIButton.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "96023c81a7167b4f205a179a4b4272ac",
+    "semantic_hash": "96023c81a7167b4f205a179a4b4272ac"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/comment/CommentInput.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "b923eaaa606c3236d0209ef91f6e2c21",
+    "semantic_hash": "b923eaaa606c3236d0209ef91f6e2c21"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/comment/CommentInputActionBar.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "78694ef316fa22157919534fc1edff39",
+    "semantic_hash": "78694ef316fa22157919534fc1edff39"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/comment/CommentInputCleanup.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "83245e883aba1ac1b9d69582dc59c3c0",
+    "semantic_hash": "83245e883aba1ac1b9d69582dc59c3c0"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/comment/CommentInputKeyboard.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "652f33ef9c8274aece23eaf10754159d",
+    "semantic_hash": "652f33ef9c8274aece23eaf10754159d"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/comment/CommentInputSaveController.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "604229261722ee2da45b47cb2df4b08f",
+    "semantic_hash": "604229261722ee2da45b47cb2df4b08f"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/comment/CommentInputView.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "5c0e26168948c245084f423faacffb89",
+    "semantic_hash": "5c0e26168948c245084f423faacffb89"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/comment/CommentWidget.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "54184260996724d406d69a65b5b65e9a",
+    "semantic_hash": "54184260996724d406d69a65b5b65e9a"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/comment/CommentWidgetHelper.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "c9a0cf84bf48d205fbc9d67c42aa8664",
+    "semantic_hash": "c9a0cf84bf48d205fbc9d67c42aa8664"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/comment/InlineAICommentHandler.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "58b55522c3a98e26e64503399eaeb9a5",
+    "semantic_hash": "58b55522c3a98e26e64503399eaeb9a5"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/comment/UnfocusedCommentInput.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "d31e33e16e538c3bd4602d28fe33e5d5",
+    "semantic_hash": "d31e33e16e538c3bd4602d28fe33e5d5"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/comment/index.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "a2efae75defbc471f1dcb5e21b5fae9f",
+    "semantic_hash": "a2efae75defbc471f1dcb5e21b5fae9f"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/highlight/CommentList.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "a78ab17a360dfb2bf53923612514c5f4",
+    "semantic_hash": "a78ab17a360dfb2bf53923612514c5f4"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/highlight/DragContentGenerator.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "743a79fdad5e2380692aac15b5ea1913",
+    "semantic_hash": "743a79fdad5e2380692aac15b5ea1913"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/highlight/DragPreview.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "2cb9efa164aa60024b6f6ac738868e3e",
+    "semantic_hash": "2cb9efa164aa60024b6f6ac738868e3e"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/highlight/HighlightCard.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "eb86eb0c64e60b583f8df7cc8bfd4e0d",
+    "semantic_hash": "eb86eb0c64e60b583f8df7cc8bfd4e0d"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/highlight/HighlightCardRegistry.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "ad829a4e2b81f75c42ab9e799db22f69",
+    "semantic_hash": "ad829a4e2b81f75c42ab9e799db22f69"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/highlight/HighlightCardView.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "78353d209038bcb45a8c1089653c7c80",
+    "semantic_hash": "78353d209038bcb45a8c1089653c7c80"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/highlight/HighlightContent.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "1e39e5dc63e63bb2de659659850281dd",
+    "semantic_hash": "1e39e5dc63e63bb2de659659850281dd"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/highlight/card/Clipboard.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "46671a008381b4267ce4f9abe867892e",
+    "semantic_hash": "46671a008381b4267ce4f9abe867892e"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/highlight/card/DragController.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "1fb837198a406559818d66ec70dc2063",
+    "semantic_hash": "1fb837198a406559818d66ec70dc2063"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/highlight/card/FileNavigator.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "6090fe5890f21806a082d20a87003a5b",
+    "semantic_hash": "6090fe5890f21806a082d20a87003a5b"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/highlight/card/FlashcardController.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "b302bb19c4fdf04e1609414e3cf6b191",
+    "semantic_hash": "b302bb19c4fdf04e1609414e3cf6b191"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/highlight/card/MenuController.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "12b796adf3f703b6de7da7bdc9cd1932",
+    "semantic_hash": "12b796adf3f703b6de7da7bdc9cd1932"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/highlight/card/SelectionController.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "757685680d732c09d0f152ab71b360de",
+    "semantic_hash": "757685680d732c09d0f152ab71b360de"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/highlight/card/TitleBarRenderer.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "a6d01338628204fb01fa5ce8423795c6",
+    "semantic_hash": "a6d01338628204fb01fa5ce8423795c6"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/highlight/card/index.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "1ff729b6200eefb00565098f1f665876",
+    "semantic_hash": "1ff729b6200eefb00565098f1f665876"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/components/highlight/index.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "d22f2eee23f30e38a5e81b87dabe5cd9",
+    "semantic_hash": "d22f2eee23f30e38a5e81b87dabe5cd9"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/editor/EditorHighlightDecorations.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "5e5b87ebd7f1d2bb8adf218001202089",
+    "semantic_hash": "5e5b87ebd7f1d2bb8adf218001202089"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/editor/HighlightDecorator.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "2cd6383c20cf5ec60328ff1582503c9f",
+    "semantic_hash": "2cd6383c20cf5ec60328ff1582503c9f"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/FlashcardComponent.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "8a8668a1ef4971992f760e8613e4a0dc",
+    "semantic_hash": "8a8668a1ef4971992f760e8613e4a0dc"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/FlashcardComponentContext.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "bef1b6b141e46fcd027aa14252bb7c9c",
+    "semantic_hash": "bef1b6b141e46fcd027aa14252bb7c9c"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/FlashcardRenderer.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "80ad56a0501fc2d395cc202e3e67c4ee",
+    "semantic_hash": "80ad56a0501fc2d395cc202e3e67c4ee"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/FlashcardStatsPanel.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "66cd68c55901ea28807417e3123895a6",
+    "semantic_hash": "66cd68c55901ea28807417e3123895a6"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/FlashcardUIState.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "894219615eceddfc8b567c687b023284",
+    "semantic_hash": "894219615eceddfc8b567c687b023284"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/controllers/FlashcardGroupManager.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "e5c09c2e75c95e66b8fe057ac14c1588",
+    "semantic_hash": "e5c09c2e75c95e66b8fe057ac14c1588"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/controllers/FlashcardGroupModal.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "095c45fbafb654ab53d960c610b085dc",
+    "semantic_hash": "095c45fbafb654ab53d960c610b085dc"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/controllers/FlashcardOperations.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "64ca2879c7fa0b256fd593beb8e748ab",
+    "semantic_hash": "64ca2879c7fa0b256fd593beb8e748ab"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/controllers/FlashcardProgress.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "1ee800457640f08e37a911684763870a",
+    "semantic_hash": "1ee800457640f08e37a911684763870a"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/controllers/FlashcardProgressStats.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "8b3e9c84237b8551118d780712b4a6b4",
+    "semantic_hash": "8b3e9c84237b8551118d780712b4a6b4"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/controllers/FlashcardReviewQueue.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "8a0aaf0c6d65b9df92a5833b663e6f79",
+    "semantic_hash": "8a0aaf0c6d65b9df92a5833b663e6f79"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/controllers/FlashcardUtils.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "84d51970ed24a3197b455bb7a153ad05",
+    "semantic_hash": "84d51970ed24a3197b455bb7a153ad05"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/controllers/index.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "a9572bbc97b9aa17cccb8af508c66cbe",
+    "semantic_hash": "a9572bbc97b9aa17cccb8af508c66cbe"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/index.ts": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "1c386f2a8ee8da2f3bd174a847d1e72c",
+    "semantic_hash": "1c386f2a8ee8da2f3bd174a847d1e72c"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/renderers/FlashcardActivationRenderer.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "c770cfeb1f4f1d1a874ccad04bdef137",
+    "semantic_hash": "c770cfeb1f4f1d1a874ccad04bdef137"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/renderers/FlashcardCardRenderer.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "cba720bc3d302ad9604c412ae33eb615",
+    "semantic_hash": "cba720bc3d302ad9604c412ae33eb615"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/renderers/FlashcardEmptyStateRenderer.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "5cb40cf4553e04adca3bbff7e91237f8",
+    "semantic_hash": "5cb40cf4553e04adca3bbff7e91237f8"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/renderers/FlashcardGroupListRenderer.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "696c9642a132b8dbda123f529bfc436c",
+    "semantic_hash": "696c9642a132b8dbda123f529bfc436c"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/renderers/FlashcardMarkdownRenderer.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "2185ca552c01457d862515bc41af2a5f",
+    "semantic_hash": "2185ca552c01457d862515bc41af2a5f"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/components/renderers/index.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "a9f135b7714337a7eee83c9d928b8ff6",
+    "semantic_hash": "a9f135b7714337a7eee83c9d928b8ff6"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/index.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "45c1e936bc1a431f67de63be979516f0",
+    "semantic_hash": "45c1e936bc1a431f67de63be979516f0"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/services/CardGroupFilterMatcher.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "6191a736f522dc01231abcb34e52574b",
+    "semantic_hash": "6191a736f522dc01231abcb34e52574b"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/services/CardGroupRepository.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "49d3df8d045842d7ee51b8bf75bd342d",
+    "semantic_hash": "49d3df8d045842d7ee51b8bf75bd342d"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/services/DailyStatsService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "2fb16ee0fc4429c2b47a52fd30a02f1a",
+    "semantic_hash": "2fb16ee0fc4429c2b47a52fd30a02f1a"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/services/FSRSAdapter.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "fe343de114155cd3df28b9b3bf1a3bab",
+    "semantic_hash": "fe343de114155cd3df28b9b3bf1a3bab"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/services/FSRSManager.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "1ae945d093510435cdd0c206f4dc06bd",
+    "semantic_hash": "1ae945d093510435cdd0c206f4dc06bd"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/services/FSRSService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "cf3cdca23050ffb7e581be6b46bb2125",
+    "semantic_hash": "cf3cdca23050ffb7e581be6b46bb2125"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/services/FlashcardCardService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "7b3626cf13bc642834bbba7cb8fa8cfc",
+    "semantic_hash": "7b3626cf13bc642834bbba7cb8fa8cfc"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/services/FlashcardEventSyncService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "48ab5a4ab6ea98e5da0f82b6fa98e1a1",
+    "semantic_hash": "48ab5a4ab6ea98e5da0f82b6fa98e1a1"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/services/FlashcardFactory.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "f36974243317fe5da4f4ebceff293072",
+    "semantic_hash": "f36974243317fe5da4f4ebceff293072"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/services/FlashcardGroupService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "39158bae48258667c2e48c3dbe534b3d",
+    "semantic_hash": "39158bae48258667c2e48c3dbe534b3d"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/services/FlashcardReviewService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "b5df7a2a3eddc3a031ff0cdc0d42d3ff",
+    "semantic_hash": "b5df7a2a3eddc3a031ff0cdc0d42d3ff"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/services/FlashcardStorageService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "aa1b30bef535c632c5f5a40c42aeb74f",
+    "semantic_hash": "aa1b30bef535c632c5f5a40c42aeb74f"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/services/FlashcardStudyService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "88a906cefa111e0302f89be644ad702e",
+    "semantic_hash": "88a906cefa111e0302f89be644ad702e"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/services/FlashcardUIStateService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "86e9d5096249293522387647f6c7422e",
+    "semantic_hash": "86e9d5096249293522387647f6c7422e"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/services/SourceCardService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "c53742d2f018cbf57f86ff2261fa90d3",
+    "semantic_hash": "c53742d2f018cbf57f86ff2261fa90d3"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/services/index.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "8e85d13d9bb5fef3e201310e258c0e2a",
+    "semantic_hash": "8e85d13d9bb5fef3e201310e258c0e2a"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/settings/FlashcardSettingsTab.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "1ba9e19a5ee99c67c7fab888d6762478",
+    "semantic_hash": "1ba9e19a5ee99c67c7fab888d6762478"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/settings/index.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "1564f580d394b57958224949e1cbc154",
+    "semantic_hash": "1564f580d394b57958224949e1cbc154"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/types/FSRSTypes.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "7c7256502a1e6ad2a83f5097f029697b",
+    "semantic_hash": "7c7256502a1e6ad2a83f5097f029697b"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/types/FlashcardTypes.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "9159ffc59c673152e8d6b6157d2115d0",
+    "semantic_hash": "9159ffc59c673152e8d6b6157d2115d0"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/types/index.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "51107f18219234181f8cc2c45eada19b",
+    "semantic_hash": "51107f18219234181f8cc2c45eada19b"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/i18n/en.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "c27ba8c6ca493ae06dde20c1c49f479a",
+    "semantic_hash": "c27ba8c6ca493ae06dde20c1c49f479a"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/i18n/index.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "93ccd3246170a6fb5c2667640d42b886",
+    "semantic_hash": "93ccd3246170a6fb5c2667640d42b886"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/i18n/zh.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "d3adfca6805468daf86aae19e4406b40",
+    "semantic_hash": "d3adfca6805468daf86aae19e4406b40"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/plugin/PluginBootstrap.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "2ce1edfa2fe879730791e4c5e6ca68aa",
+    "semantic_hash": "2ce1edfa2fe879730791e4c5e6ca68aa"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/plugin/PluginServices.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "3ae64717ac4d76ebcc165e0fc3e59266",
+    "semantic_hash": "3ae64717ac4d76ebcc165e0fc3e59266"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/plugin/WindowManager.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "c897bcec874f4c9c90c64bad3ed046e7",
+    "semantic_hash": "c897bcec874f4c9c90c64bad3ed046e7"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/repositories/HighlightRepository.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "412dca89af311b11b21e7a073604c97c",
+    "semantic_hash": "412dca89af311b11b21e7a073604c97c"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/repositories/IHighlightRepository.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "4572d7f772f9f8ab2f6ce4b052806e2e",
+    "semantic_hash": "4572d7f772f9f8ab2f6ce4b052806e2e"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/BlockIdService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "e19a20c5dbc53dc5baef61046f342bb3",
+    "semantic_hash": "e19a20c5dbc53dc5baef61046f342bb3"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/CanvasService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "57c684e0896605d33d3cef22a86a12cf",
+    "semantic_hash": "57c684e0896605d33d3cef22a86a12cf"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/EventManager.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "3cba509b95ff06d72d76f729fc88598a",
+    "semantic_hash": "3cba509b95ff06d72d76f729fc88598a"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/ExcludePatternMatcher.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "b1d8160c1a75924f917794a97c5075d3",
+    "semantic_hash": "b1d8160c1a75924f917794a97c5075d3"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/ExportService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "a757277341ad1089fd173186b1949deb",
+    "semantic_hash": "a757277341ad1089fd173186b1949deb"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/HighlightManager.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "7866d51e5a6b513f84bb34cb63f6481c",
+    "semantic_hash": "7866d51e5a6b513f84bb34cb63f6481c"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/HighlightService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "53f92130d28a42cfe71659e092fe4b91",
+    "semantic_hash": "53f92130d28a42cfe71659e092fe4b91"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/InitializationManager.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "c29f3005a331630cdb54ba26b07f7770",
+    "semantic_hash": "c29f3005a331630cdb54ba26b07f7770"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/LicenseManager.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "5450fbec91a3017e863e42064aae19ba",
+    "semantic_hash": "5450fbec91a3017e863e42064aae19ba"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/LocationService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "d6a40edbf88cd12a5e115a311aaa5367",
+    "semantic_hash": "d6a40edbf88cd12a5e115a311aaa5367"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/ai/AIServiceManager.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "f2b867b8ad1f733836f792d5cd0c5214",
+    "semantic_hash": "f2b867b8ad1f733836f792d5cd0c5214"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/ai/AIServiceRegistry.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "cbf739e2537c329c831c40a7701c5360",
+    "semantic_hash": "cbf739e2537c329c831c40a7701c5360"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/ai/AITestHelper.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "c534b9d02124466dc0a178847ad067f6",
+    "semantic_hash": "c534b9d02124466dc0a178847ad067f6"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/ai/AnthropicService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "2539b83bb273a0761ab7150d6bb84c8b",
+    "semantic_hash": "2539b83bb273a0761ab7150d6bb84c8b"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/ai/BaseAIService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "f636c24cd9ad4db41738041505317025",
+    "semantic_hash": "f636c24cd9ad4db41738041505317025"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/ai/BaseHTTPClient.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "d56783f25e49938de8f32c6b8fa14f06",
+    "semantic_hash": "d56783f25e49938de8f32c6b8fa14f06"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/ai/CustomAIService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "b2e672d9a5ae40e84fa91b577c067653",
+    "semantic_hash": "b2e672d9a5ae40e84fa91b577c067653"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/ai/DeepseekService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "313295d6bb26a9dab03f7ad74b9b3f89",
+    "semantic_hash": "313295d6bb26a9dab03f7ad74b9b3f89"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/ai/GeminiService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "06d743b7f6ca63b562ca669a81218e05",
+    "semantic_hash": "06d743b7f6ca63b562ca669a81218e05"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/ai/OllamaService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "27c0cfe0e7d32a0e673ae3e2cc853264",
+    "semantic_hash": "27c0cfe0e7d32a0e673ae3e2cc853264"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/ai/OpenAICompatibleService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "685030c1da6870b4ca3e643054032358",
+    "semantic_hash": "685030c1da6870b4ca3e643054032358"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/ai/OpenAIService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "43947b54cbfb099bbf330be29f69c979",
+    "semantic_hash": "43947b54cbfb099bbf330be29f69c979"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/ai/SiliconFlowService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "6ccd0193c39c939f437d7d9a8d92c1b7",
+    "semantic_hash": "6ccd0193c39c939f437d7d9a8d92c1b7"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/ai/factories.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "3dfe0494e2f35b8d4558ba93214856fd",
+    "semantic_hash": "3dfe0494e2f35b8d4558ba93214856fd"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/ai/index.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "887318ee5de7e482606f38f6aa454fed",
+    "semantic_hash": "887318ee5de7e482606f38f6aa454fed"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/ai/types.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "860fb87af5123c03644c23d25a0945e6",
+    "semantic_hash": "860fb87af5123c03644c23d25a0945e6"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/comment/CommentService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "c0fe9f1fccde5362b0ed0ffe1a38e2f6",
+    "semantic_hash": "c0fe9f1fccde5362b0ed0ffe1a38e2f6"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/comment/index.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "4f7349798c1dbfa027aede9cc3bba731",
+    "semantic_hash": "4f7349798c1dbfa027aede9cc3bba731"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/export/ExportContentRenderer.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "d2f14f8d1725fd6a17a1aa66f69fdad0",
+    "semantic_hash": "d2f14f8d1725fd6a17a1aa66f69fdad0"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/export/ExportFileWriter.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "718135148b8b9b06d8c91df6ab6f61a6",
+    "semantic_hash": "718135148b8b9b06d8c91df6ab6f61a6"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/highlight/GlobalHighlightService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "16de7623337320bdb59de5adee6ef807",
+    "semantic_hash": "16de7623337320bdb59de5adee6ef807"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/highlight/HighlightBatchOps.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "87eecd82eba05fc63ee1de47989d1c14",
+    "semantic_hash": "87eecd82eba05fc63ee1de47989d1c14"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/highlight/HighlightCommentResolver.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "791b6801088d4cf1f2c7524ef9023ad4",
+    "semantic_hash": "791b6801088d4cf1f2c7524ef9023ad4"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/highlight/HighlightDataService.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "8c50acc54dc56ed55967978b8613bc33",
+    "semantic_hash": "8c50acc54dc56ed55967978b8613bc33"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/highlight/HighlightExtractor.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "325caa6b7cef7886761ed5b984bfd169",
+    "semantic_hash": "325caa6b7cef7886761ed5b984bfd169"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/highlight/HighlightIndexFileWatcher.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "133b0dc7ca059d5580c1306c29b6b536",
+    "semantic_hash": "133b0dc7ca059d5580c1306c29b6b536"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/highlight/HighlightIndexStore.ts": {
+    "mtime": 1781742784.6425116,
+    "ast_hash": "92cb0d11e082c28b3017f56865b84ada",
+    "semantic_hash": "92cb0d11e082c28b3017f56865b84ada"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/highlight/HighlightIndexer.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "c7c6a567a3d88ba8297188294e7ce97d",
+    "semantic_hash": "c7c6a567a3d88ba8297188294e7ce97d"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/highlight/HighlightMatchStrategies.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "8ee040cb38e65be743405894806d66dd",
+    "semantic_hash": "8ee040cb38e65be743405894806d66dd"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/highlight/HighlightMatcher.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "f3afc65c1b0b9c622a2f069ee7c25cdf",
+    "semantic_hash": "f3afc65c1b0b9c622a2f069ee7c25cdf"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/highlight/index.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "16552c1f6fa52f98e36b013d068fd3a1",
+    "semantic_hash": "16552c1f6fa52f98e36b013d068fd3a1"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/search/SearchService.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "2e93d7801cba9361b99dddf5343aee3b",
+    "semantic_hash": "2e93d7801cba9361b99dddf5343aee3b"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/services/search/index.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "0c67d7a889ae1c0d1e7400a6c24cbdd2",
+    "semantic_hash": "0c67d7a889ae1c0d1e7400a6c24cbdd2"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/settings/SettingsMigration.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "0829e7806585c638e529dd314fa9ddfd",
+    "semantic_hash": "0829e7806585c638e529dd314fa9ddfd"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/settings/SettingsTab.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "b0657e763c41651b729fd4ab007a6118",
+    "semantic_hash": "b0657e763c41651b729fd4ab007a6118"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/settings/ai/AIServiceSettings.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "05ddc2d4104facb1283a1e8f62c1ebbf",
+    "semantic_hash": "05ddc2d4104facb1283a1e8f62c1ebbf"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/settings/ai/CustomAISettings.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "29b23cbeedba257f2bd0620373ee7853",
+    "semantic_hash": "29b23cbeedba257f2bd0620373ee7853"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/settings/ai/OllamaSettings.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "4f7263b395845db907d0a1225f53d931",
+    "semantic_hash": "4f7263b395845db907d0a1225f53d931"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/settings/ai/StandardAIProviderSettings.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "e5fd5fe7ab318758ac02bdcbf8c6c038",
+    "semantic_hash": "e5fd5fe7ab318758ac02bdcbf8c6c038"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/settings/ai/index.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "855b2a6d19c5b51f965ff1c6fe868317",
+    "semantic_hash": "855b2a6d19c5b51f965ff1c6fe868317"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/settings/ai/providerConfigs.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "0ae26b96bc32a1110d5e833c30fb0ef9",
+    "semantic_hash": "0ae26b96bc32a1110d5e833c30fb0ef9"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/settings/components/RegexRuleEditor.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "1b9ddd306d99a46a5aa3f82c0cea1e66",
+    "semantic_hash": "1b9ddd306d99a46a5aa3f82c0cea1e66"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/settings/tabs/AIServiceTab.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "d7e971b8d8fc82a8ed38fd492f759b2e",
+    "semantic_hash": "d7e971b8d8fc82a8ed38fd492f759b2e"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/settings/tabs/GeneralSettingsTab.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "d7a2f0646dee9e2c2db5c87cd7ec0c5a",
+    "semantic_hash": "d7a2f0646dee9e2c2db5c87cd7ec0c5a"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/settings/tabs/PromptSettingsTab.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "3e24c2e9ce7563fe4580de01f604199c",
+    "semantic_hash": "3e24c2e9ce7563fe4580de01f604199c"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/storage/DataValidator.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "3934eec97f1b6365d7324f526b84034c",
+    "semantic_hash": "3934eec97f1b6365d7324f526b84034c"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/storage/FileMappingStore.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "07fc1796eb70bcd1104bdb4745389af4",
+    "semantic_hash": "07fc1796eb70bcd1104bdb4745389af4"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/storage/FilePathUtils.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "bb29608e5dd51eafffdb212f4601f7c6",
+    "semantic_hash": "bb29608e5dd51eafffdb212f4601f7c6"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/storage/FlashcardDataStore.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "401a8da76a462d46aba1113ffbb14426",
+    "semantic_hash": "401a8da76a462d46aba1113ffbb14426"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/storage/HiNoteDataManager.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "5b35de3e0eb69be6362910c938829eec",
+    "semantic_hash": "5b35de3e0eb69be6362910c938829eec"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/storage/HiNoteStorageLayout.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "38844026e5f49cedf153cc21e30aadcf",
+    "semantic_hash": "38844026e5f49cedf153cc21e30aadcf"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/storage/HighlightDataFormat.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "2c7532c44864ad8ca13791f74bb1d9cd",
+    "semantic_hash": "2c7532c44864ad8ca13791f74bb1d9cd"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/templates/ExportModal.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "eeb81edaca8bf45c9e6ae6e2824c9b45",
+    "semantic_hash": "eeb81edaca8bf45c9e6ae6e2824c9b45"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/templates/exportStyles.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "f70a59c1b8ea19f08d1b3ace6a655f72",
+    "semantic_hash": "f70a59c1b8ea19f08d1b3ace6a655f72"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/templates/index.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "650a412dd43bcaf67bf63a7ba210da82",
+    "semantic_hash": "650a412dd43bcaf67bf63a7ba210da82"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/types/ai.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "3b0c50a142088665b86afa71257e7763",
+    "semantic_hash": "3b0c50a142088665b86afa71257e7763"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/types/highlight.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "78f60e36c5e7b09255a787077f07c609",
+    "semantic_hash": "78f60e36c5e7b09255a787077f07c609"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/types/index.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "13d70ae959b07bd5c9793ffed821cb9b",
+    "semantic_hash": "13d70ae959b07bd5c9793ffed821cb9b"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/types/plugin.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "39e4cbe44aa83924790964f163715dd2",
+    "semantic_hash": "39e4cbe44aa83924790964f163715dd2"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/types/settings.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "48e1a897cdab8ebb4ccc51b212b42863",
+    "semantic_hash": "48e1a897cdab8ebb4ccc51b212b42863"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/utils/ConfirmModal.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "6b79de4cd7d84163ba9f90ae6f20f8cf",
+    "semantic_hash": "6b79de4cd7d84163ba9f90ae6f20f8cf"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/utils/HighlightRegexUtils.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "e5cb5f4e6688f2144c8d47e4b0386a64",
+    "semantic_hash": "e5cb5f4e6688f2144c8d47e4b0386a64"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/utils/IdGenerator.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "723338e8a75259ad725db603d0b26cd7",
+    "semantic_hash": "723338e8a75259ad725db603d0b26cd7"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/utils/ObsidianInternals.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "0f69aff1cfe9dd9d8f9342a40ff0ae99",
+    "semantic_hash": "0f69aff1cfe9dd9d8f9342a40ff0ae99"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/actions/HighlightDeletionManager.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "0faf825daf3c8445527e23db40f8dbdf",
+    "semantic_hash": "0faf825daf3c8445527e23db40f8dbdf"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/actions/HighlightIconManager.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "d5d023617d0f89ed436948deb3e73e1d",
+    "semantic_hash": "d5d023617d0f89ed436948deb3e73e1d"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/actions/index.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "d202dfa67397f5cd2de07b1de723adda",
+    "semantic_hash": "d202dfa67397f5cd2de07b1de723adda"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/canvas/CanvasHighlightProcessor.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "491c615c75e440726a31d9a9326be71b",
+    "semantic_hash": "491c615c75e440726a31d9a9326be71b"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/canvas/index.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "f80eecbd1683842d76dbdac31f651ef0",
+    "semantic_hash": "f80eecbd1683842d76dbdac31f651ef0"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/comments/CommentController.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "17cf0eda3e84a40daf9ea01b4ba3461d",
+    "semantic_hash": "17cf0eda3e84a40daf9ea01b4ba3461d"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/comments/CommentInputManager.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "6a2acd2ddf255b6b8de341da4c6abfe4",
+    "semantic_hash": "6a2acd2ddf255b6b8de341da4c6abfe4"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/comments/index.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "15f56878552e3e0eca2fa00b6519a027",
+    "semantic_hash": "15f56878552e3e0eca2fa00b6519a027"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/exports/ExportManager.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "005734f812ff1b15b77c113d5ea00983",
+    "semantic_hash": "005734f812ff1b15b77c113d5ea00983"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/exports/index.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "e51a9ecab4f5f71c127cc38eae85c884",
+    "semantic_hash": "e51a9ecab4f5f71c127cc38eae85c884"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/flashcards/FlashcardViewManager.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "8c588c6a951060d3fb3d3e98251b15c2",
+    "semantic_hash": "8c588c6a951060d3fb3d3e98251b15c2"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/flashcards/HighlightFlashcardManager.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "51b1b3f5be2ff05f30c120d5c720ad68",
+    "semantic_hash": "51b1b3f5be2ff05f30c120d5c720ad68"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/flashcards/index.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "9a4a0525a4d9e030e7f50d3d830863a7",
+    "semantic_hash": "9a4a0525a4d9e030e7f50d3d830863a7"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/index.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "59f7170eca3bb443ea306ed1f15a34f7",
+    "semantic_hash": "59f7170eca3bb443ea306ed1f15a34f7"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/list/HighlightListController.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "b60f6c3044dbf1a532930fe9f9e76080",
+    "semantic_hash": "b60f6c3044dbf1a532930fe9f9e76080"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/list/InfiniteScrollManager.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "ef35b8ae85a8fa599fe774d7ff4f86e1",
+    "semantic_hash": "ef35b8ae85a8fa599fe774d7ff4f86e1"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/list/index.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "7e6d06a7bfb93abdff383ded677d8caf",
+    "semantic_hash": "7e6d06a7bfb93abdff383ded677d8caf"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/preview/PreviewHighlightResolver.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "0334ae1cdb38e29d3be0e8d202814dec",
+    "semantic_hash": "0334ae1cdb38e29d3be0e8d202814dec"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/preview/PreviewWidgetRenderer.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "6ee13a48d2cdda301b1a6f43ef99603a",
+    "semantic_hash": "6ee13a48d2cdda301b1a6f43ef99603a"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/preview/index.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "9830c8cb9328953572b35cfbb1655ecb",
+    "semantic_hash": "9830c8cb9328953572b35cfbb1655ecb"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/rendering/HighlightRenderController.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "7e580bb4bc67ca2063c6719f2f378c89",
+    "semantic_hash": "7e580bb4bc67ca2063c6719f2f378c89"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/rendering/HighlightRenderManager.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "c844a82bd6f06909c8352cd5fc7dbd93",
+    "semantic_hash": "c844a82bd6f06909c8352cd5fc7dbd93"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/rendering/index.ts": {
+    "mtime": 1781742784.646512,
+    "ast_hash": "ec0c0d31ebc1236dcc8528349bc8cded",
+    "semantic_hash": "ec0c0d31ebc1236dcc8528349bc8cded"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/virtual/VirtualHighlightManager.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "8e7d3948b6526a97ab17c28839733a45",
+    "semantic_hash": "8e7d3948b6526a97ab17c28839733a45"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/highlight/virtual/index.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "86faa76826a0821a6d27124ec2580fb4",
+    "semantic_hash": "86faa76826a0821a6d27124ec2580fb4"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/hinote/HiNoteView.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "0ae44b7f1abbba593fb543c338195c56",
+    "semantic_hash": "0ae44b7f1abbba593fb543c338195c56"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/hinote/HiNoteViewEventBindings.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "cfb29dca70b0095826cfbd1ada189aa5",
+    "semantic_hash": "cfb29dca70b0095826cfbd1ada189aa5"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/hinote/HiNoteViewSetup.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "c870d0ae1d524c900316b273ea69bbbb",
+    "semantic_hash": "c870d0ae1d524c900316b273ea69bbbb"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/hinote/HiNoteViewSetupTypes.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "900f94944aa47d55a48428fac277349d",
+    "semantic_hash": "900f94944aa47d55a48428fac277349d"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/hinote/ViewState.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "1a0c16d40e44e158bfe935f06fb5dfd2",
+    "semantic_hash": "1a0c16d40e44e158bfe935f06fb5dfd2"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/hinote/setup/FileListSetup.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "70d9948b6457359fa5afcf3e349ce368",
+    "semantic_hash": "70d9948b6457359fa5afcf3e349ce368"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/hinote/setup/HighlightRenderingSetup.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "ccf150d7675ea5b4550da6ab3ba162cc",
+    "semantic_hash": "ccf150d7675ea5b4550da6ab3ba162cc"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/hinote/setup/LayoutCanvasSetup.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "021aaa358a59d70fb784e09fba178a71",
+    "semantic_hash": "021aaa358a59d70fb784e09fba178a71"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/hinote/setup/SearchSelectionSetup.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "493557282b7c751e9507627a4a52d2b3",
+    "semantic_hash": "493557282b7c751e9507627a4a52d2b3"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/layout/LayoutManager.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "2ae0c3133feade89de39850829b12590",
+    "semantic_hash": "2ae0c3133feade89de39850829b12590"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/layout/ViewPositionController.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "4007ae239fc31822c3cc3fdd4e195a01",
+    "semantic_hash": "4007ae239fc31822c3cc3fdd4e195a01"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/layout/ViewPositionDetector.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "34252f404a61d4c6fa3fb6295d981688",
+    "semantic_hash": "34252f404a61d4c6fa3fb6295d981688"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/layout/index.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "cfaa65ed930d71d1925b130085d2e5ed",
+    "semantic_hash": "cfaa65ed930d71d1925b130085d2e5ed"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/managers/DeviceManager.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "e9e3db65d30c14240d2f139260c8ba9c",
+    "semantic_hash": "e9e3db65d30c14240d2f139260c8ba9c"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/managers/EventCoordinator.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "94344076a5d8ebfe0afef0a98fd15abd",
+    "semantic_hash": "94344076a5d8ebfe0afef0a98fd15abd"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/managers/FileListController.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "f531dc222f74cee11cd9b7230e1f4310",
+    "semantic_hash": "f531dc222f74cee11cd9b7230e1f4310"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/managers/FileListDataSource.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "ce25281588518a3fe50b07e74d64fc9a",
+    "semantic_hash": "ce25281588518a3fe50b07e74d64fc9a"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/managers/FileListItemRenderer.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "bfa30566082f6bb3ca7d6eba5dc9228a",
+    "semantic_hash": "bfa30566082f6bb3ca7d6eba5dc9228a"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/managers/FileListManager.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "ad6c6d677db99c27e860dc39c3dbdb6a",
+    "semantic_hash": "ad6c6d677db99c27e860dc39c3dbdb6a"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/managers/SearchUIHelper.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "1df32615b98f6897e4ee2295688497b1",
+    "semantic_hash": "1df32615b98f6897e4ee2295688497b1"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/managers/SearchUIManager.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "c128f0b238502f91680e8aa746eec9ab",
+    "semantic_hash": "c128f0b238502f91680e8aa746eec9ab"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/managers/UIInitializer.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "9500225e49875a5452c138fca69c41fa",
+    "semantic_hash": "9500225e49875a5452c138fca69c41fa"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/managers/index.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "9b8a9399366d8fb6b82e22fb9579a222",
+    "semantic_hash": "9b8a9399366d8fb6b82e22fb9579a222"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/selection/BatchExportOperations.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "c9cab0b52398378cb554e76faa21578c",
+    "semantic_hash": "c9cab0b52398378cb554e76faa21578c"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/selection/BatchFlashcardOperations.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "575195e2001399bc7fe0bbd49af7a0dc",
+    "semantic_hash": "575195e2001399bc7fe0bbd49af7a0dc"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/selection/BatchHighlightDeletionOperations.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "29b0bff34d91ff875d3c374d748e448f",
+    "semantic_hash": "29b0bff34d91ff875d3c374d748e448f"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/selection/BatchOperationsHandler.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "e8180e6e5d779257791cdf7c9e7c8a9e",
+    "semantic_hash": "e8180e6e5d779257791cdf7c9e7c8a9e"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/selection/SelectionBoxController.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "bab8417f4f940e217f875beaa56c30de",
+    "semantic_hash": "bab8417f4f940e217f875beaa56c30de"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/selection/SelectionManager.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "20c94a5b69475c7509c10cbff9121cfe",
+    "semantic_hash": "20c94a5b69475c7509c10cbff9121cfe"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/views/selection/index.ts": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "9e35e08a2e232b8e9aab2be4bfebf571",
+    "semantic_hash": "9e35e08a2e232b8e9aab2be4bfebf571"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/tsconfig.json": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "bc3e4d9c774a1e7c0e9efd6a00dbf430",
+    "semantic_hash": "bc3e4d9c774a1e7c0e9efd6a00dbf430"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/version-bump.mjs": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "dca752ddd5cb1f107e0f63d03028b55a",
+    "semantic_hash": "dca752ddd5cb1f107e0f63d03028b55a"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/versions.json": {
+    "mtime": 1781742784.6505125,
+    "ast_hash": "228a3e3633dea7d753c7a27c09b1f7f6",
+    "semantic_hash": "228a3e3633dea7d753c7a27c09b1f7f6"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/.github/FUNDING.yml": {
+    "mtime": 1781742784.602508,
+    "ast_hash": "16263fede8ea7bee478e3b9ba7e07528",
+    "semantic_hash": "16263fede8ea7bee478e3b9ba7e07528"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/.github/workflows/release.yml": {
+    "mtime": 1781742784.602508,
+    "ast_hash": "6ae8dd39f8fca497e7c7941674b0f65b",
+    "semantic_hash": "6ae8dd39f8fca497e7c7941674b0f65b"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/AGENTS.md": {
+    "mtime": 1781742784.6065085,
+    "ast_hash": "21277929b5dcbc84a738c2d5c197f04f",
+    "semantic_hash": "21277929b5dcbc84a738c2d5c197f04f"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/CLAUDE.md": {
+    "mtime": 1781743092.4479673,
+    "ast_hash": "21277929b5dcbc84a738c2d5c197f04f",
+    "semantic_hash": "21277929b5dcbc84a738c2d5c197f04f"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/README-ZH.md": {
+    "mtime": 1781742784.6065085,
+    "ast_hash": "fbf8e82b138ba2bc5a2b9aa8f2a8eef2",
+    "semantic_hash": "fbf8e82b138ba2bc5a2b9aa8f2a8eef2"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/README.md": {
+    "mtime": 1781742784.6065085,
+    "ast_hash": "417e36e6960f000cb53d36b542822b2b",
+    "semantic_hash": "417e36e6960f000cb53d36b542822b2b"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/docs/superpowers/specs/2026-06-18-inline-comment-storage-design.md": {
+    "mtime": 1781747795.1730769,
+    "ast_hash": "a2201c0edfc45c9894b7e51ef59326a9",
+    "semantic_hash": "a2201c0edfc45c9894b7e51ef59326a9"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/src/flashcard/README.md": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "91f59349ce6e598ed8d3c0dfd274fa59",
+    "semantic_hash": "91f59349ce6e598ed8d3c0dfd274fa59"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/doc/ai-comment.jpg": {
+    "mtime": 1781742784.6065085,
+    "ast_hash": "4c24da5eafa3a4a52a392ae930fd29e0",
+    "semantic_hash": "4c24da5eafa3a4a52a392ae930fd29e0"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/doc/buy-me-a-coffee.png": {
+    "mtime": 1781742784.6065085,
+    "ast_hash": "c7b6f8e340fc3854f941b3d6a78bc970",
+    "semantic_hash": "c7b6f8e340fc3854f941b3d6a78bc970"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/doc/export-as-file.jpg": {
+    "mtime": 1781742784.6145093,
+    "ast_hash": "fbc17723160a79313b8181c726c60d64",
+    "semantic_hash": "fbc17723160a79313b8181c726c60d64"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/doc/export-image.jpg": {
+    "mtime": 1781742784.6185095,
+    "ast_hash": "5e88eb21455ca079f7af8fb6dd7fedd9",
+    "semantic_hash": "5e88eb21455ca079f7af8fb6dd7fedd9"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/doc/hi-card.jpg": {
+    "mtime": 1781742784.6265104,
+    "ast_hash": "abb3753a6d54727eb776423a4b1a2a1d",
+    "semantic_hash": "abb3753a6d54727eb776423a4b1a2a1d"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/doc/hicard-setting.jpg": {
+    "mtime": 1781742784.6265104,
+    "ast_hash": "5b139c64f6f0daf54a12497aaff1f007",
+    "semantic_hash": "5b139c64f6f0daf54a12497aaff1f007"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/doc/highlighted-text-retrieval.jpg": {
+    "mtime": 1781742784.634511,
+    "ast_hash": "3dc812fb7d01c6316d20c0d8cc5e9285",
+    "semantic_hash": "3dc812fb7d01c6316d20c0d8cc5e9285"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/doc/hinote-pro.jpg": {
+    "mtime": 1781742784.634511,
+    "ast_hash": "bd7913de4d72335fcaaf58dc2fb0c43b",
+    "semantic_hash": "bd7913de4d72335fcaaf58dc2fb0c43b"
+  },
+  "/home/jay/workspaces/obsidian-hinote-enhanced/doc/main-view.jpg": {
+    "mtime": 1781742784.6385114,
+    "ast_hash": "67f14b387459edcb035ee04cbc7781dc",
+    "semantic_hash": "67f14b387459edcb035ee04cbc7781dc"
+  }
+}

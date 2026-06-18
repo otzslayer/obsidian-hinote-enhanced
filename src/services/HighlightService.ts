@@ -1,13 +1,10 @@
 import { App, TFile } from "obsidian";
 import { HighlightInfo } from '../types/highlight';
-import { HighlightInfo as HiNote } from '../types/highlight';
-import { HighlightRepository } from '../repositories/HighlightRepository';
 import type { PluginSettings } from '../types/settings';
 import {
     HighlightBatchOps,
     HighlightExtractor,
     HighlightIndexer,
-    HighlightMatcher
 } from './highlight';
 
 /**
@@ -23,17 +20,14 @@ import {
  */
 export class HighlightService {
     private extractor: HighlightExtractor;
-    private matcher: HighlightMatcher;
     private indexer: HighlightIndexer;
     private batchOps: HighlightBatchOps;
 
     constructor(
         private app: App,
         getSettings?: () => PluginSettings | undefined,
-        getHighlightRepository?: () => HighlightRepository | undefined
     ) {
         this.extractor = new HighlightExtractor(app, getSettings);
-        this.matcher = new HighlightMatcher(getHighlightRepository);
         this.indexer = new HighlightIndexer(app, this.extractor);
         this.batchOps = new HighlightBatchOps(app, this.extractor);
     }
@@ -78,20 +72,6 @@ export class HighlightService {
 
     async searchHighlightsFromIndex(searchTerm: string): Promise<HighlightInfo[]> {
         return this.indexer.searchHighlightsFromIndex(searchTerm);
-    }
-
-    // ==================== 匹配与合并 (委托给 HighlightMatcher) ====================
-    
-    public findMatchingHighlight(file: TFile, highlight: HiNote, highlightRepository: HighlightRepository): HiNote | null {
-        return this.matcher.findMatchingHighlight(file, highlight, highlightRepository);
-    }
-
-    public mergeHighlightsWithComments(
-        highlights: HighlightInfo[],
-        storedComments: HiNote[],
-        file: TFile
-    ): HighlightInfo[] {
-        return this.matcher.mergeHighlightsWithComments(highlights, storedComments, file);
     }
 
     // ==================== 批量操作 (委托给 HighlightBatchOps) ====================

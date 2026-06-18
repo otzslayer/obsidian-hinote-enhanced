@@ -1,6 +1,5 @@
 import { App, TFile } from "obsidian";
 import { HighlightInfo } from "../types/highlight";
-import { HighlightRepository } from "../repositories/HighlightRepository";
 import { t } from "../i18n";
 import { HighlightService } from "./HighlightService";
 import type { PluginSettings } from "../types/settings";
@@ -14,7 +13,6 @@ export class ExportService {
 
     constructor(
         private app: App,
-        private highlightRepository: HighlightRepository,
         highlightService?: HighlightService,
         private getSettings?: () => PluginSettings
     ) {
@@ -131,12 +129,8 @@ export class ExportService {
      */
     private async getFileHighlights(file: TFile): Promise<HighlightInfo[]> {
         const content = await this.app.vault.read(file);
-        const highlights = this.highlightService.extractHighlights(content, file);
-        
-        // 获取已存储的评论
-        const storedComments = this.highlightRepository.getCachedHighlights(file.path) || [];
-        
-        return this.highlightService.mergeHighlightsWithComments(highlights, storedComments, file);
+        // Comments come from inline parsing inside extractHighlights.
+        return this.highlightService.extractHighlights(content, file);
     }
 
     /**

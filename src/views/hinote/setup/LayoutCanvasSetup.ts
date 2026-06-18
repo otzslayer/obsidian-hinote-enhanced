@@ -100,7 +100,6 @@ export function setupLayoutAndCanvas(options: LayoutAndCanvasSetupOptions): {
     const globalHighlightService = new GlobalHighlightService(
         app,
         highlightService,
-        highlightRepository
     );
 
     const canvasProcessor = new CanvasHighlightProcessor(

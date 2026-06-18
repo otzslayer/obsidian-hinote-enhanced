@@ -58,7 +58,6 @@ export class HiNoteView extends ItemView {
         this.highlightService = services.highlightService;
         this.exportService = new ExportService(
             this.app,
-            this.highlightRepository,
             this.highlightService,
             () => this.plugin.settings
         );

@@ -30,7 +30,6 @@ export class HighlightDecorator {
         this.highlightService = highlightService;
         this.previewRenderer = new PreviewWidgetRenderer(
             this.plugin,
-            this.highlightRepository,
             this.highlightService
         );
     }

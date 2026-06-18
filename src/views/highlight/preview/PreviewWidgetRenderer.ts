@@ -1,6 +1,5 @@
 import { TFile, MarkdownPostProcessorContext } from "obsidian";
 import { HighlightInfo as HiNote } from "../../../types/highlight";
-import { HighlightRepository } from "../../../repositories/HighlightRepository";
 import { HighlightService } from '../../../services/HighlightService';
 import { CommentWidgetHelper } from '../../../components/comment';
 import { PreviewHighlightResolver } from "./PreviewHighlightResolver";
@@ -15,10 +14,9 @@ export class PreviewWidgetRenderer {
 
     constructor(
         private plugin: HiNotePluginContext,
-        private highlightRepository: HighlightRepository,
         private highlightService: HighlightService
     ) {
-        this.highlightResolver = new PreviewHighlightResolver(this.highlightRepository);
+        this.highlightResolver = new PreviewHighlightResolver();
     }
 
     /**

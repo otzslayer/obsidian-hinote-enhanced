@@ -60,7 +60,6 @@ export class InitializationManager {
         const highlightService = new HighlightService(
             this.plugin.app,
             () => this.plugin.settings,
-            () => highlightRepository
         );
         // 异步构建索引，不阻塞初始化
         void highlightService.initialize();

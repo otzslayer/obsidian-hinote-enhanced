@@ -1,7 +1,5 @@
 import { MarkdownPostProcessorContext, TFile } from "obsidian";
 import { HighlightInfo as HiNote } from "../../../types/highlight";
-import { HighlightRepository } from "../../../repositories/HighlightRepository";
-import { HighlightCommentResolver } from "../../../services/highlight";
 
 export type PreviewHighlight = HiNote & { line: number };
 
@@ -27,11 +25,8 @@ const BLOCK_TAGS = new Set([
  * Preview renderer 只应该关心 DOM 渲染；这里集中处理存储匹配、评论补全和行号计算。
  */
 export class PreviewHighlightResolver {
-    private commentResolver: HighlightCommentResolver;
+    constructor() {}
 
-    constructor(highlightRepository: HighlightRepository) {
-        this.commentResolver = new HighlightCommentResolver(highlightRepository);
-    }
 
     enrichHighlightsWithComments(
         rawHighlights: HiNote[],
@@ -67,8 +62,9 @@ export class PreviewHighlightResolver {
         ) || null;
     }
 
-    private enrichHighlight(highlight: HiNote, file: TFile): HiNote {
-        return this.commentResolver.resolveHighlight(file, highlight);
+    private enrichHighlight(highlight: HiNote, _file: TFile): HiNote {
+        // Comments are already populated inline by extractHighlights — return as-is.
+        return { ...highlight, comments: highlight.comments ?? [] };
     }
 
     private getSectionInfo(

@@ -59,7 +59,6 @@ export async function setupHiNoteView(options: HiNoteViewSetupOptions): Promise<
     const highlightDataService = new HighlightDataService(
         app,
         highlightService,
-        highlightRepository
     );
 
     highlightListController = new HighlightListController({

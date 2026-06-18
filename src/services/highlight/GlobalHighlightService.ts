@@ -1,8 +1,6 @@
 import { TFile, App } from 'obsidian';
 import { HighlightInfo } from '../../types/highlight';
-import { HighlightInfo as HiNote } from '../../types/highlight';
 import { HighlightService } from '../HighlightService';
-import { HighlightRepository } from '../../repositories/HighlightRepository';
 
 /**
  * 全局高亮服务
@@ -17,16 +15,13 @@ import { HighlightRepository } from '../../repositories/HighlightRepository';
 export class GlobalHighlightService {
     private app: App;
     private highlightService: HighlightService;
-    private highlightRepository: HighlightRepository;
-    
+
     constructor(
         app: App,
         highlightService: HighlightService,
-        highlightRepository: HighlightRepository
     ) {
         this.app = app;
         this.highlightService = highlightService;
-        this.highlightRepository = highlightRepository;
     }
     
     /**
@@ -60,26 +55,17 @@ export class GlobalHighlightService {
             return this.filterCachedHighlightsByPath(cachedHighlights, searchTerm);
         }
         
-        // 缓存不可用，从文件读取
+        // 缓存不可用，从文件读取（comments come from inline parsing）
         const allHighlights = await this.highlightService.getAllHighlights();
         const result: HighlightInfo[] = [];
-        
+
         for (const { file, highlights } of allHighlights) {
-            // 如果有搜索词，检查文件路径是否匹配
             if (searchTerm && !file.path.toLowerCase().includes(searchTerm.toLowerCase())) {
                 continue;
             }
-            
-            const fileComments = await this.highlightRepository.getFileHighlights(file.path);
-            const processedHighlights = this.processFileHighlights(highlights, fileComments, file);
-            result.push(...processedHighlights);
-            
-            // 添加虚拟高亮
-            const virtualHighlights = this.getVirtualHighlights(fileComments, file);
-            result.push(...virtualHighlights);
+            result.push(...this.addFileIcon(highlights));
         }
-        
-        // 添加稳定排序
+
         return this.sortHighlights(result);
     }
     
@@ -110,13 +96,7 @@ export class GlobalHighlightService {
             const file = this.app.vault.getAbstractFileByPath(filePath);
             if (!(file instanceof TFile)) continue;
             
-            const fileComments = await this.highlightRepository.getFileHighlights(file.path);
-            const processedHighlights = this.processFileHighlights(highlights, fileComments, file);
-            result.push(...processedHighlights);
-            
-            // 添加虚拟高亮
-            const virtualHighlights = this.getVirtualHighlights(fileComments, file);
-            result.push(...virtualHighlights);
+            result.push(...this.addFileIcon(highlights));
         }
         
         // 添加稳定排序
@@ -156,13 +136,7 @@ export class GlobalHighlightService {
         const result: HighlightInfo[] = [];
         
         for (const { file, highlights } of allHighlights) {
-            const fileComments = await this.highlightRepository.getFileHighlights(file.path);
-            const processedHighlights = this.processFileHighlights(highlights, fileComments, file);
-            result.push(...processedHighlights);
-            
-            // 添加虚拟高亮
-            const virtualHighlights = this.getVirtualHighlights(fileComments, file);
-            result.push(...virtualHighlights);
+            result.push(...this.addFileIcon(highlights));
         }
         
         // 添加稳定排序：按文件路径和位置排序
@@ -191,37 +165,15 @@ export class GlobalHighlightService {
             const file = this.app.vault.getAbstractFileByPath(filePath);
             if (!(file instanceof TFile)) continue;
             
-            const fileComments = await this.highlightRepository.getFileHighlights(file.path);
-            const processedHighlights = this.processFileHighlights(highlights, fileComments, file);
-            result.push(...processedHighlights);
-            
-            // 添加虚拟高亮
-            const virtualHighlights = this.getVirtualHighlights(fileComments, file);
-            result.push(...virtualHighlights);
+            result.push(...this.addFileIcon(highlights));
         }
         
         // 添加稳定排序：按文件路径和位置排序
         return this.sortHighlights(result);
     }
     
-    /**
-     * 处理文件的高亮
-     */
-    private processFileHighlights(
-        highlights: HighlightInfo[],
-        fileComments: HiNote[],
-        file: TFile
-    ): HighlightInfo[] {
-        return this.highlightService.mergeHighlightsWithComments(highlights, fileComments, file);
-    }
-    
-    /**
-     * 获取虚拟高亮（已废弃，由 mergeHighlightsWithComments 统一处理）
-     * 保留此方法以兼容现有代码，但实际上不再使用
-     */
-    private getVirtualHighlights(fileComments: HiNote[], file: TFile): HighlightInfo[] {
-        // 虚拟高亮现在由 mergeHighlightsWithComments 统一处理
-        return [];
+    private addFileIcon(highlights: HighlightInfo[]): HighlightInfo[] {
+        return highlights.map(h => ({ ...h, fileIcon: h.fileIcon ?? 'file-text' }));
     }
     
     /**
