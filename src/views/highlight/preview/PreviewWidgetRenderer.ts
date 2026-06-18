@@ -1,9 +1,11 @@
 import { TFile, MarkdownPostProcessorContext } from "obsidian";
 import { HighlightInfo as HiNote } from "../../../types/highlight";
 import { HighlightService } from '../../../services/HighlightService';
-import { CommentWidgetHelper } from '../../../components/comment';
+import { CommentWidgetHelper, CommentInput } from '../../../components/comment';
+import { CommentService } from '../../../services/comment/CommentService';
 import { PreviewHighlightResolver } from "./PreviewHighlightResolver";
 import type { HiNotePluginContext } from "../../../types/plugin";
+import type CommentPlugin from "../../../../main";
 
 /**
  * 읽기 모드 주석 위젯 렌더러
@@ -14,7 +16,8 @@ export class PreviewWidgetRenderer {
 
     constructor(
         private plugin: HiNotePluginContext,
-        private highlightService: HighlightService
+        private highlightService: HighlightService,
+        private commentService: CommentService
     ) {
         this.highlightResolver = new PreviewHighlightResolver();
     }
@@ -75,7 +78,7 @@ export class PreviewWidgetRenderer {
         const widget = mark.createSpan({ cls: 'hi-note-widget hi-note-preview-widget' });
         const hasComments = !!(highlight.comments && highlight.comments.length > 0);
 
-        // 보조 클래스로 버튼 생성
+        // 코멘트 유무와 상관없이 버튼 생성 (항상 createButton 호출, hasComments=false → hidden 클래스 추가됨)
         const button = CommentWidgetHelper.createButton(widget, hasComments);
         const iconContainer = button.querySelector('.hi-note-icon-container') as HTMLElement;
 
@@ -89,13 +92,47 @@ export class PreviewWidgetRenderer {
             // 툴팁 이벤트 설정
             CommentWidgetHelper.setupTooltipEvents(button, widget, tooltip);
 
-            // 클릭 이벤트 설정
+            // 클릭 이벤트: 인라인 추가 (기존 패널 열기 대신 통일)
             CommentWidgetHelper.setupClickEvent(button, tooltip, () =>
-                CommentWidgetHelper.openCommentPanel(this.plugin.app, highlight, this.plugin.eventManager)
+                this.openInlineCommentInput(widget, highlight)
             );
 
             // 정리 옵저버 생성
             CommentWidgetHelper.createCleanupObserver(widget, tooltip);
+        } else {
+            // 코멘트 없음: 호버 시 버튼 노출
+            CommentWidgetHelper.setupEmptyCommentHover(widget, button);
+
+            // 클릭 이벤트: 인라인 추가
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.openInlineCommentInput(widget, highlight);
+            });
         }
+    }
+
+    /**
+     * 읽기 모드에서 하이라이트 옆에 CommentInput을 마운트하여 인라인으로 코멘트 추가
+     */
+    private openInlineCommentInput(widget: HTMLElement, highlight: HiNote): void {
+        // 중복 입력창 방지
+        if (widget.querySelector('.hi-note-inline-comment-input')) return;
+
+        const container = widget.createDiv({ cls: 'hi-note-inline-comment-input' });
+
+        new CommentInput(
+            container,
+            highlight,
+            undefined,
+            this.plugin as unknown as CommentPlugin,
+            {
+                onSave: async (content: string) => {
+                    await this.commentService.addComment(highlight, content);
+                },
+                onCancel: () => container.remove(),
+                onClosed: () => container.remove(),
+            }
+        ).show();
     }
 }

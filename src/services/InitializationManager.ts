@@ -83,7 +83,7 @@ export class InitializationManager {
         const fsrsManager = new FSRSManager(this.plugin, dataManager);
 
         // 하이라이트 데코레이터를 초기화합니다
-        const highlightDecorator = new HighlightDecorator(this.plugin, highlightRepository, highlightService, eventManager);
+        const highlightDecorator = new HighlightDecorator(this.plugin, highlightRepository, highlightService, eventManager, highlightManager);
         highlightDecorator.enable();
 
         return {
