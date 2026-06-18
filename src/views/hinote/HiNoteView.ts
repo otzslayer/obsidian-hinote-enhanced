@@ -16,7 +16,7 @@ import { setupHiNoteView } from './HiNoteViewSetup';
 import { HiNoteViewSetupResult } from './HiNoteViewSetupTypes';
 import type { PluginServices } from '../../plugin/PluginServices';
 
-export const VIEW_TYPE_HINOTE = "hinote-view";
+export const VIEW_TYPE_HINOTE = "hinote-enhanced-view";
 
 /**
  * HiNote 메인 뷰
