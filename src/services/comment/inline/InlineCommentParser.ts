@@ -1,9 +1,10 @@
 /**
  * Pure inline comment parser — no Obsidian runtime dependency.
  *
- * Format: {>>text ^YYYY-MM-DD HH:mm^<<}
- *   - Text may contain ^, but only a strict end-anchored ^YYYY-MM-DD HH:mm^ token
- *     immediately before <<} is treated as the timestamp (KTD1).
+ * Format: {>>text ^YYYY-MM-DD HH:mm:ss^<<}
+ *   - Text may contain ^, but only a strict end-anchored ^YYYY-MM-DD HH:mm[:ss]^
+ *     token immediately before <<} is treated as the timestamp (KTD1). Seconds are
+ *     optional for back-compat with minute-precision timestamps written before.
  *   - AI comments are prefixed with "🤖 " (KTD, R4).
  *   - Orphans: {>>...<<} blocks with no preceding highlight match end (KTD5).
  */
@@ -42,9 +43,10 @@ export interface InlineParseResult {
 
 const AI_PREFIX = '🤖 ';
 
-// End-anchored timestamp: ^YYYY-MM-DD HH:mm^ immediately before <<}
-// Captures the token at the very end of the block content.
-const TIMESTAMP_SUFFIX_RE = /\s+\^(\d{4}-\d{2}-\d{2} \d{2}:\d{2})\^\s*$/;
+// End-anchored timestamp: ^YYYY-MM-DD HH:mm[:ss]^ immediately before <<}
+// Captures the token at the very end of the block content. Seconds are optional
+// so timestamps written before second-precision still parse.
+const TIMESTAMP_SUFFIX_RE = /\s+\^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}(?::\d{2})?)\^\s*$/;
 
 // Non-greedy CriticMarkup block — matches the nearest <<} (KTD1)
 const INLINE_COMMENT_RE = /\{>>([\s\S]*?)<<\}/g;

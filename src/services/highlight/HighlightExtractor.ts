@@ -134,23 +134,36 @@ export class HighlightExtractor {
             }
         }
         
-        // 하이라이트 범위가 코드 블록 범위와 겹치는지 판단합니다
-        function isInCodeBlockRange(start: number, end: number, ranges: Array<[number, number]>): boolean {
+        // 인라인 코멘트 {>>...<<} 범위를 가져옵니다. 코멘트 본문에 포함된
+        // ==text==, <mark>, <span> 같은 마크다운이 별도 하이라이트로 잘못 추출되지
+        // 않도록 코드 블록과 동일하게 제외 대상으로 둡니다.
+        const commentRanges: Array<[number, number]> = [];
+        const commentRe = /\{>>[\s\S]*?<<\}/g;
+        let commentMatch: RegExpExecArray | null;
+        while ((commentMatch = commentRe.exec(content)) !== null) {
+            commentRanges.push([commentMatch.index, commentMatch.index + commentMatch[0].length]);
+        }
+
+        // 제외 범위(코드 블록 + 인라인 코멘트)
+        const excludedRanges: Array<[number, number]> = [...codeBlockRanges, ...commentRanges];
+
+        // 하이라이트 범위가 제외 범위와 겹치는지 판단합니다
+        function overlapsExcludedRange(start: number, end: number, ranges: Array<[number, number]>): boolean {
             return ranges.some(([blockStart, blockEnd]) =>
                 Math.max(start, blockStart) < Math.min(end, blockEnd)
             );
         }
-        
+
         let match: RegExpExecArray | null;
         while ((match = pattern.exec(content)) !== null) {
             const safeMatch = match;
             const fullMatch = safeMatch[0];
             const matchStart = safeMatch.index;
             const matchEnd = matchStart + fullMatch.length;
-            
-            // 현재 하이라이트가 코드 블록 안에 있는지 확인합니다
-            if (isInCodeBlockRange(matchStart, matchEnd, codeBlockRanges)) {
-                continue; // 코드 블록 내의 하이라이트는 건너뜁니다
+
+            // 코드 블록 또는 인라인 코멘트 안에 있는 매칭은 건너뜁니다
+            if (overlapsExcludedRange(matchStart, matchEnd, excludedRanges)) {
+                continue;
             }
             
             // 추가 확인: == 형식으로 매칭된 경우 앞뒤에 추가 = 기호가 없는지 확인합니다
@@ -396,8 +409,12 @@ export class HighlightExtractor {
     }
 
     private parseTimestampToMs(ts: string): number {
-        // "YYYY-MM-DD HH:mm" → ISO 8601 for reliable Date parsing
-        return new Date(ts.replace(' ', 'T') + ':00').getTime();
+        // "YYYY-MM-DD HH:mm[:ss]" → ISO 8601 for reliable Date parsing.
+        // Legacy minute-precision timestamps need seconds appended; second-precision
+        // ones are already complete.
+        const iso = ts.replace(' ', 'T');
+        const normalized = /T\d{2}:\d{2}$/.test(iso) ? `${iso}:00` : iso;
+        return new Date(normalized).getTime();
     }
 
     /**

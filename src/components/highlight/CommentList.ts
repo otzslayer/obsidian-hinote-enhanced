@@ -35,8 +35,11 @@ export class CommentList extends Component {
     }
 
     private async renderComments() {
-        const comments = this.highlight.comments || [];
-        
+        // 표시용 정렬은 복사본에서 수행합니다. 원본 highlight.comments는 노트의
+        // 위치 순서를 유지해야 합니다 — 코멘트 수정/삭제 앵커(ordinal)가 이 순서에
+        // 의존하므로, 제자리 정렬하면 잘못된 블록을 가리켜 anchor mismatch가 발생합니다.
+        const comments = [...(this.highlight.comments || [])];
+
         // 업데이트 시간 기준 내림차순 정렬
         comments.sort((a, b) => b.updatedAt - a.updatedAt);
 

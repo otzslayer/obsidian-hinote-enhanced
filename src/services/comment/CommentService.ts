@@ -139,6 +139,19 @@ export class CommentService {
         const comment = highlight.comments.find(c => c.id === commentId);
         if (!comment) return;
 
+        // 내용이 동일하면 (편집 모드에 진입했다가 수정 없이 포커스 아웃/저장한 경우 등)
+        // 노트 쓰기·타임스탬프 갱신·이벤트는 건너뜁니다. 다만 편집 UI가 원래 코멘트로
+        // 복원되도록 카드 리렌더는 반드시 수행합니다 — 그렇지 않으면 편집 textarea만
+        // 제거되고 내용 div가 복원되지 않아 빈 코멘트처럼 보입니다.
+        if (comment.content === content) {
+            if (this.onCardUpdate) {
+                this.onCardUpdate(highlight);
+            } else if (this.onRefreshView) {
+                await this.onRefreshView();
+            }
+            return;
+        }
+
         const oldContent = comment.content;
         const now = Date.now();
         const timestamp = formatTimestamp(now);
