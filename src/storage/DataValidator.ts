@@ -11,7 +11,7 @@ type SanitizedComment = Partial<CommentItem> & {
 };
 
 /**
- * 数据验证器
+ * 데이터 유효성 검사기
  */
 export class DataValidator {
     private static isRecord(value: unknown): value is JsonRecord {
@@ -19,35 +19,35 @@ export class DataValidator {
     }
 
     /**
-     * 验证高亮数据结构
-     * @param data 高亮数据
-     * @returns 验证结果
+     * 하이라이트 데이터 구조 유효성 검사
+     * @param data 하이라이트 데이터
+     * @returns 유효성 검사 결과
      */
     static validateHighlightData(data: unknown): { valid: boolean; errors: string[] } {
         const errors: string[] = [];
 
         if (!this.isRecord(data)) {
-            errors.push('数据必须是对象');
+            errors.push('데이터는 객체여야 합니다');
             return { valid: false, errors };
         }
 
-        // 验证版本
+        // 버전 검증
         if (!data.version || typeof data.version !== 'string') {
-            errors.push('缺少有效的版本信息');
+            errors.push('유효한 버전 정보가 없습니다');
         }
 
-        // 验证lastModified
+        // lastModified 검증
         if (data.lastModified && typeof data.lastModified !== 'number') {
-            errors.push('lastModified必须是数字');
+            errors.push('lastModified는 숫자여야 합니다');
         }
 
-        // 验证highlights对象
+        // highlights 객체 검증
         if (!this.isRecord(data.highlights)) {
-            errors.push('缺少highlights对象');
+            errors.push('highlights 객체가 없습니다');
             return { valid: false, errors };
         }
 
-        // 验证每个高亮
+        // 각 하이라이트 검증
         for (const [id, highlight] of Object.entries(data.highlights)) {
             const highlightErrors = this.validateHighlight(id, highlight);
             errors.push(...highlightErrors);
@@ -57,65 +57,65 @@ export class DataValidator {
     }
 
     /**
-     * 验证单个高亮
-     * @param id 高亮ID
-     * @param highlight 高亮数据
-     * @returns 错误列表
+     * 단일 하이라이트 유효성 검사
+     * @param id 하이라이트 ID
+     * @param highlight 하이라이트 데이터
+     * @returns 오류 목록
      */
     static validateHighlight(id: string, highlight: unknown): string[] {
         const errors: string[] = [];
 
         if (!this.isRecord(highlight)) {
-            errors.push(`高亮 ${id}: 数据必须是对象`);
+            errors.push(`하이라이트 ${id}: 데이터는 객체여야 합니다`);
             return errors;
         }
 
-        // 必需字段验证
+        // 필수 필드 검증
         if (!highlight.text || typeof highlight.text !== 'string') {
-            errors.push(`高亮 ${id}: 缺少有效的text字段`);
+            errors.push(`하이라이트 ${id}: 유효한 text 필드가 없습니다`);
         }
 
         if (typeof highlight.position !== 'number') {
-            errors.push(`高亮 ${id}: position必须是数字`);
+            errors.push(`하이라이트 ${id}: position은 숫자여야 합니다`);
         }
 
         if (typeof highlight.created !== 'number') {
-            errors.push(`高亮 ${id}: created必须是数字`);
+            errors.push(`하이라이트 ${id}: created는 숫자여야 합니다`);
         }
 
         if (typeof highlight.updated !== 'number') {
-            errors.push(`高亮 ${id}: updated必须是数字`);
+            errors.push(`하이라이트 ${id}: updated는 숫자여야 합니다`);
         }
 
-        // 可选字段验证
+        // 선택적 필드 검증
         if (highlight.backgroundColor && typeof highlight.backgroundColor !== 'string') {
-            errors.push(`高亮 ${id}: backgroundColor必须是字符串`);
+            errors.push(`하이라이트 ${id}: backgroundColor는 문자열이어야 합니다`);
         }
 
         if (highlight.blockId && typeof highlight.blockId !== 'string') {
-            errors.push(`高亮 ${id}: blockId必须是字符串`);
+            errors.push(`하이라이트 ${id}: blockId는 문자열이어야 합니다`);
         }
 
         if (highlight.contextBefore && typeof highlight.contextBefore !== 'string') {
-            errors.push(`高亮 ${id}: contextBefore必须是字符串`);
+            errors.push(`하이라이트 ${id}: contextBefore는 문자열이어야 합니다`);
         }
 
         if (highlight.contextAfter && typeof highlight.contextAfter !== 'string') {
-            errors.push(`高亮 ${id}: contextAfter必须是字符串`);
+            errors.push(`하이라이트 ${id}: contextAfter는 문자열이어야 합니다`);
         }
 
         if (highlight.textFingerprint && typeof highlight.textFingerprint !== 'string') {
-            errors.push(`高亮 ${id}: textFingerprint必须是字符串`);
+            errors.push(`하이라이트 ${id}: textFingerprint는 문자열이어야 합니다`);
         }
 
         if (highlight.isCloze && typeof highlight.isCloze !== 'boolean') {
-            errors.push(`高亮 ${id}: isCloze必须是布尔值`);
+            errors.push(`하이라이트 ${id}: isCloze는 불리언이어야 합니다`);
         }
 
-        // 验证评论数组
+        // 댓글 배열 검증
         if (highlight.comments) {
             if (!Array.isArray(highlight.comments)) {
-                errors.push(`高亮 ${id}: comments必须是数组`);
+                errors.push(`하이라이트 ${id}: comments는 배열이어야 합니다`);
             } else {
                 highlight.comments.forEach((comment: unknown, index: number) => {
                     const commentErrors = this.validateComment(comment, `${id}.comments[${index}]`);
@@ -128,106 +128,106 @@ export class DataValidator {
     }
 
     /**
-     * 验证评论数据
-     * @param comment 评论数据
-     * @param path 路径（用于错误信息）
-     * @returns 错误列表
+     * 댓글 데이터 유효성 검사
+     * @param comment 댓글 데이터
+     * @param path 경로 (오류 메시지용)
+     * @returns 오류 목록
      */
     static validateComment(comment: unknown, path: string): string[] {
         const errors: string[] = [];
 
         if (!this.isRecord(comment)) {
-            errors.push(`${path}: 评论数据必须是对象`);
+            errors.push(`${path}: 댓글 데이터는 객체여야 합니다`);
             return errors;
         }
 
         if (!comment.id || typeof comment.id !== 'string') {
-            errors.push(`${path}: 缺少有效的id字段`);
+            errors.push(`${path}: 유효한 id 필드가 없습니다`);
         }
 
         if (!comment.content || typeof comment.content !== 'string') {
-            errors.push(`${path}: 缺少有效的content字段`);
+            errors.push(`${path}: 유효한 content 필드가 없습니다`);
         }
 
         if (typeof comment.created !== 'number') {
-            errors.push(`${path}: created必须是数字`);
+            errors.push(`${path}: created는 숫자여야 합니다`);
         }
 
         if (typeof comment.updated !== 'number') {
-            errors.push(`${path}: updated必须是数字`);
+            errors.push(`${path}: updated는 숫자여야 합니다`);
         }
 
         return errors;
     }
 
     /**
-     * 验证闪卡数据结构
-     * @param data 闪卡数据
-     * @returns 验证结果
+     * 플래시카드 데이터 구조 유효성 검사
+     * @param data 플래시카드 데이터
+     * @returns 유효성 검사 결과
      */
     static validateFlashcardData(data: unknown): { valid: boolean; errors: string[] } {
         const errors: string[] = [];
 
         if (!this.isRecord(data)) {
-            errors.push('闪卡数据必须是对象');
+            errors.push('플래시카드 데이터는 객체여야 합니다');
             return { valid: false, errors };
         }
 
-        // 验证版本
+        // 버전 검증
         if (!data.version || typeof data.version !== 'string') {
-            errors.push('缺少有效的版本信息');
+            errors.push('유효한 버전 정보가 없습니다');
         }
 
-        // 验证cards对象
+        // cards 객체 검증
         if (data.cards && typeof data.cards !== 'object') {
-            errors.push('cards必须是对象');
+            errors.push('cards는 객체여야 합니다');
         }
 
-        // 验证globalStats
+        // globalStats 검증
         if (data.globalStats && typeof data.globalStats !== 'object') {
-            errors.push('globalStats必须是对象');
+            errors.push('globalStats는 객체여야 합니다');
         }
 
-        // 验证cardGroups
+        // cardGroups 검증
         if (data.cardGroups && !Array.isArray(data.cardGroups)) {
-            errors.push('cardGroups必须是数组');
+            errors.push('cardGroups는 배열이어야 합니다');
         }
 
         return { valid: errors.length === 0, errors };
     }
 
     /**
-     * 验证文件映射数据
-     * @param data 映射数据
-     * @returns 验证结果
+     * 파일 매핑 데이터 유효성 검사
+     * @param data 매핑 데이터
+     * @returns 유효성 검사 결과
      */
     static validateFileMappingData(data: unknown): { valid: boolean; errors: string[] } {
         const errors: string[] = [];
 
         if (!this.isRecord(data)) {
-            errors.push('映射数据必须是对象');
+            errors.push('매핑 데이터는 객체여야 합니다');
             return { valid: false, errors };
         }
 
         if (!data.version || typeof data.version !== 'string') {
-            errors.push('缺少有效的版本信息');
+            errors.push('유효한 버전 정보가 없습니다');
         }
 
         if (!data.mapping || typeof data.mapping !== 'object') {
-            errors.push('缺少mapping对象');
+            errors.push('mapping 객체가 없습니다');
         }
 
         if (typeof data.lastUpdated !== 'number') {
-            errors.push('lastUpdated必须是数字');
+            errors.push('lastUpdated는 숫자여야 합니다');
         }
 
         return { valid: errors.length === 0, errors };
     }
 
     /**
-     * 清理和标准化高亮数据
-     * @param highlight 原始高亮数据
-     * @returns 清理后的高亮数据
+     * 하이라이트 데이터 정리 및 정규화
+     * @param highlight 원본 하이라이트 데이터
+     * @returns 정리된 하이라이트 데이터
      */
     static sanitizeHighlight(highlight: unknown): SanitizedHighlight {
         const sanitized: SanitizedHighlight = {};
@@ -236,7 +236,7 @@ export class DataValidator {
             return sanitized;
         }
 
-        // 必需字段
+        // 필수 필드
         if (highlight.text && typeof highlight.text === 'string') {
             sanitized.text = highlight.text;
         }
@@ -257,7 +257,7 @@ export class DataValidator {
             sanitized.updated = highlight.updatedAt;
         }
 
-        // 可选字段
+        // 선택적 필드
         if (highlight.backgroundColor && typeof highlight.backgroundColor === 'string') {
             sanitized.backgroundColor = highlight.backgroundColor;
         }
@@ -286,7 +286,7 @@ export class DataValidator {
             sanitized.paragraphOffset = highlight.paragraphOffset;
         }
 
-        // 处理评论数组
+        // 댓글 배열 처리
         if (Array.isArray(highlight.comments)) {
             sanitized.comments = highlight.comments
                 .filter((comment: unknown) => this.isRecord(comment))
@@ -298,9 +298,9 @@ export class DataValidator {
     }
 
     /**
-     * 清理和标准化评论数据
-     * @param comment 原始评论数据
-     * @returns 清理后的评论数据
+     * 댓글 데이터 정리 및 정규화
+     * @param comment 원본 댓글 데이터
+     * @returns 정리된 댓글 데이터
      */
     static sanitizeComment(comment: unknown): SanitizedComment {
         const sanitized: SanitizedComment = {};

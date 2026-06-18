@@ -2,20 +2,20 @@ import { HighlightInfo } from "../../types/highlight";
 import { SelectionBoxController } from "./SelectionBoxController";
 
 /**
- * 选择管理器
- * 负责处理高亮卡片的选择功能，包括：
- * - 框选功能
- * - 选择状态管理
- * - 选择框绘制
+ * 선택 매니저
+ * 하이라이트 카드의 선택 기능 처리 담당:
+ * - 드래그 선택 기능
+ * - 선택 상태 관리
+ * - 선택 박스 그리기
  */
 export class SelectionManager {
     private highlightContainer: HTMLElement;
     private selectionBoxController: SelectionBoxController;
-    // 使用 Map 存储选中的卡片，key 为 DOM 元素，value 为高亮数据
-    // 这样不依赖 highlight.id，即使高亮没有 ID 也能正常工作
+    // Map으로 선택된 카드 저장, key는 DOM 요소, value는 하이라이트 데이터
+    // highlight.id에 의존하지 않아 ID 없는 하이라이트도 정상 작동
     private selectedCards: Map<HTMLElement, HighlightInfo> = new Map();
-    
-    // 回调函数
+
+    // 콜백 함수
     private onSelectionChangeCallback: ((selectedCount: number) => void) | null = null;
     
     constructor(highlightContainer: HTMLElement) {
@@ -28,63 +28,63 @@ export class SelectionManager {
     }
     
     /**
-     * 设置选择变化回调
+     * 선택 변경 콜백 설정
      */
     setOnSelectionChange(callback: (selectedCount: number) => void) {
         this.onSelectionChangeCallback = callback;
     }
     
     /**
-     * 初始化选择功能
+     * 선택 기능 초기화
      */
     initialize() {
         this.selectionBoxController.initialize();
     }
     
     /**
-     * 清除所有选中状态
+     * 모든 선택 상태 초기화
      */
     clearSelection() {
-        // 清除所有选中卡片的 DOM 状态
+        // 모든 선택된 카드의 DOM 상태 초기화
         this.selectedCards.forEach((highlight, element) => {
             element.removeClass('selected');
         });
-        
-        // 清空选中的卡片集合
+
+        // 선택된 카드 집합 초기화
         this.selectedCards.clear();
-        
-        // 通知选择变化
+
+        // 선택 변경 알림
         this.notifySelectionChange();
     }
     
     /**
-     * 更新选中的高亮列表
-     * 从 DOM 同步选中状态到内部 Map
+     * 선택된 하이라이트 목록 업데이트
+     * DOM에서 내부 Map으로 선택 상태 동기화
      */
     updateSelectedHighlights() {
         this.selectedCards.clear();
         const selectedCardElements = Array.from(this.highlightContainer.querySelectorAll('.highlight-card.selected'));
-        
+
         selectedCardElements.forEach(cardElement => {
             const highlightData = cardElement.getAttribute('data-highlight');
             if (highlightData) {
                 try {
                     const highlight = JSON.parse(highlightData) as HighlightInfo;
-                    // 使用 DOM 元素作为 key，不再依赖 highlight.id
+                    // DOM 요소를 key로 사용, highlight.id에 더 이상 의존하지 않음
                     this.selectedCards.set(cardElement as HTMLElement, highlight);
                 } catch (e) {
                     console.error('Error parsing highlight data:', e);
                 }
             }
         });
-        
-        // 通知选择变化
+
+        // 선택 변경 알림
         this.notifySelectionChange();
     }
     
     /**
-     * 获取选中的高亮
-     * 返回 Set 以保持向后兼容
+     * 선택된 하이라이트 가져오기
+     * 하위 호환성 유지를 위해 Set 반환
      */
     getSelectedHighlights(): Set<HighlightInfo> {
         const highlights = new Set<HighlightInfo>();
@@ -95,62 +95,62 @@ export class SelectionManager {
     }
     
     /**
-     * 获取选中数量
+     * 선택 수량 가져오기
      */
     getSelectedCount(): number {
         return this.selectedCards.size;
     }
     
     /**
-     * 选中单个卡片
-     * @param element 卡片元素
-     * @param highlight 高亮数据
+     * 단일 카드 선택
+     * @param element 카드 요소
+     * @param highlight 하이라이트 데이터
      */
     selectCard(element: HTMLElement, highlight: HighlightInfo) {
-        // 添加到选中集合
+        // 선택 집합에 추가
         this.selectedCards.set(element, highlight);
-        
-        // 更新 DOM 状态
+
+        // DOM 상태 업데이트
         element.addClass('selected');
-        
-        // 通知选择变化
+
+        // 선택 변경 알림
         this.notifySelectionChange();
     }
     
     /**
-     * 取消选中单个卡片
-     * @param element 卡片元素
+     * 단일 카드 선택 해제
+     * @param element 카드 요소
      */
     unselectCard(element: HTMLElement) {
         if (this.selectedCards.has(element)) {
-            // 更新 DOM 状态
+            // DOM 상태 업데이트
             element.removeClass('selected');
-            
-            // 从选中集合中移除
+
+            // 선택 집합에서 제거
             this.selectedCards.delete(element);
-            
-            // 通知选择变化
+
+            // 선택 변경 알림
             this.notifySelectionChange();
         }
     }
     
     /**
-     * 检查卡片是否被选中
-     * @param element 卡片元素
+     * 카드 선택 여부 확인
+     * @param element 카드 요소
      */
     isCardSelected(element: HTMLElement): boolean {
         return this.selectedCards.has(element);
     }
     
     /**
-     * 是否处于选择模式
+     * 선택 모드 여부
      */
     isInSelectionMode(): boolean {
         return this.selectionBoxController.isInSelectionMode();
     }
     
     /**
-     * 通知选择变化
+     * 선택 변경 알림
      */
     private notifySelectionChange() {
         if (this.onSelectionChangeCallback) {
@@ -159,11 +159,11 @@ export class SelectionManager {
     }
     
     /**
-     * 清理资源
+     * 리소스 정리
      */
     destroy() {
         this.selectionBoxController.destroy();
-        // 清除选择状态
+        // 선택 상태 초기화
         this.clearSelection();
     }
 }

@@ -24,7 +24,7 @@ export class OllamaSettings extends BaseAIServiceSettings {
             cls: 'ai-service-settings'
         });
 
-        // 添加标题
+        // 제목 추가
         new Setting(settingsContainer)
             .setName(t('Ollama service'))
             .setHeading();
@@ -52,7 +52,7 @@ export class OllamaSettings extends BaseAIServiceSettings {
                 return text;
             });
 
-        // 添加检查按钮
+        // 확인 버튼 추가
         hostSetting.addButton(button => {
             button.setButtonText(t('Check'));
             button.onClick(async () => {
@@ -73,20 +73,20 @@ export class OllamaSettings extends BaseAIServiceSettings {
             });
         });
 
-        // 默认显示模型选择（如果有保存的模型列表）
+        // 기본 모델 선택 표시 (저장된 모델 목록이 있는 경우)
         if (ollamaSettings.availableModels?.length) {
             this.displayOllamaModelDropdown(settingsContainer, ollamaSettings.availableModels);
         }
     }
 
     private displayOllamaModelDropdown(container: HTMLElement, models: string[]) {
-        // 移除旧的模型选择（如果存在）
+        // 기존 모델 선택 제거 (존재하는 경우)
         const existingModelSetting = container.querySelector('.model-setting');
         if (existingModelSetting) {
             existingModelSetting.remove();
         }
 
-        // 创建新的设置项，并添加特定的类名以便后续识别
+        // 새 설정 항목 생성 및 나중에 식별할 수 있도록 특정 클래스명 추가
         const modelSetting = new Setting(container)
             .setName(t('Model'))
             .setDesc(t('Select a Ollama model.'))
@@ -95,7 +95,7 @@ export class OllamaSettings extends BaseAIServiceSettings {
                     models.map((modelName: string) => [modelName, modelName])
                 );
 
-                // 修改这里的默认值选择逻辑
+                // 기본값 선택 로직 수정
                 const currentModel = this.getOllamaSettings('http://localhost:11434').model;
                 const defaultModel = models.includes(currentModel) ? currentModel : models[0];
 
@@ -108,7 +108,7 @@ export class OllamaSettings extends BaseAIServiceSettings {
                     });
             });
 
-        // 为新创建的设置项添加类名
+        // 새로 생성된 설정 항목에 클래스명 추가
         modelSetting.settingEl.addClass('model-setting');
     }
 }

@@ -28,10 +28,10 @@ import {
 } from "./FlashcardUIState";
 
 /**
- * 闪卡组件，整合所有闪卡相关功能
+ * 플래시카드 컴포넌트, 모든 플래시카드 관련 기능 통합
  */
 export class FlashcardComponent extends Component {
-    // 核心属性
+    // 핵심 속성
     private progressContainer: HTMLElement | null = null;
     private container: HTMLElement;
     private currentIndex: number = 0;
@@ -46,10 +46,10 @@ export class FlashcardComponent extends Component {
     private plugin: CommentPlugin;
     private completionMessage: string | null = null;
     
-    // 存储每个分组的学习进度和完成状态
+    // 각 그룹의 학습 진도 및 완료 상태 저장
     private groupProgress: Record<string, GroupProgressState> = {};
 
-    // 评分按钮配置
+    // 평가 버튼 설정
     private readonly ratingButtons: FlashcardRatingButton[] = [
         { label: t('Again'), rating: FSRS_RATING.AGAIN, key: '1', ratingText: 'again' },
         { label: t('Hard'), rating: FSRS_RATING.HARD, key: '2', ratingText: 'hard' },
@@ -57,7 +57,7 @@ export class FlashcardComponent extends Component {
         { label: t('Easy'), rating: FSRS_RATING.EASY, key: '4', ratingText: 'easy' }
     ];
     
-    // 子组件
+    // 하위 컴포넌트
     public renderer: FlashcardRenderer;
     public operations: FlashcardOperations;
     public groupManager: FlashcardGroupManager;
@@ -71,7 +71,7 @@ export class FlashcardComponent extends Component {
         this.app = plugin.app;
         this.fsrsManager = plugin.fsrsManager;
         
-        // 初始化子组件
+        // 하위 컴포넌트 초기화
         this.renderer = new FlashcardRenderer(this);
         this.operations = new FlashcardOperations(this);
         this.groupManager = new FlashcardGroupManager(this);
@@ -88,81 +88,81 @@ export class FlashcardComponent extends Component {
     }
     
     /**
-     * 设置许可证管理器
-     * @param licenseManager 许可证管理器
+     * 라이선스 매니저 설정
+     * @param licenseManager 라이선스 매니저
      */
     public setLicenseManager(licenseManager: LicenseManager) {
         this.licenseManager = licenseManager;
     }
     
     /**
-     * 设置卡片列表
-     * @param highlights 高亮列表
+     * 카드 목록 설정
+     * @param highlights 하이라이트 목록
      */
     public setCards(cards: FlashcardState[]) {
-        // 直接设置卡片列表，不再自动创建闪卡
+        // 카드 목록 직접 설정, 플래시카드 자동 생성 없음
         this.cards = cards;
     }
     
     /**
-     * 清理组件
+     * 컴포넌트 정리
      */
     public cleanup() {
-        // 键盘事件监听器已移除
+        // 키보드 이벤트 리스너 제거됨
     }
     
     /**
-     * 激活组件
+     * 컴포넌트 활성화
      */
     public async activate() {
         this.isActive = true;
-        
-        // 检查许可证状态
+
+        // 라이선스 상태 확인
         if (this.licenseManager) {
             const isActivated = await this.licenseManager.isActivated();
             const isFeatureEnabled = isActivated ? await this.licenseManager.isFeatureEnabled('flashcard') : false;
-            
+
             if (isActivated && isFeatureEnabled) {
-                // 已激活且启用了闪卡功能，刷新卡片列表
+                // 활성화되고 플래시카드 기능이 활성화된 경우 카드 목록 새로고침
                 this.operations.refreshCardList();
-                
-                // 渲染功能界面
+
+                // 기능 화면 렌더링
                 this.renderer.render();
                 return;
             }
         }
-        
-        // 未激活或未启用闪卡功能，显示激活界面
+
+        // 비활성화 또는 플래시카드 기능 미활성화, 활성화 화면 표시
         this.renderer.renderActivation();
     }
     
     /**
-     * 渲染激活界面
+     * 활성화 화면 렌더링
      */
     public renderActivation() {
         this.renderer.renderActivation();
     }
     
     /**
-     * 停用组件
+     * 컴포넌트 비활성화
      */
     public deactivate() {
         this.isActive = false;
         this.container.empty();
         this.container.removeClass('flashcard-mode');
-        // 键盘事件监听器已移除
+        // 키보드 이벤트 리스너 제거됨
     }
     
     /**
-     * 销毁组件
+     * 컴포넌트 소멸
      */
     public destroy() {
-        // 键盘事件监听器已移除
+        // 키보드 이벤트 리스너 제거됨
         this.container.removeClass('flashcard-mode');
         this.container.empty();
     }
     
-    // Getter/Setter 方法
+    // Getter/Setter 메서드
     
     public getContainer(): HTMLElement {
         return this.container;
@@ -227,34 +227,34 @@ export class FlashcardComponent extends Component {
     }
     
     /**
-     * 获取全局完成消息
-     * @returns 完成消息或 null
+     * 전역 완료 메시지 가져오기
+     * @returns 완료 메시지 또는 null
      */
     public getCompletionMessage(): string | null {
         return this.completionMessage;
     }
     
     /**
-     * 设置全局完成消息
-     * @param message 完成消息或 null
+     * 전역 완료 메시지 설정
+     * @param message 완료 메시지 또는 null
      */
     public setCompletionMessage(message: string | null) {
         this.completionMessage = message;
     }
     
     /**
-     * 获取指定分组的完成消息
-     * @param groupName 分组名称
-     * @returns 完成消息或 null
+     * 지정된 그룹의 완료 메시지 가져오기
+     * @param groupName 그룹 이름
+     * @returns 완료 메시지 또는 null
      */
     public getGroupCompletionMessage(groupName: string): string | null {
         return getGroupCompletionMessage(this.groupProgress, groupName);
     }
     
     /**
-     * 设置指定分组的完成消息
-     * @param groupName 分组名称
-     * @param message 完成消息或 null
+     * 지정된 그룹의 완료 메시지 설정
+     * @param groupName 그룹 이름
+     * @param message 완료 메시지 또는 null
      */
     public setGroupCompletionMessage(groupName: string, message: string | null) {
         setGroupCompletionMessage(this.fsrsManager, this.groupProgress, groupName, message);
@@ -277,13 +277,13 @@ export class FlashcardComponent extends Component {
         this.progressContainer = container;
     }
     
-    // 键盘快捷键相关方法已移除
+    // 키보드 단축키 관련 메서드 제거됨
     
     public getRatingButtons() {
         return this.ratingButtons;
     }
     
-    // 代理方法，用于简化调用
+    // 프록시 메서드, 호출 단순화용
     
     public flipCard() {
         this.operations.flipCard();
@@ -301,11 +301,11 @@ export class FlashcardComponent extends Component {
         this.operations.refreshCardList();
     }
     
-    // 键盘快捷键设置方法已移除
-    
+    // 키보드 단축키 설정 메서드 제거됨
+
     /**
-     * 保存当前状态
-     * 优化版本：直接在组件中处理状态保存，确保所有状态都被正确保存
+     * 현재 상태 저장
+     * 최적화 버전: 컴포넌트 내에서 직접 상태 저장 처리, 모든 상태가 올바르게 저장되도록 보장
      */
     public saveState() {
         saveFlashcardUIState(this.fsrsManager, {

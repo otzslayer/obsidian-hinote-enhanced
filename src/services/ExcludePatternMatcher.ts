@@ -2,17 +2,17 @@ import { TFile } from 'obsidian';
 
 export class ExcludePatternMatcher {
     /**
-     * 检查文件是否应该被排除
-     * @param file 要检查的文件
-     * @param patterns 排除模式列表
-     * @returns 如果文件应该被排除则返回 true
+     * 파일을 제외해야 하는지 확인합니다
+     * @param file 확인할 파일
+     * @param patterns 제외 패턴 목록
+     * @returns 파일을 제외해야 하면 true
      */
     static shouldExclude(file: TFile, patternsStr: string): boolean {
         if (!patternsStr || patternsStr.trim().length === 0) {
             return false;
         }
 
-        // 将逗号分隔的字符串分割成数组
+        // 쉼표로 구분된 문자열을 배열로 분할합니다
         const patterns = patternsStr
             .split(',')
             .map(pattern => pattern.trim())
@@ -22,32 +22,32 @@ export class ExcludePatternMatcher {
         const fileName = file.basename;
 
         return patterns.some(pattern => {
-            // 移除前后空格
+            // 앞뒤 공백을 제거합니다
             pattern = pattern.trim();
             
-            // 如果是空字符串，跳过
+            // 빈 문자열이면 건너뜁니다
             if (!pattern) {
                 return false;
             }
 
-            // 处理笔记链接格式 [[note]]
+            // 노트 링크 형식 [[note]]을 처리합니다
             if (pattern.startsWith('[[') && pattern.endsWith(']]')) {
                 const noteName = pattern.slice(2, -2);
                 return fileName === noteName;
             }
 
-            // 处理文件扩展名格式 *.extension
+            // 파일 확장자 형식 *.extension을 처리합니다
             if (pattern.startsWith('*.')) {
                 const extension = pattern.slice(2);
                 return file.extension === extension || filePath.endsWith(extension);
             }
 
-            // 处理文件夹路径
-            // 确保路径格式一致（移除开头的 '/'）
+            // 폴더 경로를 처리합니다
+            // 경로 형식을 일관되게 정규화합니다 (앞의 '/' 제거)
             const normalizedPattern = pattern.replace(/^\/+/, '');
             const normalizedPath = filePath.replace(/^\/+/, '');
 
-            // 检查文件是否在指定文件夹中
+            // 파일이 지정된 폴더 안에 있는지 확인합니다
             return normalizedPath.startsWith(normalizedPattern + '/') || 
                    normalizedPath === normalizedPattern;
         });

@@ -1,11 +1,11 @@
 import { t } from "../../i18n";
 
 /**
- * 搜索UI辅助类
- * 负责处理搜索相关的UI交互，包括：
- * - 搜索前缀提示
- * - 提示框定位
- * - 事件监听管理
+ * 검색 UI 보조 클래스
+ * 검색 관련 UI 상호작용 처리 담당:
+ * - 검색 접두사 힌트
+ * - 힌트 박스 위치 지정
+ * - 이벤트 리스너 관리
  */
 export class SearchUIHelper {
     private searchInput: HTMLInputElement;
@@ -23,17 +23,17 @@ export class SearchUIHelper {
     }
     
     /**
-     * 显示搜索前缀提示
+     * 검색 접두사 힌트 표시
      */
     showSearchPrefixHints() {
         this.destroy();
-        
-        // 创建提示容器
+
+        // 힌트 컨테이너 생성
         const hintsContainer = activeDocument.body.createDiv({
             cls: 'search-prefix-hints show'
         });
         
-        // 定义可用的搜索前缀
+        // 사용 가능한 검색 접두사 정의
         const prefixes = [
             { prefix: 'all:', description: t('search-prefix-all') },
             { prefix: 'path:', description: t('search-prefix-path') },
@@ -41,7 +41,7 @@ export class SearchUIHelper {
             { prefix: 'comment:', description: t('search-prefix-comment') }
         ];
         
-        // 创建提示项
+        // 힌트 항목 생성
         prefixes.forEach(({ prefix, description }) => {
             const hintItem = hintsContainer.createDiv({
                 cls: 'search-prefix-hint-item'
@@ -57,22 +57,22 @@ export class SearchUIHelper {
                 text: description
             });
             
-            // 添加点击事件
+            // 클릭 이벤트 추가
             hintItem.addEventListener('click', () => {
                 this.searchInput.value = prefix + ' ';
                 this.searchInput.focus();
                 hintsContainer.remove();
-                
-                // 触发搜索
+
+                // 검색 트리거
                 const inputEvent = new Event('input', { bubbles: true });
                 this.searchInput.dispatchEvent(inputEvent);
             });
         });
         
-        // 定位提示容器
+        // 힌트 컨테이너 위치 지정
         this.positionSearchHints(hintsContainer);
-        
-        // 添加输入事件监听器
+
+        // 입력 이벤트 리스너 추가
         const handleInputChange = () => {
             const inputValue = this.searchInput.value.trim();
             
@@ -90,7 +90,7 @@ export class SearchUIHelper {
         
         this.searchInput.addEventListener('input', handleInputChange);
         
-        // 点击其他区域隐藏提示框
+        // 다른 영역 클릭 시 힌트 박스 숨김
         const hideHintsOnClickOutside = (e: MouseEvent) => {
             if (hintsContainer && !hintsContainer.contains(e.target as Node) && 
                 e.target !== this.searchInput) {
@@ -99,7 +99,7 @@ export class SearchUIHelper {
             }
         };
         
-        // 失去焦点时清理
+        // 포커스 잃을 때 정리
         const handleBlur = () => {
             window.setTimeout(() => {
                 if (!activeDocument.activeElement ||
@@ -112,13 +112,13 @@ export class SearchUIHelper {
         
         this.searchInput.addEventListener('blur', handleBlur);
         
-        // 添加点击事件监听器
+        // 클릭 이벤트 리스너 추가
         this.documentClickTimer = window.setTimeout(() => {
             activeDocument.addEventListener('click', hideHintsOnClickOutside);
             this.documentClickTimer = null;
         }, 10);
         
-        // 存储事件监听器引用
+        // 이벤트 리스너 참조 저장
         this.searchHintsEventHandlers = {
             input: handleInputChange,
             blur: handleBlur,
@@ -127,7 +127,7 @@ export class SearchUIHelper {
     }
     
     /**
-     * 定位搜索提示容器
+     * 검색 힌트 컨테이너 위치 지정
      */
     private positionSearchHints(hintsContainer: HTMLElement) {
         const searchRect = this.searchInput.getBoundingClientRect();
@@ -141,7 +141,7 @@ export class SearchUIHelper {
     }
     
     /**
-     * 清理资源
+     * 리소스 정리
      */
     destroy() {
         if (this.documentClickTimer !== null) {
@@ -149,13 +149,13 @@ export class SearchUIHelper {
             this.documentClickTimer = null;
         }
 
-        // 移除提示框
+        // 힌트 박스 제거
         const existingHints = activeDocument.querySelector('.search-prefix-hints');
         if (existingHints) {
             existingHints.remove();
         }
-        
-        // 清理事件监听器
+
+        // 이벤트 리스너 정리
         if (this.searchHintsEventHandlers) {
             this.searchInput.removeEventListener('input', this.searchHintsEventHandlers.input);
             this.searchInput.removeEventListener('blur', this.searchHintsEventHandlers.blur);

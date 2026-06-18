@@ -6,12 +6,12 @@ import { HighlightService } from './HighlightService';
 import { IdGenerator } from '../utils/IdGenerator';
 
 /**
- * 高亮管理器 - 业务逻辑层
- * 职责：
- * 1. 处理高亮的业务逻辑（添加、删除、更新）
- * 2. 数据验证和清理
- * 3. 事件触发协调
- * 4. 协调多个服务和仓储
+ * 하이라이트 관리자 - 비즈니스 로직 레이어
+ * 역할:
+ * 1. 하이라이트 비즈니스 로직 처리 (추가, 삭제, 업데이트)
+ * 2. 데이터 검증 및 정리
+ * 3. 이벤트 트리거 조율
+ * 4. 여러 서비스와 저장소 간 조율
  */
 export class HighlightManager {
     constructor(
@@ -22,10 +22,10 @@ export class HighlightManager {
     ) {}
 
     /**
-     * 添加或更新高亮
-     * @param file 文件
-     * @param highlight 高亮信息
-     * @returns 添加的高亮
+     * 하이라이트를 추가하거나 업데이트합니다
+     * @param file 파일
+     * @param highlight 하이라이트 정보
+     * @returns 추가된 하이라이트
      */
     async addHighlight(file: TFile, highlight: HiNote): Promise<HiNote> {
         if (!highlight.id) {
@@ -67,10 +67,10 @@ export class HighlightManager {
     }
 
     /**
-     * 移除高亮
-     * @param file 文件
-     * @param highlight 高亮信息
-     * @returns 是否成功移除
+     * 하이라이트를 제거합니다
+     * @param file 파일
+     * @param highlight 하이라이트 정보
+     * @returns 제거 성공 여부
      */
     async removeHighlight(file: TFile, highlight: HiNote): Promise<boolean> {
         const filePath = file.path;
@@ -102,9 +102,9 @@ export class HighlightManager {
     }
 
     /**
-     * 获取文件的所有高亮
-     * @param file 文件
-     * @returns 高亮数组
+     * 파일의 모든 하이라이트를 가져옵니다
+     * @param file 파일
+     * @returns 하이라이트 배열
      */
     async getFileHighlights(file: TFile): Promise<HiNote[]> {
         if (!file) return [];
@@ -112,10 +112,10 @@ export class HighlightManager {
     }
 
     /**
-     * 根据文本和位置查找高亮
-     * @param file 文件
-     * @param highlight 高亮信息（包含 text 和 position）
-     * @returns 匹配的高亮数组
+     * 텍스트와 위치로 하이라이트를 검색합니다
+     * @param file 파일
+     * @param highlight 하이라이트 정보 (text 및 position 포함)
+     * @returns 일치하는 하이라이트 배열
      */
     async findHighlights(file: TFile, highlight: { text: string; position?: number }): Promise<HiNote[]> {
         if (!file) return [];
@@ -134,28 +134,28 @@ export class HighlightManager {
     }
 
     /**
-     * 根据 blockId 查找高亮
-     * @param file 文件
-     * @param blockId 块 ID
-     * @returns 高亮数组
+     * blockId로 하이라이트를 검색합니다
+     * @param file 파일
+     * @param blockId 블록 ID
+     * @returns 하이라이트 배열
      */
     async findHighlightsByBlockId(file: TFile, blockId: string): Promise<HiNote[]> {
         return this.repository.findHighlightsByBlockId(file, blockId);
     }
 
     /**
-     * 根据 ID 查找高亮
-     * @param highlightId 高亮 ID
-     * @returns 高亮信息，如果未找到则返回 null
+     * ID로 하이라이트를 검색합니다
+     * @param highlightId 하이라이트 ID
+     * @returns 하이라이트 정보, 찾지 못한 경우 null
      */
     findHighlightById(highlightId: string): HiNote | null {
         return this.repository.findHighlightById(highlightId);
     }
 
     /**
-     * 检查孤立数据数量
-     * 检查所有存储的高亮和评论，统计那些在文档中找不到对应高亮文本的孤立数据数量
-     * @returns 孤立数据数量
+     * 고립 데이터 수를 확인합니다
+     * 저장된 모든 하이라이트와 댓글을 검사하여, 문서에서 해당 하이라이트 텍스트를 찾을 수 없는 고립 데이터의 수를 집계합니다
+     * @returns 고립 데이터 수
      */
     async checkOrphanedDataCount(): Promise<{ orphanedHighlights: number; affectedFiles: number }> {
         let orphanedHighlights = 0;
@@ -191,7 +191,7 @@ export class HighlightManager {
                     affectedFiles.add(filePath);
                 }
             } catch {
-                // 错误处理
+                // 오류 처리
             }
         }
 
@@ -199,9 +199,9 @@ export class HighlightManager {
     }
 
     /**
-     * 清理孤立数据
-     * 检查所有存储的高亮和评论，移除那些在文档中找不到对应高亮文本的孤立数据
-     * @returns 清理的数据数量
+     * 고립 데이터를 정리합니다
+     * 저장된 모든 하이라이트와 댓글을 검사하여, 문서에서 해당 하이라이트 텍스트를 찾을 수 없는 고립 데이터를 제거합니다
+     * @returns 정리된 데이터 수
      */
     async cleanOrphanedData(): Promise<{ removedHighlights: number; affectedFiles: number }> {
         let removedHighlights = 0;
@@ -239,7 +239,7 @@ export class HighlightManager {
                     }
                 }
             } catch {
-                // 错误处理
+                // 오류 처리
             }
         }
 
@@ -247,9 +247,9 @@ export class HighlightManager {
     }
 
     /**
-     * 处理文件重命名
-     * @param oldPath 旧路径
-     * @param newPath 新路径
+     * 파일 이름 변경을 처리합니다
+     * @param oldPath 이전 경로
+     * @param newPath 새 경로
      */
     async handleFileRename(oldPath: string, newPath: string): Promise<void> {
         await this.repository.handleFileRename(oldPath, newPath);

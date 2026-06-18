@@ -10,11 +10,11 @@ import type CommentPlugin from '../../main';
 import type { PluginServices } from '../plugin/PluginServices';
 
 /**
- * 初始化管理器
- * 负责管理插件的延迟初始化逻辑
+ * 초기화 관리자
+ * 플러그인의 지연 초기화 로직을 관리합니다
  */
 export class InitializationManager {
-    // 延迟初始化标志
+    // 지연 초기화 플래그
     private isInitialized: boolean = false;
     private initializationPromise: Promise<PluginServices> | null = null;
     private services: PluginServices | null = null;
@@ -22,21 +22,21 @@ export class InitializationManager {
     constructor(private plugin: CommentPlugin) {}
 
     /**
-     * 确保插件已初始化（延迟初始化）
-     * 只在用户首次使用功能时才执行初始化
+     * 플러그인이 초기화되었는지 확인합니다 (지연 초기화)
+     * 사용자가 기능을 처음 사용할 때만 초기화를 실행합니다
      */
     async ensureInitialized(): Promise<PluginServices> {
-        // 如果已经初始化，直接返回
+        // 이미 초기화된 경우 바로 반환합니다
         if (this.isInitialized && this.services) {
             return this.services;
         }
 
-        // 如果正在初始化，等待完成
+        // 초기화 중이면 완료될 때까지 기다립니다
         if (this.initializationPromise) {
             return this.initializationPromise;
         }
 
-        // 开始初始化
+        // 초기화를 시작합니다
         this.services = this.initialize();
         this.isInitialized = true;
         this.initializationPromise = Promise.resolve(this.services);
@@ -44,27 +44,27 @@ export class InitializationManager {
     }
 
     /**
-     * 实际的初始化逻辑
+     * 실제 초기화 로직
      */
     private initialize(): PluginServices {
-        // 初始化事件管理器（共享实例）
+        // 이벤트 관리자를 초기화합니다 (공유 인스턴스)
         const eventManager = new EventManager(this.plugin.app);
 
-        // 初始化数据管理器（共享实例）
+        // 데이터 관리자를 초기화합니다 (공유 인스턴스)
         const dataManager = new HiNoteDataManager(this.plugin.app);
 
-        // 初始化架构层
+        // 아키텍처 레이어를 초기화합니다
         const highlightRepository = new HighlightRepository(dataManager);
 
-        // 初始化高亮服务（共享实例）
+        // 하이라이트 서비스를 초기화합니다 (공유 인스턴스)
         const highlightService = new HighlightService(
             this.plugin.app,
             () => this.plugin.settings,
         );
-        // 异步构建索引，不阻塞初始化
+        // 비동기로 인덱스를 구축하여 초기화를 차단하지 않습니다
         void highlightService.initialize();
 
-        // 初始化 Canvas 服务（共享实例）
+        // Canvas 서비스를 초기화합니다 (공유 인스턴스)
         const canvasService = new CanvasService(this.plugin.app.vault);
 
         const highlightManager = new HighlightManager(
@@ -74,15 +74,15 @@ export class InitializationManager {
             highlightService
         );
         
-        // 异步加载数据，不阻塞初始化
+        // 비동기로 데이터를 로드하여 초기화를 차단하지 않습니다
         highlightRepository.initialize().catch(error => {
-            console.error('[HiNote] 加载高亮数据失败:', error);
+            console.error('[HiNote] 하이라이트 데이터 로드 실패:', error);
         });
 
-        // 初始化 FSRS 管理器（传入数据管理器以使用新存储层）
+        // FSRS 관리자를 초기화합니다 (새 저장 레이어를 사용하도록 데이터 관리자를 전달합니다)
         const fsrsManager = new FSRSManager(this.plugin, dataManager);
 
-        // 初始化高亮装饰器
+        // 하이라이트 데코레이터를 초기화합니다
         const highlightDecorator = new HighlightDecorator(this.plugin, highlightRepository, highlightService, eventManager);
         highlightDecorator.enable();
 
@@ -99,24 +99,24 @@ export class InitializationManager {
     }
 
     /**
-     * 清理资源
+     * 리소스를 정리합니다
      */
     async cleanup(): Promise<void> {
-        // 数据自动保存，无需手动保存
+        // 데이터는 자동 저장되므로 수동 저장이 필요하지 않습니다
 
-        // 清理高亮装饰器
+        // 하이라이트 데코레이터를 정리합니다
         if (this.services?.highlightDecorator) {
             this.services.highlightDecorator.disable();
         }
 
-        // 清理高亮服务（注销事件监听器，清空索引）
+        // 하이라이트 서비스를 정리합니다 (이벤트 리스너 해제 및 인덱스 초기화)
         if (this.services?.highlightService) {
             this.services.highlightService.destroy();
         }
     }
 
     /**
-     * 检查是否已初始化
+     * 초기화 여부를 확인합니다
      */
     get initialized(): boolean {
         return this.isInitialized;

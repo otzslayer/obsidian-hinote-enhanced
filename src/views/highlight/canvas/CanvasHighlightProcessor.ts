@@ -4,15 +4,15 @@ import { CanvasService } from '../../../services/CanvasService';
 import { HighlightDataService } from '../../../services/highlight';
 
 /**
- * Canvas 高亮处理器
- * 负责处理 Canvas 文件中的高亮显示
+ * Canvas 하이라이트 프로세서
+ * Canvas 파일의 하이라이트 표시 처리 담당
  */
 export class CanvasHighlightProcessor {
     private app: App;
     private canvasService: CanvasService;
     private highlightDataService: HighlightDataService;
     
-    // 回调函数
+    // 콜백 함수
     private onShowLoading: (() => void) | null = null;
     private onHideLoading: (() => void) | null = null;
     private onShowError: ((message: string) => void) | null = null;
@@ -29,7 +29,7 @@ export class CanvasHighlightProcessor {
     }
     
     /**
-     * 设置回调函数
+     * 콜백 함수 설정
      */
     setCallbacks(callbacks: {
         onShowLoading?: () => void;
@@ -52,59 +52,59 @@ export class CanvasHighlightProcessor {
     }
     
     /**
-     * 处理 Canvas 文件
-     * 只加载 Canvas 中引用的文件的高亮
+     * Canvas 파일 처리
+     * Canvas에서 참조된 파일의 하이라이트만 로드
      */
     async processCanvasFile(file: TFile): Promise<HighlightInfo[]> {
-        // 显示加载指示器
+        // 로딩 표시기 표시
         if (this.onShowLoading) {
             this.onShowLoading();
         }
-        
+
         try {
-            // 1. 解析 Canvas 文件，获取所有文件路径
+            // 1. Canvas 파일 파싱하여 모든 파일 경로 가져오기
             const filePaths = await this.canvasService.parseCanvasFile(file);
-            
+
             if (filePaths.length === 0) {
-                // 如果没有文件节点，显示提示
+                // 파일 노드가 없는 경우 안내 표시
                 if (this.onShowEmpty) {
                     this.onShowEmpty('There are no file nodes in the current Canvas.');
                 }
                 return [];
             }
-            
-            // 2. 只加载 Canvas 中引用的文件的高亮
+
+            // 2. Canvas에서 참조된 파일의 하이라이트만 로드
             const allHighlights: HighlightInfo[] = [];
-            
+
             for (const filePath of filePaths) {
                 const targetFile = this.app.vault.getAbstractFileByPath(filePath);
                 if (targetFile instanceof TFile) {
-                    // 加载该文件的高亮
+                    // 해당 파일의 하이라이트 로드
                     const fileHighlights = await this.highlightDataService.loadFileHighlights(targetFile);
-                    
-                    // 添加文件信息
+
+                    // 파일 정보 추가
                     const highlightsWithFileInfo = fileHighlights.map(h => ({
                         ...h,
                         fileName: targetFile.basename,
                         filePath: targetFile.path,
                         fileIcon: 'file-text'
                     }));
-                    
+
                     allHighlights.push(...highlightsWithFileInfo);
                 }
             }
-            
-            // 3. 标记为 Canvas 高亮
+
+            // 3. Canvas 하이라이트로 마킹
             return this.markAsCanvasHighlights(allHighlights, file);
-            
+
         } catch (error) {
-            console.error('处理 Canvas 文件失败:', error);
+            console.error('Canvas 파일 처리 실패:', error);
             if (this.onShowError) {
-                this.onShowError('处理 Canvas 文件时出错');
+                this.onShowError('Canvas 파일 처리 중 오류 발생');
             }
             return [];
         } finally {
-            // 隐藏加载指示器
+            // 로딩 표시기 숨김
             if (this.onHideLoading) {
                 this.onHideLoading();
             }
@@ -112,14 +112,14 @@ export class CanvasHighlightProcessor {
     }
     
     /**
-     * 标记高亮为 Canvas 来源
+     * 하이라이트를 Canvas 출처로 마킹
      */
     private markAsCanvasHighlights(highlights: HighlightInfo[], canvasFile: TFile): HighlightInfo[] {
         return highlights.map(highlight => ({
             ...highlight,
             isFromCanvas: true,
             canvasSource: canvasFile.path,
-            isGlobalSearch: true // 标记为全局搜索结果，这样会显示文件名
+            isGlobalSearch: true // 전역 검색 결과로 마킹하여 파일명이 표시되도록 함
         }));
     }
 }

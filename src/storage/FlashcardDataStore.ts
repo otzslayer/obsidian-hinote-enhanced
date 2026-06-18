@@ -16,7 +16,7 @@ export class FlashcardDataStore {
 
             const validation = DataValidator.validateFlashcardData(data);
             if (!validation.valid) {
-                console.warn('闪卡数据验证失败:', validation.errors);
+                console.warn('플래시카드 데이터 유효성 검사 실패:', validation.errors);
                 return null;
             }
 

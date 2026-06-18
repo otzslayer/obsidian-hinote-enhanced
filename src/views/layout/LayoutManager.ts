@@ -1,21 +1,21 @@
 import { Platform } from 'obsidian';
 
 /**
- * 布局管理器
- * 负责视图布局的更新和响应式设计
+ * 레이아웃 매니저
+ * 뷰 레이아웃 업데이트 및 반응형 디자인 담당
  */
 export class LayoutManager {
     private containerEl: HTMLElement;
     private fileListContainer: HTMLElement;
     private mainContentContainer: HTMLElement;
     private searchContainer: HTMLElement;
-    
-    // 回调函数
+
+    // 콜백 함수
     private onCreateFloatingButton: (() => void) | null = null;
     private onRemoveFloatingButton: (() => void) | null = null;
     private onUpdateFileList: ((forceRefresh?: boolean) => Promise<void>) | null = null;
     
-    // 状态
+    // 상태
     private isDraggedToMainView: boolean = false;
     private isFlashcardMode: boolean = false;
     private isShowingFileList: boolean = true;
@@ -35,7 +35,7 @@ export class LayoutManager {
     }
     
     /**
-     * 设置回调函数
+     * 콜백 함수 설정
      */
     setCallbacks(callbacks: {
         onCreateFloatingButton?: () => void;
@@ -54,7 +54,7 @@ export class LayoutManager {
     }
     
     /**
-     * 更新状态
+     * 상태 업데이트
      */
     updateState(state: {
         isDraggedToMainView?: boolean;
@@ -81,35 +81,35 @@ export class LayoutManager {
     }
     
     /**
-     * 更新视图布局
+     * 뷰 레이아웃 업데이트
      */
     async updateViewLayout(): Promise<void> {
-        // 检测设备类型和屏幕大小
+        // 디바이스 유형 및 화면 크기 감지
         this.isMobileView = this.checkIfMobile();
         this.isSmallScreen = this.checkIfSmallScreen();
-        
-        // 先清除所有显示相关的类
+
+        // 먼저 모든 표시 관련 클래스 제거
         this.fileListContainer.removeClass('highlight-display-block');
         this.fileListContainer.removeClass('highlight-display-none');
         this.mainContentContainer.removeClass('highlight-display-none');
-        
-        // 添加或移除主视图标记类
+
+        // 메인 뷰 마커 클래스 추가 또는 제거
         const container = this.containerEl.children[1];
         if (this.isDraggedToMainView) {
             container.addClass('is-in-main-view');
         } else {
             container.removeClass('is-in-main-view');
         }
-        
-        // 添加或移除小屏幕标记类
+
+        // 소형 화면 마커 클래스 추가 또는 제거
         if (this.isSmallScreen) {
             container.addClass('is-small-screen');
         } else {
             container.removeClass('is-small-screen');
         }
-        
+
         if (this.isDraggedToMainView) {
-            // 立即应用布局,不阻塞UI
+            // UI 차단 없이 레이아웃 즉시 적용
             if (this.isMobileView && this.isSmallScreen) {
                 this.applySmallScreenLayout();
             } else if (this.isSmallScreen) {
@@ -117,36 +117,36 @@ export class LayoutManager {
             } else {
                 this.applyLargeScreenLayout();
             }
-            
-            // 创建浮动按钮
+
+            // 플로팅 버튼 생성
             if (this.onCreateFloatingButton) {
                 this.onCreateFloatingButton();
             }
-            
-            // 延迟同步文件列表状态,不阻塞UI渲染。
-            // 不在拖拽进主视图时强制刷新,避免清空缓存后触发全库高亮扫描。
+
+            // UI 렌더링을 차단하지 않고 파일 목록 상태를 지연 동기화.
+            // 메인 뷰에 드래그 시 강제 새로고침하지 않아 캐시 초기화 후 전체 라이브러리 하이라이트 스캔 방지.
             if (this.onUpdateFileList) {
                 window.setTimeout(() => {
                     void this.onUpdateFileList?.();
                 }, 50);
             }
         } else {
-            // 侧边栏布局
+            // 사이드바 레이아웃
             this.applySidebarLayout();
         }
     }
     
     /**
-     * 应用小屏幕布局（手机）
+     * 소형 화면 레이아웃 적용 (휴대폰)
      */
     private applySmallScreenLayout(): void {
         if (this.isShowingFileList) {
-            // 显示文件列表，隐藏内容区域
+            // 파일 목록 표시, 콘텐츠 영역 숨김
             this.fileListContainer.addClass('highlight-display-block');
             this.mainContentContainer.addClass('highlight-display-none');
             this.fileListContainer.addClass('highlight-full-width');
         } else {
-            // 显示内容区域，隐藏文件列表
+            // 콘텐츠 영역 표시, 파일 목록 숨김
             this.fileListContainer.addClass('highlight-display-none');
             this.mainContentContainer.removeClass('highlight-display-none');
             this.fileListContainer.removeClass('highlight-full-width');
@@ -154,17 +154,17 @@ export class LayoutManager {
     }
     
     /**
-     * 应用大屏幕布局（平板、桌面）
+     * 대형 화면 레이아웃 적용 (태블릿, 데스크톱)
      */
     private applyLargeScreenLayout(): void {
-        // 同时显示文件列表和内容
+        // 파일 목록과 콘텐츠 동시 표시
         this.fileListContainer.addClass('highlight-display-block');
         this.mainContentContainer.removeClass('highlight-display-none');
         this.fileListContainer.removeClass('highlight-full-width');
     }
 
     /**
-     * 应用窄窗格布局（桌面端 Obsidian pane 被缩小时）
+     * 좁은 창 레이아웃 적용 (데스크톱 Obsidian 창이 좁아졌을 때)
      */
     private applyCompactLayout(): void {
         this.fileListContainer.addClass('highlight-display-none');
@@ -173,18 +173,18 @@ export class LayoutManager {
     }
     
     /**
-     * 应用侧边栏布局
+     * 사이드바 레이아웃 적용
      */
     private applySidebarLayout(): void {
-        // 隐藏文件列表
+        // 파일 목록 숨김
         this.fileListContainer.addClass('highlight-display-none');
-        
-        // 移除浮动按钮
+
+        // 플로팅 버튼 제거
         if (this.onRemoveFloatingButton) {
             this.onRemoveFloatingButton();
         }
-        
-        // 显示搜索容器（除非在闪卡模式）
+
+        // 검색 컨테이너 표시 (플래시카드 모드가 아닌 경우)
         if (!this.isFlashcardMode) {
             this.searchContainer.removeClass('highlight-display-none');
             const iconButtons = this.searchContainer.querySelector('.highlight-search-icons') as HTMLElement;
@@ -195,14 +195,14 @@ export class LayoutManager {
     }
     
     /**
-     * 检测是否为移动设备
+     * 모바일 디바이스 여부 감지
      */
     checkIfMobile(): boolean {
         return Platform.isMobile;
     }
     
     /**
-     * 检测是否为小屏幕设备（宽度小于768px）
+     * 소형 화면 디바이스 여부 감지 (너비 768px 미만)
      */
     checkIfSmallScreen(): boolean {
         const containerWidth = this.containerEl.getBoundingClientRect().width;
@@ -210,7 +210,7 @@ export class LayoutManager {
     }
     
     /**
-     * 获取当前设备信息
+     * 현재 디바이스 정보 가져오기
      */
     getDeviceInfo(): {
         isMobile: boolean;

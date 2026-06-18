@@ -1,19 +1,19 @@
 /**
- * AI 服务模块统一导出
+ * AI 서비스 모듈 통합 내보내기
  */
 
-// 核心管理器
+// 핵심 관리자
 export { AIServiceManager } from './AIServiceManager';
 export { AIServiceRegistry } from './AIServiceRegistry';
 
-// 基础类
+// 기본 클래스
 export { BaseAIService } from './BaseAIService';
 export { BaseHTTPClient } from './BaseHTTPClient';
 
-// 工具类
+// 유틸리티 클래스
 export { AITestHelper } from './AITestHelper';
 
-// 类型定义
+// 타입 정의
 export {
     AIProviderType,
     AIServiceError,
@@ -28,7 +28,7 @@ export type {
     AIModel
 } from './BaseAIService';
 
-// 具体服务（如果需要直接使用）
+// 개별 서비스 (직접 사용이 필요한 경우)
 export { OpenAIService } from './OpenAIService';
 export { AnthropicService } from './AnthropicService';
 export { GeminiService } from './GeminiService';
@@ -37,7 +37,7 @@ export { SiliconFlowService } from './SiliconFlowService';
 export { OllamaService } from './OllamaService';
 export { CustomAIService } from './CustomAIService';
 
-// 工厂类（如果需要自定义注册）
+// 팩토리 클래스 (커스텀 등록이 필요한 경우)
 export {
     OpenAIServiceFactory,
     AnthropicServiceFactory,

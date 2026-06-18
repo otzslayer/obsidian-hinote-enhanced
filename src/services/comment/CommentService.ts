@@ -7,14 +7,14 @@ import CommentPlugin from '../../../main';
 import { t } from '../../i18n';
 
 /**
- * 评论服务
- * 负责评论的添加、更新、删除等业务逻辑
- * 
- * 职责：
- * - 评论的 CRUD 操作
- * - 虚拟高亮的管理
- * - 闪卡关联检查
- * - 文件查找逻辑
+ * 댓글 서비스
+ * 댓글의 추가, 업데이트, 삭제 등 비즈니스 로직을 담당합니다
+ *
+ * 역할:
+ * - 댓글 CRUD 작업
+ * - 가상 하이라이트 관리
+ * - 플래시카드 연관 확인
+ * - 파일 검색 로직
  */
 export class CommentService {
     private app: App;
@@ -22,13 +22,13 @@ export class CommentService {
     private highlightManager: HighlightManager;
     private inlineWriter: InlineCommentWriter;
 
-    // 回调函数
+    // 콜백 함수
     private onRefreshView: (() => Promise<void>) | null = null;
     private onHighlightsUpdate: ((highlights: HighlightInfo[]) => void) | null = null;
     private onCardUpdate: ((highlight: HighlightInfo) => void) | null = null;
     private onCardRemove: ((highlight: HighlightInfo) => void) | null = null;
 
-    // 当前状态
+    // 현재 상태
     private currentFile: TFile | null = null;
     private highlights: HighlightInfo[] = [];
 
@@ -44,7 +44,7 @@ export class CommentService {
     }
     
     /**
-     * 设置回调函数
+     * 콜백 함수를 설정합니다
      */
     setCallbacks(callbacks: {
         onRefreshView?: () => Promise<void>;
@@ -67,7 +67,7 @@ export class CommentService {
     }
     
     /**
-     * 更新状态
+     * 상태를 업데이트합니다
      */
     updateState(state: {
         currentFile?: TFile | null;
@@ -82,7 +82,7 @@ export class CommentService {
     }
     
     /**
-     * 添加评论
+     * 댓글을 추가합니다
      */
     async addComment(highlight: HighlightInfo, content: string): Promise<void> {
         const file = await this.getFileForHighlight(highlight);
@@ -129,7 +129,7 @@ export class CommentService {
     }
     
     /**
-     * 更新评论
+     * 댓글을 업데이트합니다
      */
     async updateComment(highlight: HighlightInfo, commentId: string, content: string): Promise<void> {
         const file = await this.getFileForHighlight(highlight);
@@ -165,7 +165,7 @@ export class CommentService {
     }
     
     /**
-     * 删除评论
+     * 댓글을 삭제합니다
      */
     async deleteComment(highlight: HighlightInfo, commentId: string): Promise<void> {
         const file = await this.getFileForHighlight(highlight);
@@ -206,7 +206,7 @@ export class CommentService {
     }
     
     /**
-     * 删除虚拟高亮（当取消添加评论时）
+     * 가상 하이라이트를 삭제합니다 (댓글 추가를 취소할 때)
      */
     async deleteVirtualHighlight(highlight: HighlightInfo): Promise<void> {
         if (!highlight.isVirtual || (highlight.comments && highlight.comments.length > 0)) {
@@ -217,15 +217,15 @@ export class CommentService {
         if (file) {
             await this.highlightManager.removeHighlight(file, highlight);
             this.highlights = this.highlights.filter(h => {
-                // 如果有 ID，通过 ID 比较
+                // ID가 있으면 ID로 비교합니다
                 if (h.id && highlight.id) {
                     return h.id !== highlight.id;
                 }
-                // 如果没有 ID，通过位置和文本比较
+                // ID가 없으면 위치와 텍스트로 비교합니다
                 return !(h.position === highlight.position && h.text === highlight.text);
             });
             
-            // 通知外部更新高亮列表
+            // 외부에 하이라이트 목록 업데이트를 알립니다
             if (this.onHighlightsUpdate) {
                 this.onHighlightsUpdate(this.highlights);
             }
@@ -239,21 +239,21 @@ export class CommentService {
     }
     
     /**
-     * 获取高亮对应的文件
+     * 하이라이트에 해당하는 파일을 가져옵니다
      */
     private async getFileForHighlight(highlight: HighlightInfo): Promise<TFile | null> {
-        // 如果有当前文件，使用当前文件
+        // 현재 파일이 있으면 현재 파일을 사용합니다
         if (this.currentFile) {
             return this.currentFile;
         }
-        // 如果是全部高亮视图，使用 highlight.filePath 获取文件
+        // 전체 하이라이트 뷰인 경우 highlight.filePath로 파일을 가져옵니다
         if (highlight.filePath) {
             const file = this.app.vault.getAbstractFileByPath(highlight.filePath);
             if (file instanceof TFile) {
                 return file;
             }
         }
-        // 如果通过 filePath 找不到，尝试通过 fileName
+        // filePath로 찾지 못하면 fileName으로 시도합니다
         if (highlight.fileName) {
             const files = this.app.vault.getFiles();
             const file = files.find(f => f.basename === highlight.fileName || f.name === highlight.fileName);
@@ -265,7 +265,7 @@ export class CommentService {
     }
     
     /**
-     * 检查高亮是否已经创建了闪卡
+     * 하이라이트에 플래시카드가 이미 생성되었는지 확인합니다
      */
     private checkHasFlashcard(highlightId: string): boolean {
         const fsrsManager = this.plugin.fsrsManager;

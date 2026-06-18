@@ -2,7 +2,7 @@ import { setIcon } from "obsidian";
 import { t } from "../../i18n";
 
 /**
- * UI 元素引用接口
+ * UI 요소 참조 인터페이스
  */
 export interface UIElements {
     mainContainer: HTMLElement;
@@ -19,64 +19,64 @@ export interface UIElements {
 }
 
 /**
- * UI 初始化管理器
- * 职责：
- * 1. 创建所有 UI 元素
- * 2. 设置图标和样式
- * 3. 返回 UI 元素引用供其他模块使用
+ * UI 초기화 매니저
+ * 담당:
+ * 1. 모든 UI 요소 생성
+ * 2. 아이콘 및 스타일 설정
+ * 3. 다른 모듈이 사용할 UI 요소 참조 반환
  */
 export class UIInitializer {
     /**
-     * 初始化所有 UI 元素
-     * @param container 根容器
-     * @returns UI 元素引用
+     * 모든 UI 요소 초기화
+     * @param container 루트 컨테이너
+     * @returns UI 요소 참조
      */
     initializeUI(container: HTMLElement): UIElements {
-        // 清空容器并添加类
+        // 컨테이너 비우고 클래스 추가
         container.empty();
         container.addClass("comment-view-container");
         container.addClass("hinote-view-container");
 
-        // 创建主容器
+        // 메인 컨테이너 생성
         const mainContainer = container.createEl("div", {
             cls: "highlight-main-container"
         });
 
-        // 创建文件列表区域（只在主视图中显示）
+        // 파일 목록 영역 생성 (메인 뷰에서만 표시)
         const fileListContainer = mainContainer.createEl("div", {
             cls: "highlight-file-list-container"
         });
 
-        // 创建右侧内容区域
+        // 우측 콘텐츠 영역 생성
         const mainContentContainer = mainContainer.createEl("div", {
             cls: "highlight-content-container"
         });
 
-        // 创建返回按钮（仅在移动端显示）
+        // 뒤로가기 버튼 생성 (모바일에서만 표시)
         const { backButtonContainer, backButton } = this.createBackButton(mainContentContainer);
 
-        // 创建搜索区域
+        // 검색 영역 생성
         const searchContainer = mainContentContainer.createEl("div", {
             cls: "highlight-search-container"
         });
 
-        // 创建搜索输入框
+        // 검색 입력창 생성
         const searchInput = this.createSearchInput(searchContainer);
 
-        // 创建搜索加载指示器
+        // 검색 로딩 표시기 생성
         const searchLoadingIndicator = this.createSearchLoadingIndicator(searchContainer);
 
-        // 创建图标按钮容器
+        // 아이콘 버튼 컨테이너 생성
         const iconButtonsContainer = searchContainer.createEl("div", {
             cls: "highlight-search-icons"
         });
 
-        // 创建高亮容器
+        // 하이라이트 컨테이너 생성
         const highlightContainer = mainContentContainer.createEl("div", {
             cls: "highlight-container"
         });
 
-        // 创建加载指示器
+        // 로딩 표시기 생성
         const loadingIndicator = this.createLoadingIndicator();
 
         return {
@@ -95,7 +95,7 @@ export class UIInitializer {
     }
 
     /**
-     * 创建返回按钮
+     * 뒤로가기 버튼 생성
      */
     private createBackButton(parent: HTMLElement): { backButtonContainer: HTMLElement; backButton: HTMLElement } {
         const backButtonContainer = parent.createEl("div", {
@@ -116,7 +116,7 @@ export class UIInitializer {
     }
 
     /**
-     * 创建搜索输入框
+     * 검색 입력창 생성
      */
     private createSearchInput(parent: HTMLElement): HTMLInputElement {
         const searchInput = parent.createEl("input", {
@@ -127,7 +127,7 @@ export class UIInitializer {
             }
         });
 
-        // 添加焦点和失焦事件
+        // 포커스 및 블러 이벤트 추가
         searchInput.addEventListener('focus', () => {
             parent.addClass('focused');
         });
@@ -140,7 +140,7 @@ export class UIInitializer {
     }
 
     /**
-     * 创建搜索加载指示器
+     * 검색 로딩 표시기 생성
      */
     private createSearchLoadingIndicator(parent: HTMLElement): HTMLElement {
         const indicator = parent.createEl("div", {
@@ -155,7 +155,7 @@ export class UIInitializer {
     }
 
     /**
-     * 创建加载指示器
+     * 로딩 표시기 생성
      */
     private createLoadingIndicator(): HTMLElement {
         const loadingIndicator = createEl("div", {

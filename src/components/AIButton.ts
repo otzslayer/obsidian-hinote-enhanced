@@ -4,7 +4,7 @@ import { t } from "../i18n";
 import CommentPlugin from "../../main";
 
 /**
- * 内容提供者接口，用于获取 AI 分析所需的文本和评论
+ * AI 분석에 필요한 텍스트와 댓글을 가져오기 위한 콘텐츠 제공자 인터페이스
  */
 export interface ContentProvider {
     getText: () => string;
@@ -12,23 +12,23 @@ export interface ContentProvider {
 }
 
 /**
- * AI 按钮选项接口
+ * AI 버튼 옵션 인터페이스
  */
 export interface AIButtonOptions {
-    /** AI 响应后的回调函数 */
+    /** AI 응답 후 콜백 함수 */
     onResponse: (content: string) => Promise<void>;
-    /** 按钮的 CSS 类名 */
+    /** 버튼의 CSS 클래스명 */
     buttonClass: string;
-    /** 按钮的图标名称 */
+    /** 버튼의 아이콘 이름 */
     buttonIcon: string;
-    /** 按钮的 aria-label 属性 */
+    /** 버튼의 aria-label 속성 */
     buttonLabel: string;
-    /** 按钮的位置 */
+    /** 버튼 위치 */
     position: 'left' | 'right' | 'titlebar';
 }
 
 /**
- * AI 按钮组件，用于显示 AI 相关功能的按钮和下拉菜单
+ * AI 관련 기능의 버튼과 드롭다운 메뉴를 표시하는 AI 버튼 컴포넌트
  */
 export class AIButton {
     private container: HTMLElement;
@@ -39,11 +39,11 @@ export class AIButton {
     private options: AIButtonOptions;
 
     /**
-     * 创建 AI 按钮组件
-     * @param container 容器元素
-     * @param contentProvider 内容提供者
-     * @param plugin 插件实例
-     * @param options 按钮选项
+     * AI 버튼 컴포넌트 생성
+     * @param container 컨테이너 요소
+     * @param contentProvider 콘텐츠 제공자
+     * @param plugin 플러그인 인스턴스
+     * @param options 버튼 옵션
      */
     constructor(
         container: HTMLElement,
@@ -54,7 +54,7 @@ export class AIButton {
         this.plugin = plugin;
         this.container = container;
         this.contentProvider = contentProvider;
-        // 合并选项，使用传入的选项覆盖默认值
+        // 옵션 병합, 전달된 옵션으로 기본값 덮어쓰기
         this.options = {
             ...options
         };
@@ -63,46 +63,46 @@ export class AIButton {
     }
 
     /**
-     * 销毁组件，清理资源
+     * 컴포넌트 소멸, 리소스 정리
      */
     destroy() {
         this.aiContainer.detach();
     }
 
     /**
-     * 初始化按钮和下拉菜单
+     * 버튼 및 드롭다운 메뉴 초기화
      */
     private initButton() {
-        // AI 按钮和下拉菜单容器
+        // AI 버튼 및 드롭다운 메뉴 컨테이너
         const aiContainer = this.container.createEl("div", {
             cls: "highlight-ai-container"
         });
         this.aiContainer = aiContainer;
 
-        // 根据位置设置容器类名
+        // 위치에 따라 컨테이너 클래스명 설정
         if (this.options.position) {
             aiContainer.addClass(`highlight-ai-container-${this.options.position}`);
         }
 
-        // AI 按钮
+        // AI 버튼
         const aiButton = aiContainer.createEl("div", {
             cls: this.options.buttonClass,
             attr: { 'aria-label': this.options.buttonLabel }
         });
         setIcon(aiButton, this.options.buttonIcon);
 
-        // 添加按钮点击事件
+        // 버튼 클릭 이벤트 추가
         aiButton.addEventListener("click", (e) => {
             e.stopPropagation();
             this.toggleDropdown();
         });
 
-        // 保存按钮引用以便更新状态
+        // 상태 업데이트를 위한 버튼 참조 저장
         this.aiButton = aiButton;
     }
 
     /**
-     * 切换下拉菜单的显示/隐藏状态
+     * 드롭다운 메뉴 표시/숨김 전환
      */
     private toggleDropdown() {
         const menu = new Menu();
@@ -129,8 +129,8 @@ export class AIButton {
     }
 
     /**
-     * 处理 AI 分析
-     * @param promptName 提示名称
+     * AI 분석 처리
+     * @param promptName 프롬프트 이름
      */
     private async handleAIAnalysis(promptName: string) {
         try {
@@ -138,23 +138,23 @@ export class AIButton {
 
             const aiService = new AIServiceManager(this.plugin.settings.ai);
             const prompt = this.plugin.settings.ai.prompts[promptName];
-            
+
             if (!prompt) {
                 throw new Error(t(`Not found named "${promptName}" Prompt`));
             }
 
-            // 从内容提供者获取文本和评论
+            // 콘텐츠 제공자에서 텍스트와 댓글 가져오기
             const text = this.contentProvider.getText();
             const commentsText = this.contentProvider.getComments();
 
-            // 调用 AI 服务进行分析
+            // AI 서비스를 호출하여 분석
             const response = await aiService.generateResponse(
                 prompt,
                 text,
                 commentsText
             );
 
-            // 添加 AI 分析结果
+            // AI 분석 결과 추가
             await this.options.onResponse(response);
 
             new Notice(t('AI comments added'));
@@ -167,8 +167,8 @@ export class AIButton {
     }
 
     /**
-     * 设置按钮的加载状态
-     * @param loading 是否处于加载状态
+     * 버튼의 로딩 상태 설정
+     * @param loading 로딩 중 여부
      */
     private setLoading(loading: boolean) {
         if (loading) {
@@ -181,7 +181,7 @@ export class AIButton {
     }
 
     /**
-     * 获取按钮元素
+     * 버튼 요소 가져오기
      */
     public getButtonElement(): HTMLElement {
         return this.aiButton;

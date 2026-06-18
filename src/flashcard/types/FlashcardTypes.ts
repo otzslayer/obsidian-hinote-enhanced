@@ -2,7 +2,7 @@ export interface Flashcard {
     id: string;
     front: string;    // highlight text
     back: string;     // comment content
-    sourceFile?: string;  // 原文件来源
+    sourceFile?: string;  // 원본 파일 출처
 }
 
 export interface FlashcardUIState {

@@ -1,6 +1,6 @@
-// 导出预览使用的样式
+// 내보내기 미리보기에 사용되는 스타일
 export const exportStyles = `
-    /* 导出卡片基础样式 */
+    /* 내보내기 카드 기본 스타일 */
     .highlight-export-card {
         transition: all 0.3s ease;
         padding: 20px;
@@ -8,7 +8,7 @@ export const exportStyles = `
         border-radius: 12px;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         
-        /* 添加更严格的文本控制 */
+        /* 더 엄격한 텍스트 제어 추가 */
         font-size: 16px;
         line-height: 1.6;
         letter-spacing: normal;
@@ -18,7 +18,7 @@ export const exportStyles = `
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
-    /* 现代风格模板 */
+    /* 모던 스타일 템플릿 */
     .highlight-export-card-modern {
         padding: 24px;
         position: relative;
@@ -46,7 +46,7 @@ export const exportStyles = `
     .highlight-export-card-modern .highlight-export-quote-section {
         position: relative;
         padding: 24px 0;
-        /* 确保引用部分的文本样式一致性 */
+        /* 인용 섹션의 텍스트 스타일 일관성 보장 */
         font-size: inherit;
         line-height: inherit;
         letter-spacing: inherit;
@@ -61,26 +61,26 @@ export const exportStyles = `
         margin: 0;
         position: relative;
         z-index: 1;
-        /* 确保引用文本的样式一致性 */
+        /* 인용 텍스트의 스타일 일관성 보장 */
         letter-spacing: normal;
         word-spacing: normal;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
     }
 
-    /* 确保所有文本元素继承基础样式 */
+    /* 모든 텍스트 요소가 기본 스타일을 상속하도록 보장 */
     .highlight-export-card * {
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
     }
 
-    /* 导出预览容器 */
+    /* 내보내기 미리보기 컨테이너 */
     .highlight-export-preview {
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         padding: 20px;
     }
 
-    /* 导出容器 */
+    /* 내보내기 컨테이너 */
     .highlight-export-container {
         padding: 20px;
         margin: 0;

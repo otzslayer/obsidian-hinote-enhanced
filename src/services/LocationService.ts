@@ -5,55 +5,55 @@ export class LocationService {
     constructor(private app: App) {}
 
     /**
-     * 跳转到指定的高亮位置
+     * 지정된 하이라이트 위치로 이동합니다
      */
     public async jumpToHighlight(highlight: HighlightInfo, currentFilePath: string) {
-        // 1. 打开或激活文件
+        // 1. 파일을 열거나 활성화합니다
         const targetLeaf = await this.openOrActivateFile(currentFilePath);
         if (!targetLeaf) return;
 
-        // 2. 定位高亮内容，传递 position 参数
+        // 2. 하이라이트 내용을 찾아 이동합니다 (position 매개변수 전달)
         await this.locateAndHighlightText(targetLeaf, highlight.text, highlight.position);
     }
 
     /**
-     * 打开或激活指定文件，但不聚焦
+     * 지정된 파일을 열거나 활성화하되 포커스는 주지 않습니다
      */
     private async openOrActivateFile(filePath: string): Promise<WorkspaceLeaf | null> {
-        // 先查找已打开的文件
+        // 이미 열려 있는 파일을 먼저 찾습니다
         const markdownLeaves = this.app.workspace.getLeavesOfType("markdown");
         let targetLeaf = markdownLeaves.find((leaf: WorkspaceLeaf) => {
             const view = leaf.view as MarkdownView;
             return view.file?.path === filePath;
         });
         
-        // 如果文件未打开，则打开它
+        // 파일이 열려 있지 않으면 엽니다
         if (!targetLeaf) {
             try {
                 const file = this.app.vault.getAbstractFileByPath(filePath);
                 if (!(file instanceof TFile)) {
-                    new Notice("未找到文件");
+                    new Notice("파일을 찾을 수 없습니다");
                     return null;
                 }
                 
                 targetLeaf = this.app.workspace.getLeaf('tab');
                 await targetLeaf.openFile(file);
             } catch {
-                new Notice("打开文件失败");
+                new Notice("파일 열기에 실패했습니다");
                 return null;
             }
         }
         
-        // 激活编辑器视图，但不聚焦
+        // 에디터 뷰를 활성화하되 포커스는 주지 않습니다
         this.app.workspace.setActiveLeaf(targetLeaf, { focus: false });
         return targetLeaf;
     }
 
     /**
-     * 在编辑器中定位并高亮文本
+     * 에디터에서 텍스트를 찾아 하이라이트합니다
      */
     private async locateAndHighlightText(leaf: WorkspaceLeaf, text: string, position?: number) {
-        // 确保编辑器已准备就绪
+        // 에디터가 준비될 때까지 대기합니다
         await new Promise(resolve => window.setTimeout(resolve, 300));
         
         const markdownView = leaf.view as MarkdownView;
@@ -62,9 +62,9 @@ export class LocationService {
         
         let textPosition = -1;
         let allMatches: number[] = [];
-        let matchedText = text; // 默认使用原始文本
+        let matchedText = text; // 기본값으로 원본 텍스트를 사용합니다
         
-        // 找出所有精确匹配项
+        // 모든 정확한 일치 항목을 찾습니다
         let searchPos = 0;
         let foundPos = -1;
         while ((foundPos = content.indexOf(text, searchPos)) !== -1) {
@@ -72,15 +72,15 @@ export class LocationService {
             searchPos = foundPos + 1;
         }
         
-        // 如果提供了 position，则优先使用它
+        // position이 제공된 경우 우선적으로 사용합니다
         if (position !== undefined && position >= 0) {
-            // 首先检查精确匹配
+            // 먼저 정확한 일치를 확인합니다
             if (content.substring(position, position + text.length) === text) {
                 textPosition = position;
             } else {
-                // 如果没有精确匹配，则找最接近的匹配项
+                // 정확한 일치가 없으면 가장 가까운 일치 항목을 찾습니다
                 if (allMatches.length > 0) {
-                    // 找到与指定位置最接近的匹配项
+                    // 지정된 위치에 가장 가까운 일치 항목을 찾습니다
                     let closestMatch = allMatches[0];
                     let minDistance = Math.abs(position - closestMatch);
                     
@@ -97,27 +97,27 @@ export class LocationService {
             }
         }
         
-        // 如果没有找到精确匹配项
+        // 정확한 일치 항목을 찾지 못한 경우
         if (textPosition === -1) {
             if (allMatches.length > 0) {
                 textPosition = allMatches[0];
             } else {
-                new Notice("未找到高亮内容");
+                new Notice("하이라이트 내용을 찾을 수 없습니다");
                 return;
             }
         }
         
-        // 将文本位置转换为编辑器位置
+        // 텍스트 위치를 에디터 위치로 변환합니다
         const start = editor.offsetToPos(textPosition);
         const end = editor.offsetToPos(textPosition + matchedText.length);
         
-        // 检查视图模式
+        // 뷰 모드를 확인합니다
         const mode = markdownView.getMode(); // 'source' | 'preview'
 
         if (mode === 'preview') {
-            // 阅读模式下的处理
-            // 使用 setEphemeralState 滚动到指定行
-            // startLoc 和 endLoc 用于传递位置信息
+            // 읽기 모드 처리
+            // setEphemeralState를 사용하여 지정된 줄로 스크롤합니다
+            // startLoc 및 endLoc은 위치 정보를 전달하는 데 사용됩니다
             leaf.setEphemeralState({
                 line: start.line,
                 startLoc: { line: start.line, col: start.ch },
@@ -125,14 +125,14 @@ export class LocationService {
                 scroll: start.line
             });
         } else {
-            // 编辑/实时预览模式下的处理
-            // 1. 选中文本
+            // 편집/실시간 미리보기 모드 처리
+            // 1. 텍스트를 선택합니다
             editor.setSelection(start, end);
             
-            // 2. 滚动到目标位置，并确保选中内容在编辑器中间位置显示
+            // 2. 대상 위치로 스크롤하여 선택된 내용이 에디터 중앙에 표시되도록 합니다
             editor.scrollIntoView({from: start, to: end}, true);
             
-            // 3. 聚焦编辑器，确保用户可以看到选中内容
+            // 3. 에디터에 포커스를 주어 사용자가 선택된 내용을 볼 수 있게 합니다
             this.app.workspace.setActiveLeaf(leaf, { focus: true });
         }
     }

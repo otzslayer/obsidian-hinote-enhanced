@@ -5,7 +5,7 @@ import type { FlashcardComponentContext } from "../FlashcardComponentContext";
 import { createFlashcardGroupModal, FlashcardGroupFormValues } from "./FlashcardGroupModal";
 
 /**
- * 闪卡分组管理器，负责处理分组的创建、编辑和删除
+ * 플래시카드 그룹 매니저, 그룹의 생성, 편집 및 삭제 처리 담당
  */
 export class FlashcardGroupManager {
     private component: FlashcardComponentContext;
@@ -15,15 +15,15 @@ export class FlashcardGroupManager {
     }
 
     /**
-     * 显示创建分组模态框
+     * 그룹 생성 모달 표시
      */
     public showCreateGroupModal() {
         this.showEditGroupModal();
     }
 
     /**
-     * 显示编辑分组模态框
-     * @param group 要编辑的分组
+     * 그룹 편집 모달 표시
+     * @param group 편집할 그룹
      */
     public showEditGroupModal(group?: CardGroup) {
         const modal = createFlashcardGroupModal(group);

@@ -8,12 +8,12 @@ const translations: Record<string, Record<string, string>> = {
 };
 
 export function t(key: string): string {
-    // 获取 Obsidian 当前语言
+    // Obsidian 현재 언어 가져오기
     const locale = moment.locale();
-    // 如果是中文环境，使用中文翻译
+    // 중국어 환경이면 중국어 번역 사용
     const currentTranslations = locale.startsWith('zh') ? translations.zh : translations.en;
-    
-    // 直接获取翻译
+
+    // 번역 직접 가져오기
     const translation = currentTranslations[key];
     if (translation) {
         return translation;

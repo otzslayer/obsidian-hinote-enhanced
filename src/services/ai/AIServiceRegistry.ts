@@ -1,6 +1,6 @@
 /**
- * AI 服务注册表
- * 负责管理所有 AI 服务的注册和创建
+ * AI 서비스 레지스트리
+ * 모든 AI 서비스의 등록 및 생성을 관리합니다
  */
 
 import { IAIService, IAIServiceFactory, AIProviderType, AIServiceError } from './BaseAIService';
@@ -11,7 +11,7 @@ export class AIServiceRegistry {
     private instances = new Map<AIProviderType, IAIService>();
     
     /**
-     * 注册服务工厂
+     * 서비스 팩토리 등록
      */
     register(factory: IAIServiceFactory): void {
         const provider = factory.getProviderType();
@@ -19,26 +19,26 @@ export class AIServiceRegistry {
     }
     
     /**
-     * 批量注册服务工厂
+     * 서비스 팩토리 일괄 등록
      */
     registerAll(factories: IAIServiceFactory[]): void {
         factories.forEach(factory => this.register(factory));
     }
     
     /**
-     * 获取服务实例（懒加载）
+     * 서비스 인스턴스 가져오기 (지연 로딩)
      */
     getService(provider: AIProviderType, config: AISettings): IAIService {
-        // 检查缓存
+        // 캐시 확인
         if (this.instances.has(provider)) {
             const instance = this.instances.get(provider)!;
-            // 如果已配置，直接返回
+            // 이미 설정된 경우 바로 반환
             if (instance.isConfigured()) {
                 return instance;
             }
         }
-        
-        // 获取工厂
+
+        // 팩토리 가져오기
         const factory = this.factories.get(provider);
         if (!factory) {
             throw AIServiceError.notConfigured(
@@ -47,21 +47,21 @@ export class AIServiceRegistry {
             );
         }
         
-        // 创建实例并缓存
+        // 인스턴스 생성 및 캐싱
         const service = factory.create(config);
         this.instances.set(provider, service);
         return service;
     }
     
     /**
-     * 检查服务是否已注册
+     * 서비스 등록 여부 확인
      */
     isRegistered(provider: AIProviderType): boolean {
         return this.factories.has(provider);
     }
     
     /**
-     * 清除缓存（用于设置更新）
+     * 캐시 초기화 (설정 업데이트 시 사용)
      */
     clearCache(provider?: AIProviderType): void {
         if (provider) {
@@ -72,14 +72,14 @@ export class AIServiceRegistry {
     }
     
     /**
-     * 获取所有已注册的提供商
+     * 등록된 모든 공급자 가져오기
      */
     getRegisteredProviders(): AIProviderType[] {
         return Array.from(this.factories.keys());
     }
     
     /**
-     * 获取所有已创建的服务实例
+     * 생성된 모든 서비스 인스턴스 가져오기
      */
     getActiveServices(): AIProviderType[] {
         return Array.from(this.instances.keys());

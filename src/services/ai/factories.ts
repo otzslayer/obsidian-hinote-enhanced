@@ -1,6 +1,6 @@
 /**
- * AI 服务工厂集合
- * 为每个 AI 服务提供工厂实现
+ * AI 서비스 팩토리 모음
+ * 각 AI 서비스에 대한 팩토리 구현을 제공합니다
  */
 
 import { IAIService, IAIServiceFactory, AIProviderType, AIServiceError } from './BaseAIService';
@@ -15,7 +15,7 @@ import { OllamaService } from './OllamaService';
 import { CustomAIService } from './CustomAIService';
 
 /**
- * OpenAI 服务工厂
+ * OpenAI 서비스 팩토리
  */
 export class OpenAIServiceFactory implements IAIServiceFactory {
     getProviderType(): AIProviderType {
@@ -40,7 +40,7 @@ export class OpenAIServiceFactory implements IAIServiceFactory {
 }
 
 /**
- * Anthropic 服务工厂
+ * Anthropic 서비스 팩토리
  */
 export class AnthropicServiceFactory implements IAIServiceFactory {
     getProviderType(): AIProviderType {
@@ -65,7 +65,7 @@ export class AnthropicServiceFactory implements IAIServiceFactory {
 }
 
 /**
- * Gemini 服务工厂
+ * Gemini 서비스 팩토리
  */
 export class GeminiServiceFactory implements IAIServiceFactory {
     getProviderType(): AIProviderType {
@@ -90,7 +90,7 @@ export class GeminiServiceFactory implements IAIServiceFactory {
 }
 
 /**
- * Deepseek 服务工厂
+ * Deepseek 서비스 팩토리
  */
 export class DeepseekServiceFactory implements IAIServiceFactory {
     getProviderType(): AIProviderType {
@@ -115,7 +115,7 @@ export class DeepseekServiceFactory implements IAIServiceFactory {
 }
 
 /**
- * SiliconFlow 服务工厂
+ * SiliconFlow 서비스 팩토리
  */
 export class SiliconFlowServiceFactory implements IAIServiceFactory {
     getProviderType(): AIProviderType {
@@ -136,7 +136,7 @@ export class SiliconFlowServiceFactory implements IAIServiceFactory {
 }
 
 /**
- * Ollama 服务工厂
+ * Ollama 서비스 팩토리
  */
 export class OllamaServiceFactory implements IAIServiceFactory {
     getProviderType(): AIProviderType {
@@ -152,7 +152,7 @@ export class OllamaServiceFactory implements IAIServiceFactory {
             throw AIServiceError.notConfigured(AIProviderType.OLLAMA, 'Host not configured');
         }
 
-        // Ollama 需要适配器，因为它的接口不同
+        // Ollama는 인터페이스가 다르기 때문에 어댑터가 필요합니다
         return new OllamaServiceAdapter(
             settings.ollama.host,
             settings.ollama.model || ''
@@ -161,7 +161,7 @@ export class OllamaServiceFactory implements IAIServiceFactory {
 }
 
 /**
- * Custom 服务工厂
+ * Custom 서비스 팩토리
  */
 export class CustomAIServiceFactory implements IAIServiceFactory {
     getProviderType(): AIProviderType {
@@ -191,8 +191,8 @@ export class CustomAIServiceFactory implements IAIServiceFactory {
 }
 
 /**
- * Ollama 服务适配器
- * 将 OllamaService 适配为 IAIService 接口
+ * Ollama 서비스 어댑터
+ * OllamaService를 IAIService 인터페이스에 맞게 어댑터합니다
  */
 class OllamaServiceAdapter implements IAIService {
     private service: OllamaService;

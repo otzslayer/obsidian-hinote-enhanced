@@ -6,18 +6,18 @@ import { HighlightIndexFileWatcher } from "./HighlightIndexFileWatcher";
 import { ObsidianInternals } from "../../utils/ObsidianInternals";
 
 /**
- * 高亮索引器
- * 职责：
- * 1. 构建和维护全局高亮索引
- * 2. 注册文件事件监听器实现索引自动更新
- * 3. 基于索引的关键词搜索
- * 4. 索引的增量更新和过期管理
+ * 하이라이트 인덱서
+ * 역할:
+ * 1. 전역 하이라이트 인덱스를 구축하고 유지합니다
+ * 2. 파일 이벤트 리스너를 등록하여 인덱스를 자동으로 업데이트합니다
+ * 3. 인덱스 기반 키워드 검색
+ * 4. 인덱스의 증분 업데이트 및 만료 관리
  */
 export class HighlightIndexer {
     private indexStore = new HighlightIndexStore();
     private fileWatcher: HighlightIndexFileWatcher;
     
-    // 是否正在构建索引
+    // 인덱스 구축 중 여부
     private isIndexing: boolean = false;
     private indexBuildTimer: number | null = null;
     
@@ -36,16 +36,16 @@ export class HighlightIndexer {
     }
 
     /**
-     * 初始化索引器，包括构建索引和注册文件事件监听器
+     * 인덱서를 초기화합니다 (인덱스 구축 및 파일 이벤트 리스너 등록 포함)
      */
     async initialize(): Promise<void> {
-        // 注册文件事件监听器，实现索引的自动更新
+        // 파일 이벤트 리스너를 등록하여 인덱스를 자동으로 업데이트합니다
         this.fileWatcher.register();
         
-        // 根据设备类型调整索引构建策略
-        // 移动端延迟更长时间，避免影响启动性能
+        // 디바이스 유형에 따라 인덱스 구축 전략을 조정합니다
+        // 모바일에서는 시작 성능에 영향을 주지 않도록 더 오래 지연합니다
         const isMobile = ObsidianInternals.isMobile(this.app);
-        const delay = isMobile ? 10000 : 3000; // 移动端10秒，桌面端3秒
+        const delay = isMobile ? 10000 : 3000; // 모바일 10초, 데스크톱 3초
         
         this.indexBuildTimer = window.setTimeout(() => {
             this.indexBuildTimer = null;
@@ -54,10 +54,10 @@ export class HighlightIndexer {
     }
     
     /**
-     * 销毁索引器，清理资源
+     * 인덱서를 소멸시키고 리소스를 정리합니다
      */
     destroy(): void {
-        // 注销文件事件监听器
+        // 파일 이벤트 리스너를 해제합니다
         this.fileWatcher.unregister();
 
         if (this.indexBuildTimer !== null) {
@@ -65,72 +65,72 @@ export class HighlightIndexer {
             this.indexBuildTimer = null;
         }
         
-        // 清空索引
+        // 인덱스를 초기화합니다
         this.indexStore.reset();
         
-        // 清空文件内容缓存
+        // 파일 내용 캐시를 지웁니다
         this.extractor.clearContentCache();
     }
     
     /**
-     * 构建文件级高亮索引
-     * 只对包含高亮的文件建立索引，而不是对每个高亮单独建立索引
+     * 파일 수준의 하이라이트 인덱스를 구축합니다
+     * 각 하이라이트별로 인덱싱하지 않고 하이라이트가 포함된 파일만 인덱싱합니다
      */
     async buildFileIndex(): Promise<void> {
-        // 如果已经在构建索引，则跳过
+        // 이미 인덱스를 구축 중이면 건너뜁니다
         if (this.isIndexing) {
             return;
         }
         
         this.isIndexing = true;
         try {
-            // 获取所有高亮
+            // 모든 하이라이트를 가져옵니다
             const allHighlights = await this.extractor.getAllHighlights();
             
-            // 创建新索引
+            // 새 인덱스를 생성합니다
             const newWordToFiles = new Map<string, Set<string>>();
             const newFileToHighlights = new Map<string, HighlightInfo[]>();
             
-            // 填充索引
+            // 인덱스를 채웁니다
             for (const { file, highlights } of allHighlights) {
-                // 为每个文件中的高亮添加文件信息
+                // 각 파일의 하이라이트에 파일 정보를 추가합니다
                 const highlightsWithFileInfo = highlights.map(h => ({
                     ...h,
                     fileName: file.basename,
                     filePath: file.path
                 }));
                 
-                // 添加到文件映射
+                // 파일 매핑에 추가합니다
                 newFileToHighlights.set(file.path, highlightsWithFileInfo);
                 
-                // 提取关键词并添加到索引
+                // 키워드를 추출하여 인덱스에 추가합니다
                 const fileWords = this.indexStore.extractKeywordsFromHighlights(highlights);
                 this.indexStore.addKeywordsToIndex(fileWords, file.path, newWordToFiles);
             }
             
-            // 更新索引
+            // 인덱스를 업데이트합니다
             this.indexStore.replace(newWordToFiles, newFileToHighlights);
             
         } catch {
-            // 忽略索引构建错误
+            // 인덱스 구축 오류를 무시합니다
         } finally {
             this.isIndexing = false;
         }
     }
     
     /**
-     * 从索引中获取所有高亮（公共方法，供外部调用）
-     * 如果索引可用，直接从缓存返回，避免重新读取文件
-     * 如果索引未构建，触发按需构建（但本次返回 null）
-     * @returns 所有高亮数组，如果索引未构建则返回 null
+     * 인덱스에서 모든 하이라이트를 가져옵니다 (외부 호출용 공개 메서드)
+     * 인덱스를 사용할 수 있으면 캐시에서 바로 반환하여 파일 재읽기를 방지합니다
+     * 인덱스가 구축되지 않았으면 주문형 구축을 트리거하고 이번에는 null을 반환합니다
+     * @returns 모든 하이라이트 배열, 인덱스가 구축되지 않았으면 null
      */
     public getAllHighlightsFromCache(): HighlightInfo[] | null {
-        // 如果索引从未构建过，触发按需构建
+        // 인덱스가 한 번도 구축되지 않았으면 주문형 구축을 트리거합니다
         if (this.indexStore.lastUpdated === 0 && !this.isIndexing) {
             void this.buildFileIndex();
         }
         
-        // 检查索引是否可用
+        // 인덱스를 사용할 수 있는지 확인합니다
         if (!this.indexStore.isExpired() && this.indexStore.fileToHighlights.size > 0) {
             return this.indexStore.getAllHighlights();
         }
@@ -138,88 +138,88 @@ export class HighlightIndexer {
     }
     
     /**
-     * 从索引中移除文件
-     * @param filePath 要移除的文件路径
+     * 인덱스에서 파일을 제거합니다
+     * @param filePath 제거할 파일 경로
      */
     removeFileFromIndex(filePath: string): void {
-        // 如果索引未初始化或过期，则跳过
+        // 인덱스가 초기화되지 않았거나 만료된 경우 건너뜁니다
         this.indexStore.removeFile(filePath);
     }
     
     /**
-     * 增量更新文件的索引
-     * @param file 要更新的文件
+     * 파일의 인덱스를 증분 업데이트합니다
+     * @param file 업데이트할 파일
      */
     async updateFileInIndex(file: TFile): Promise<void> {
-        // 如果索引正在构建中，跳过增量更新
+        // 인덱스 구축 중이면 증분 업데이트를 건너뜁니다
         if (this.isIndexing) {
             return;
         }
         
-        // 如果索引未初始化，初始化空索引结构
+        // 인덱스가 초기화되지 않았으면 빈 인덱스 구조를 초기화합니다
         this.indexStore.ensureInitialized();
         
-        // 如果索引已过期，触发完整重建（异步，不阻塞当前更新）
+        // 인덱스가 만료된 경우 전체 재구축을 트리거합니다 (비동기, 현재 업데이트를 차단하지 않음)
         if (this.indexStore.isExpired()) {
-            // 异步触发重建，但不等待
+            // 재구축을 비동기로 트리거하되 기다리지 않습니다
             void this.buildFileIndex();
             return;
         }
         
         try {
-            // 先从索引中移除该文件的所有关联
+            // 먼저 인덱스에서 해당 파일의 모든 연관을 제거합니다
             this.removeFileFromIndex(file.path);
             
-            // 重新索引该文件
+            // 해당 파일을 다시 인덱싱합니다
             if (this.extractor.shouldProcessFile(file)) {
                 const content = await this.app.vault.read(file);
                 const highlights = this.extractor.extractHighlights(content, file);
-                
+
                 if (highlights.length > 0) {
-                    // 为高亮添加文件信息
+                    // 하이라이트에 파일 정보를 추가합니다
                     const highlightsWithFileInfo = highlights.map(h => ({
                         ...h,
                         fileName: file.basename,
                         filePath: file.path
                     }));
                     
-                    // 添加到文件映射
+                    // 파일 매핑에 추가합니다
                     this.indexStore.setFileHighlights(file.path, highlightsWithFileInfo);
                 }
             }
         } catch {
-            // 忽略更新索引错误
+            // 인덱스 업데이트 오류를 무시합니다
         }
     }
     
     /**
-     * 使用文件级索引搜索高亮
-     * @param searchTerm 搜索词
-     * @returns 匹配的高亮数组
+     * 파일 수준 인덱스를 사용하여 하이라이트를 검색합니다
+     * @param searchTerm 검색어
+     * @returns 일치하는 하이라이트 배열
      */
     async searchHighlightsFromIndex(searchTerm: string): Promise<HighlightInfo[]> {
-        // 检查索引是否需要重建
+        // 인덱스를 재구축해야 하는지 확인합니다
         if (this.indexStore.isExpired() || this.indexStore.fileToHighlights.size === 0) {
             await this.buildFileIndex();
         }
         
-        // 如果搜索词为空，返回所有高亮
+        // 검색어가 비어 있으면 모든 하이라이트를 반환합니다
         if (!searchTerm.trim()) {
             return this.indexStore.getAllHighlights();
         }
         
-        // 分词搜索
+        // 단어 분리 검색
         const terms = this.indexStore.tokenizeText(searchTerm);
         if (terms.length === 0) {
             return this.indexStore.getAllHighlights();
         }
         
-        // 对每个词找到匹配的文件
+        // 각 단어에 대해 일치하는 파일을 찾습니다
         const matchingFileSets: Set<string>[] = [];
         for (const term of terms) {
             const matchingFiles = new Set<string>();
             
-            // 查找包含该词的所有文件
+            // 해당 단어를 포함하는 모든 파일을 찾습니다
             for (const [word, files] of this.indexStore.wordToFiles.entries()) {
                 if (word.includes(term)) {
                     for (const filePath of files) {
@@ -231,7 +231,7 @@ export class HighlightIndexer {
             matchingFileSets.push(matchingFiles);
         }
         
-        // 取交集（所有词都匹配的文件）
+        // 교집합을 구합니다 (모든 단어가 일치하는 파일)
         let resultFilePaths: Set<string>;
         if (matchingFileSets.length > 0) {
             resultFilePaths = matchingFileSets[0];
@@ -242,17 +242,17 @@ export class HighlightIndexer {
             resultFilePaths = new Set();
         }
         
-        // 从匹配的文件中获取高亮
+        // 일치하는 파일에서 하이라이트를 가져옵니다
         const results: HighlightInfo[] = [];
         for (const filePath of resultFilePaths) {
             const fileHighlights = this.indexStore.fileToHighlights.get(filePath) || [];
             
-            // 进一步过滤高亮，只保留包含所有搜索词的高亮
+            // 하이라이트를 추가로 필터링하여 모든 검색어를 포함하는 것만 유지합니다
             for (const highlight of fileHighlights) {
                 const highlightText = highlight.text.toLowerCase();
                 const commentTexts = highlight.comments?.map(c => c.content.toLowerCase()) || [];
                 
-                // 检查是否所有搜索词都在高亮文本或评论中
+                // 모든 검색어가 하이라이트 텍스트 또는 댓글에 있는지 확인합니다
                 const allTermsFound = terms.every(term => {
                     return highlightText.includes(term) || 
                            commentTexts.some(commentText => commentText.includes(term));

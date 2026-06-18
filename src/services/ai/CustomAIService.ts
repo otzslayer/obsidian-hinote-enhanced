@@ -3,13 +3,13 @@ import { AIProviderType } from './BaseAIService';
 import type { AIModel } from './BaseAIService';
 
 /**
- * API 类型检测结果
+ * API 유형 감지 결과
  */
 export type APIType = 'openai' | 'anthropic' | 'gemini';
 type CustomAIMessage = { role: string; content: string };
 
 /**
- * OpenAI 兼容格式的响应
+ * OpenAI 호환 형식의 응답
  */
 interface OpenAIResponse {
     choices: Array<{
@@ -20,7 +20,7 @@ interface OpenAIResponse {
 }
 
 /**
- * Anthropic 格式的响应
+ * Anthropic 형식의 응답
  */
 interface AnthropicResponse {
     content: Array<{
@@ -29,7 +29,7 @@ interface AnthropicResponse {
 }
 
 /**
- * Gemini 格式的响应
+ * Gemini 형식의 응답
  */
 interface GeminiResponse {
     candidates: Array<{
@@ -42,8 +42,8 @@ interface GeminiResponse {
 }
 
 /**
- * 自定义 AI 服务
- * 支持自动检测 API 类型，兼容 OpenAI/Anthropic/Gemini 格式
+ * 커스텀 AI 서비스
+ * API 유형 자동 감지를 지원하며, OpenAI/Anthropic/Gemini 형식과 호환됩니다
  */
 export class CustomAIService {
     private baseUrl: string;
@@ -59,7 +59,7 @@ export class CustomAIService {
         customHeaders?: Record<string, string>,
         detectedApiType?: APIType
     ) {
-        this.baseUrl = baseUrl.replace(/\/$/, ''); // 移除末尾的斜杠
+        this.baseUrl = baseUrl.replace(/\/$/, ''); // 말미의 슬래시 제거
         this.model = model;
         this.customHeaders = customHeaders;
         this.httpClient = new BaseHTTPClient();
@@ -67,19 +67,19 @@ export class CustomAIService {
     }
 
     /**
-     * 智能检测 API 类型
-     * 通过 URL 模式和测试请求来判断
+     * API 유형 지능형 감지
+     * URL 패턴 및 테스트 요청으로 판별합니다
      */
     async detectAPIType(): Promise<APIType> {
-        // 如果已经检测过，直接返回
+        // 이미 감지된 경우 바로 반환
         if (this.detectedApiType) {
             return this.detectedApiType;
         }
 
-        // 1. 基于 URL 的启发式检测
+        // 1. URL 기반 휴리스틱 감지
         const urlLower = this.baseUrl.toLowerCase();
-        
-        // 检查常见的 API 端点模式
+
+        // 일반적인 API 엔드포인트 패턴 확인
         if (urlLower.includes('openai') || 
             urlLower.includes('/v1/chat/completions') ||
             urlLower.includes('/chat/completions')) {
@@ -99,41 +99,41 @@ export class CustomAIService {
             return 'gemini';
         }
 
-        // 2. 如果 URL 检测失败，尝试通过测试请求来检测
-        // 优先尝试 OpenAI 格式（最常见）
+        // 2. URL 감지 실패 시 테스트 요청으로 감지 시도
+        // OpenAI 형식 우선 시도 (가장 일반적)
         try {
             await this.requestOpenAICompatible(this.createTestMessages(), { max_tokens: 5 });
             this.detectedApiType = 'openai';
             return 'openai';
         } catch {
-            // OpenAI 格式失败，继续尝试其他格式
+            // OpenAI 형식 실패, 다른 형식 시도 계속
         }
 
-        // 尝试 Anthropic 格式
+        // Anthropic 형식 시도
         try {
             await this.requestAnthropicCompatible(this.createTestMessages(), 5);
             this.detectedApiType = 'anthropic';
             return 'anthropic';
         } catch {
-            // Anthropic 格式失败
+            // Anthropic 형식 실패
         }
 
-        // 尝试 Gemini 格式
+        // Gemini 형식 시도
         try {
             await this.requestGeminiCompatible(this.createTestMessages());
             this.detectedApiType = 'gemini';
             return 'gemini';
         } catch {
-            // 所有格式都失败
+            // 모든 형식 실패
         }
 
-        // 默认使用 OpenAI 格式（最通用）
+        // 기본값으로 OpenAI 형식 사용 (가장 범용적)
         this.detectedApiType = 'openai';
         return 'openai';
     }
 
     /**
-     * 测试 OpenAI 格式
+     * OpenAI 형식 테스트
      */
     private async testOpenAIFormat(): Promise<boolean> {
         const content = await this.requestOpenAICompatible(this.createTestMessages(), { max_tokens: 5 });
@@ -141,7 +141,7 @@ export class CustomAIService {
     }
 
     /**
-     * 测试 Anthropic 格式
+     * Anthropic 형식 테스트
      */
     private async testAnthropicFormat(): Promise<boolean> {
         const content = await this.requestAnthropicCompatible(this.createTestMessages(), 5);
@@ -149,7 +149,7 @@ export class CustomAIService {
     }
 
     /**
-     * 测试 Gemini 格式
+     * Gemini 형식 테스트
      */
     private async testGeminiFormat(): Promise<boolean> {
         const content = await this.requestGeminiCompatible(this.createTestMessages());
@@ -157,20 +157,20 @@ export class CustomAIService {
     }
 
     /**
-     * 生成响应
+     * 응답 생성
      */
     async generateResponse(prompt: string): Promise<string> {
         return await this.chat([{ role: 'user', content: prompt }]);
     }
 
     /**
-     * 聊天接口
+     * 채팅 인터페이스
      */
     async chat(messages: CustomAIMessage[]): Promise<string> {
-        // 自动检测 API 类型
+        // API 유형 자동 감지
         const apiType = await this.detectAPIType();
 
-        // 根据检测到的类型调用相应的方法
+        // 감지된 유형에 따라 해당 메서드 호출
         switch (apiType) {
             case 'openai':
                 return await this.chatOpenAICompatible(messages);
@@ -184,7 +184,7 @@ export class CustomAIService {
     }
 
     /**
-     * OpenAI 兼容格式的聊天
+     * OpenAI 호환 형식의 채팅
      */
     private async chatOpenAICompatible(messages: CustomAIMessage[]): Promise<string> {
         try {
@@ -198,7 +198,7 @@ export class CustomAIService {
     }
 
     /**
-     * Anthropic 兼容格式的聊天
+     * Anthropic 호환 형식의 채팅
      */
     private async chatAnthropicCompatible(messages: CustomAIMessage[]): Promise<string> {
         try {
@@ -212,7 +212,7 @@ export class CustomAIService {
     }
 
     /**
-     * Gemini 兼容格式的聊天
+     * Gemini 호환 형식의 채팅
      */
     private async chatGeminiCompatible(messages: CustomAIMessage[]): Promise<string> {
         try {
@@ -320,31 +320,31 @@ export class CustomAIService {
     }
 
     /**
-     * 更新模型
+     * 모델 업데이트
      */
     updateModel(model: string) {
         this.model = model;
     }
 
     /**
-     * 获取检测到的 API 类型
+     * 감지된 API 유형 가져오기
      */
     getDetectedAPIType(): APIType | null {
         return this.detectedApiType;
     }
 
     /**
-     * 获取提供商类型
+     * 공급자 유형 가져오기
      */
     getProviderType(): AIProviderType {
         return AIProviderType.CUSTOM;
     }
 
     /**
-     * 列出可用模型
+     * 사용 가능한 모델 목록 조회
      */
     async listModels(): Promise<AIModel[]> {
-        // Custom 服务通常只有一个配置的模型
+        // 커스텀 서비스는 일반적으로 설정된 모델이 하나뿐입니다
         return [{
             id: this.model,
             name: this.model,
@@ -353,21 +353,21 @@ export class CustomAIService {
     }
 
     /**
-     * 检查是否已配置
+     * 설정 완료 여부 확인
      */
     isConfigured(): boolean {
         return !!(this.apiKey && this.baseUrl && this.model);
     }
 
     /**
-     * 测试连接
+     * 연결 테스트
      */
     async testConnection(): Promise<boolean> {
         try {
-            // 先检测 API 类型
+            // 먼저 API 유형 감지
             const apiType = await this.detectAPIType();
 
-            // 根据类型进行测试
+            // 유형에 따라 테스트 수행
             switch (apiType) {
                 case 'openai':
                     await this.testOpenAIFormat();
@@ -387,12 +387,12 @@ export class CustomAIService {
     }
 
     /**
-     * 构建请求头
+     * 요청 헤더 생성
      */
     private buildHeaders(authType: 'Bearer' | 'ApiKey' = 'Bearer'): Record<string, string> {
         const headers = BaseHTTPClient.buildAuthHeaders(this.apiKey, authType);
         
-        // 合并自定义请求头
+        // 커스텀 요청 헤더 병합
         if (this.customHeaders) {
             return { ...headers, ...this.customHeaders };
         }

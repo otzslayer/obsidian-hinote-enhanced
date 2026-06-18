@@ -20,24 +20,24 @@ export class DragPreview {
         this.instance = activeDocument.createElement('div');
         this.instance.className = 'highlight-dragging';
 
-        // 创建内容容器
+        // 내용 컨테이너 생성
         const content = activeDocument.createElement('div');
         content.className = 'highlight-dragging-content';
-        
-        // 限制预览文本长度
+
+        // 미리보기 텍스트 길이 제한
         const previewText = text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
         content.textContent = previewText;
         
         this.instance.appendChild(content);
         activeDocument.body.appendChild(this.instance);
 
-        // 设置初始位置
+        // 초기 위치 설정
         this.updatePosition(e.clientX, e.clientY);
 
-        // 设置空的拖拽图像
+        // 빈 드래그 이미지 설정
         e.dataTransfer?.setDragImage(this.dragImage, 0, 0);
 
-        // 添加移动监听
+        // 이동 리스너 추가
         activeDocument.addEventListener('dragover', this.handleDragOver);
     }
 

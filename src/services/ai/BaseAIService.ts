@@ -10,7 +10,7 @@ import {
     AIErrorCode
 } from './types';
 
-// 重新导出类型，供其他服务使用
+// 다른 서비스에서 사용할 수 있도록 타입 재내보내기
 export type { 
     IAIService,
     IAIServiceFactory,
@@ -26,8 +26,8 @@ export {
 };
 
 /**
- * AI 服务抽象基类
- * 为所有 AI 服务提供统一的接口和通用功能
+ * AI 서비스 추상 기본 클래스
+ * 모든 AI 서비스에 통일된 인터페이스와 공통 기능을 제공합니다
  */
 export abstract class BaseAIService implements IAIService {
     protected httpClient: BaseHTTPClient;
@@ -47,65 +47,65 @@ export abstract class BaseAIService implements IAIService {
     }
 
     /**
-     * 获取默认的 API 端点 URL
-     * 子类必须实现
+     * 기본 API 엔드포인트 URL 가져오기
+     * 하위 클래스에서 반드시 구현해야 합니다
      */
     protected abstract getDefaultBaseUrl(): string;
 
     /**
-     * 获取 API 端点路径
-     * 子类必须实现
+     * API 엔드포인트 경로 가져오기
+     * 하위 클래스에서 반드시 구현해야 합니다
      */
     protected abstract getEndpoint(): string;
 
     /**
-     * 格式化请求体
-     * 子类必须实现，将统一的消息格式转换为特定 API 的格式
+     * 요청 본문 형식화
+     * 하위 클래스에서 반드시 구현해야 하며, 통일된 메시지 형식을 특정 API 형식으로 변환합니다
      */
     protected abstract formatRequestBody(messages: AIMessage[]): Record<string, unknown>;
 
     /**
-     * 解析响应
-     * 子类必须实现，从 API 响应中提取文本内容
+     * 응답 파싱
+     * 하위 클래스에서 반드시 구현해야 하며, API 응답에서 텍스트 내용을 추출합니다
      */
     protected abstract parseResponse(response: unknown): string;
 
     /**
-     * 获取提供商类型
-     * 子类必须实现
+     * 공급자 유형 가져오기
+     * 하위 클래스에서 반드시 구현해야 합니다
      */
     abstract getProviderType(): AIProviderType;
 
     /**
-     * 列出可用模型
-     * 子类必须实现
+     * 사용 가능한 모델 목록 조회
+     * 하위 클래스에서 반드시 구현해야 합니다
      */
     abstract listModels(): Promise<AIModel[]>;
 
     /**
-     * 构建请求头
-     * 子类可以覆盖以自定义请求头
+     * 요청 헤더 생성
+     * 하위 클래스에서 재정의하여 요청 헤더를 커스터마이징할 수 있습니다
      */
     protected buildHeaders(): Record<string, string> {
         return BaseHTTPClient.buildAuthHeaders(this.apiKey);
     }
 
     /**
-     * 更新模型
+     * 모델 업데이트
      */
     updateModel(model: string): void {
         this.model = model;
     }
 
     /**
-     * 检查是否已配置
+     * 설정 완료 여부 확인
      */
     isConfigured(): boolean {
         return !!(this.apiKey && this.model);
     }
 
     /**
-     * 生成响应（单轮对话）
+     * 응답 생성 (단일 대화)
      */
     async generateResponse(prompt: string): Promise<string> {
         const messages: AIMessage[] = [
@@ -115,8 +115,8 @@ export abstract class BaseAIService implements IAIService {
     }
 
     /**
-     * 多轮对话
-     * 这是核心方法，所有 AI 服务都使用相同的流程
+     * 다중 대화
+     * 핵심 메서드로, 모든 AI 서비스가 동일한 흐름을 사용합니다
      */
     async chat(messages: AIMessage[]): Promise<string> {
         try {
@@ -137,7 +137,7 @@ export abstract class BaseAIService implements IAIService {
     }
 
     /**
-     * 测试连接
+     * 연결 테스트
      */
     async testConnection(): Promise<boolean> {
         try {
@@ -159,24 +159,24 @@ export abstract class BaseAIService implements IAIService {
     }
 
     /**
-     * 构建完整的 URL
-     * 子类可以覆盖以自定义 URL 构建逻辑
+     * 전체 URL 생성
+     * 하위 클래스에서 재정의하여 URL 생성 로직을 커스터마이징할 수 있습니다
      */
     protected buildUrl(): string {
         return `${this.baseUrl}${this.getEndpoint()}`;
     }
 
     /**
-     * 错误处理
-     * 将原始错误包装为 AIServiceError
+     * 오류 처리
+     * 원시 오류를 AIServiceError로 래핑합니다
      */
     protected handleError(error: unknown): AIServiceError {
-        // 如果已经是 AIServiceError，直接返回
+        // 이미 AIServiceError인 경우 그대로 반환
         if (error instanceof AIServiceError) {
             return error;
         }
 
-        // 判断错误类型
+        // 오류 유형 판별
         let code = AIErrorCode.API_ERROR;
         const message = error instanceof Error ? error.message : 'Unknown error';
 
@@ -199,8 +199,8 @@ export abstract class BaseAIService implements IAIService {
     }
 
     /**
-     * 验证响应格式
-     * 通用的响应验证辅助方法
+     * 응답 형식 검증
+     * 범용 응답 검증 보조 메서드
      */
     protected validateResponse(response: unknown, path: string[]): boolean {
         let current: unknown = response;

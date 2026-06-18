@@ -3,14 +3,14 @@ import { HighlightInfo } from '../../types/highlight';
 import { HighlightService } from '../HighlightService';
 
 /**
- * 全局高亮服务
- * 负责加载和处理所有文件的高亮
- * 
- * 职责：
- * - 加载所有文件的高亮数据
- * - 按路径或关键词搜索高亮
- * - 使用缓存优化性能
- * - 对高亮进行排序
+ * 전역 하이라이트 서비스
+ * 모든 파일의 하이라이트를 로드하고 처리합니다
+ *
+ * 역할:
+ * - 모든 파일의 하이라이트 데이터 로드
+ * - 경로 또는 키워드로 하이라이트 검색
+ * - 캐시를 사용하여 성능 최적화
+ * - 하이라이트 정렬
  */
 export class GlobalHighlightService {
     private app: App;
@@ -25,37 +25,37 @@ export class GlobalHighlightService {
     }
     
     /**
-     * 更新所有高亮
+     * 모든 하이라이트를 업데이트합니다
      */
     async updateAllHighlights(searchTerm: string = '', searchType: string = ''): Promise<HighlightInfo[]> {
-        // 如果是路径搜索
+        // 경로 검색인 경우
         if (searchType === 'path') {
             return await this.loadHighlightsByPath(searchTerm);
         }
         
-        // 如果有搜索词，使用索引搜索
+        // 검색어가 있으면 인덱스 검색을 사용합니다
         if (searchTerm) {
             return await this.searchHighlightsFromIndex(searchTerm);
         }
         
-        // 否则加载所有高亮
+        // 그 외에는 모든 하이라이트를 로드합니다
         return await this.loadAllHighlights();
     }
     
     /**
-     * 按路径加载高亮
-     * 优先使用缓存，避免重复读取文件
+     * 경로별로 하이라이트를 로드합니다
+     * 캐시를 우선 사용하여 파일 중복 읽기를 방지합니다
      */
     private async loadHighlightsByPath(searchTerm: string): Promise<HighlightInfo[]> {
-        // 尝试从缓存获取
+        // 캐시에서 가져오기를 시도합니다
         const cachedHighlights = this.highlightService.getAllHighlightsFromCache();
-        
+
         if (cachedHighlights) {
-            // 使用缓存数据，按路径过滤
+            // 캐시 데이터를 사용하여 경로로 필터링합니다
             return this.filterCachedHighlightsByPath(cachedHighlights, searchTerm);
         }
         
-        // 缓存不可用，从文件读取（comments come from inline parsing）
+        // 캐시를 사용할 수 없어 파일에서 읽습니다（comments come from inline parsing）
         const allHighlights = await this.highlightService.getAllHighlights();
         const result: HighlightInfo[] = [];
 
@@ -70,17 +70,17 @@ export class GlobalHighlightService {
     }
     
     /**
-     * 从缓存的高亮中按路径过滤
+     * 캐시된 하이라이트에서 경로로 필터링합니다
      */
     private async filterCachedHighlightsByPath(cachedHighlights: HighlightInfo[], searchTerm: string): Promise<HighlightInfo[]> {
         const result: HighlightInfo[] = [];
         
-        // 按文件分组处理
+        // 파일별로 그룹화하여 처리합니다
         const highlightsByFile = new Map<string, HighlightInfo[]>();
         for (const highlight of cachedHighlights) {
             const filePath = highlight.filePath || '';
             
-            // 如果有搜索词，检查文件路径是否匹配
+            // 검색어가 있으면 파일 경로가 일치하는지 확인합니다
             if (searchTerm && !filePath.toLowerCase().includes(searchTerm.toLowerCase())) {
                 continue;
             }
@@ -91,7 +91,7 @@ export class GlobalHighlightService {
             highlightsByFile.get(filePath)!.push(highlight);
         }
         
-        // 处理每个文件的高亮
+        // 각 파일의 하이라이트를 처리합니다
         for (const [filePath, highlights] of highlightsByFile.entries()) {
             const file = this.app.vault.getAbstractFileByPath(filePath);
             if (!(file instanceof TFile)) continue;
@@ -99,12 +99,12 @@ export class GlobalHighlightService {
             result.push(...this.addFileIcon(highlights));
         }
         
-        // 添加稳定排序
+        // 안정적인 정렬을 적용합니다
         return this.sortHighlights(result);
     }
-    
+
     /**
-     * 从索引搜索高亮
+     * 인덱스에서 하이라이트를 검색합니다
      */
     private async searchHighlightsFromIndex(searchTerm: string): Promise<HighlightInfo[]> {
         const searchResults = await this.highlightService.searchHighlightsFromIndex(searchTerm);
@@ -119,19 +119,19 @@ export class GlobalHighlightService {
     }
     
     /**
-     * 加载所有高亮
-     * 优先使用缓存，避免重复读取文件
+     * 모든 하이라이트를 로드합니다
+     * 캐시를 우선 사용하여 파일 중복 읽기를 방지합니다
      */
     private async loadAllHighlights(): Promise<HighlightInfo[]> {
-        // 尝试从缓存获取
+        // 캐시에서 가져오기를 시도합니다
         const cachedHighlights = this.highlightService.getAllHighlightsFromCache();
-        
+
         if (cachedHighlights) {
-            // 使用缓存数据，快速返回
+            // 캐시 데이터를 사용하여 빠르게 반환합니다
             return this.processCachedHighlights(cachedHighlights);
         }
         
-        // 缓存不可用，从文件读取
+        // 캐시를 사용할 수 없어 파일에서 읽습니다
         const allHighlights = await this.highlightService.getAllHighlights();
         const result: HighlightInfo[] = [];
         
@@ -139,18 +139,18 @@ export class GlobalHighlightService {
             result.push(...this.addFileIcon(highlights));
         }
         
-        // 添加稳定排序：按文件路径和位置排序
+        // 안정적인 정렬 추가: 파일 경로 및 위치 기준 정렬
         return this.sortHighlights(result);
     }
-    
+
     /**
-     * 处理缓存的高亮数据
-     * 直接使用索引中的数据，合并评论信息
+     * 캐시된 하이라이트 데이터를 처리합니다
+     * 인덱스의 데이터를 직접 사용하여 댓글 정보를 병합합니다
      */
     private async processCachedHighlights(cachedHighlights: HighlightInfo[]): Promise<HighlightInfo[]> {
         const result: HighlightInfo[] = [];
         
-        // 按文件分组处理
+        // 파일별로 그룹화하여 처리합니다
         const highlightsByFile = new Map<string, HighlightInfo[]>();
         for (const highlight of cachedHighlights) {
             const filePath = highlight.filePath || '';
@@ -160,7 +160,7 @@ export class GlobalHighlightService {
             highlightsByFile.get(filePath)!.push(highlight);
         }
         
-        // 处理每个文件的高亮
+        // 각 파일의 하이라이트를 처리합니다
         for (const [filePath, highlights] of highlightsByFile.entries()) {
             const file = this.app.vault.getAbstractFileByPath(filePath);
             if (!(file instanceof TFile)) continue;
@@ -168,16 +168,16 @@ export class GlobalHighlightService {
             result.push(...this.addFileIcon(highlights));
         }
         
-        // 添加稳定排序：按文件路径和位置排序
+        // 안정적인 정렬 추가: 파일 경로 및 위치 기준 정렬
         return this.sortHighlights(result);
     }
-    
+
     private addFileIcon(highlights: HighlightInfo[]): HighlightInfo[] {
         return highlights.map(h => ({ ...h, fileIcon: h.fileIcon ?? 'file-text' }));
     }
     
     /**
-     * 从路径提取文件名
+     * 경로에서 파일 이름을 추출합니다
      */
     private extractFileNameFromPath(filePath?: string): string {
         if (!filePath) return '';
@@ -185,43 +185,43 @@ export class GlobalHighlightService {
     }
     
     /**
-     * 对高亮进行稳定排序
-     * 排序规则：
-     * 1. 按文件路径字母顺序
-     * 2. 同一文件内按位置（position 字段）
-     * 3. 虚拟高亮排在文件最前面
+     * 하이라이트를 안정적으로 정렬합니다
+     * 정렬 규칙:
+     * 1. 파일 경로 알파벳 순서
+     * 2. 같은 파일 내에서 위치 기준 (position 필드)
+     * 3. 가상 하이라이트는 파일 맨 앞에 배치
      */
     private sortHighlights(highlights: HighlightInfo[]): HighlightInfo[] {
         return highlights.sort((a, b) => {
-            // 获取文件路径，虚拟高亮使用其 filePath
+            // 파일 경로를 가져옵니다. 가상 하이라이트는 자체 filePath를 사용합니다
             const pathA = a.filePath || '';
             const pathB = b.filePath || '';
             
-            // 先按文件路径排序
+            // 먼저 파일 경로 기준으로 정렬합니다
             if (pathA !== pathB) {
                 return pathA.localeCompare(pathB);
             }
             
-            // 同一文件内，虚拟高亮排在前面
+            // 같은 파일 내에서 가상 하이라이트를 앞에 배치합니다
             if (a.isVirtual && !b.isVirtual) return -1;
             if (!a.isVirtual && b.isVirtual) return 1;
             
-            // 都是虚拟高亮或都不是，按位置排序
-            // position 是文本在文档中的位置（数字）
+            // 둘 다 가상 하이라이트이거나 둘 다 아닌 경우 위치 기준으로 정렬합니다
+            // position은 문서에서 텍스트의 위치 (숫자)
             if (a.position !== undefined && b.position !== undefined) {
                 if (a.position !== b.position) {
                     return a.position - b.position;
                 }
             }
             
-            // 如果位置相同或没有位置信息，按创建时间排序
+            // 위치가 같거나 위치 정보가 없으면 생성 시간 기준으로 정렬합니다
             if (a.createdAt !== undefined && b.createdAt !== undefined) {
                 if (a.createdAt !== b.createdAt) {
                     return a.createdAt - b.createdAt;
                 }
             }
             
-            // 最后按 ID 排序（保证稳定性）
+            // 마지막으로 ID 기준으로 정렬합니다 (안정성 보장)
             const idA = a.id || '';
             const idB = b.id || '';
             return idA.localeCompare(idB);

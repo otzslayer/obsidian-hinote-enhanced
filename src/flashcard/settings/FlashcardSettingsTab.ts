@@ -23,7 +23,7 @@ export class FlashcardSettingsTab {
             .setName(t('Flashcard learning'))
             .setHeading();
 
-        // 每日新卡片学习上限
+        // 일일 새 카드 학습 상한
         new Setting(container)
             .setName(t('New cards per day'))
             .setDesc(t('Maximum number of new cards to learn each day'))
@@ -40,7 +40,7 @@ export class FlashcardSettingsTab {
                         await this.plugin.saveSettings();
                     });
                 
-                // 添加数值显示
+                // 수치 표시 추가
                 const valueDisplay = createEl('span', {
                     cls: 'slider-value',
                     text: String(params.newCardsPerDay)
@@ -53,7 +53,7 @@ export class FlashcardSettingsTab {
                 });
             });
 
-        // 每日复习卡片上限
+        // 일일 복습 카드 상한
         new Setting(container)
             .setName(t('Reviews per day'))
             .setDesc(t('Maximum number of cards to review each day'))
@@ -69,8 +69,8 @@ export class FlashcardSettingsTab {
                         this.fsrsService.setParameters(params);
                         await this.plugin.saveSettings();
                     });
-                
-                // 添加数值显示
+
+                // 수치 표시 추가
                 const valueDisplay = createEl('span', {
                     cls: 'slider-value',
                     text: String(params.reviewsPerDay)
@@ -83,7 +83,7 @@ export class FlashcardSettingsTab {
                 });
             });
 
-        // 目标记忆保持率
+        // 목표 기억 유지율
         new Setting(container)
             .setName(t('Target retention'))
             .setDesc(t('Target memory retention rate (0.8 = 80%)'))
@@ -100,7 +100,7 @@ export class FlashcardSettingsTab {
                         await this.plugin.saveSettings();
                     });
                 
-                // 添加数值显示
+                // 수치 표시 추가
                 const valueDisplay = createEl('span', {
                     cls: 'slider-value',
                     text: `${Math.round(params.request_retention * 100)}%`
@@ -113,7 +113,7 @@ export class FlashcardSettingsTab {
                 });
             });
 
-        // 最大间隔天数
+        // 최대 간격 일수
         new Setting(container)
             .setName(t('Maximum interval'))
             .setDesc(t('Maximum interval in days between reviews'))
@@ -132,13 +132,13 @@ export class FlashcardSettingsTab {
                         }
                     });
                 
-                // 设置输入框样式和后缀
+                // 입력창 스타일 및 접미사 설정
                 const inputEl = text.inputEl;
                 inputEl.type = 'number';
                 inputEl.min = '1';
                 inputEl.setCssProps({ width: '80px' });
-                
-                // 添加天数后缀
+
+                // 일수 접미사 추가
                 const suffixEl = createEl('span', {
                     text: ` ${t('days')}`,
                     cls: 'setting-item-suffix'
@@ -147,7 +147,7 @@ export class FlashcardSettingsTab {
                 inputEl.after(suffixEl);
             });
 
-        // 重置学习统计
+        // 학습 통계 초기화
         new Setting(container)
             .setName(t('Reset daily stats'))
             .setDesc(t('Reset today\'s learning statistics'))
@@ -162,32 +162,32 @@ export class FlashcardSettingsTab {
                     }
                 }));
 
-        // 添加高级设置标题
+        // 고급 설정 제목 추가
         new Setting(container)
             .setName(t('Advanced'))
             .setHeading();
         
-        // 添加高级设置说明
+        // 고급 설정 설명 추가
         container.createEl('p', { 
             text: t('These settings control the FSRS algorithm parameters. Only change them if you understand the algorithm.'),
             cls: 'setting-item-description'
         });
         
-        // 添加一个重置为默认值的按钮
+        // 기본값으로 초기화 버튼 추가
         new Setting(container)
             .setName(t('Reset algorithm parameters'))
             .setDesc(t('Reset the FSRS algorithm parameters to default values'))
             .addButton(button => button
                 .setButtonText(t('Reset to default'))
                 .onClick(async () => {
-                    // 重置 FSRS 参数
+                    // FSRS 파라미터 초기화
                     this.fsrsService.resetParameters();
                     await this.plugin.saveSettings();
-                    
-                    // 获取重置后的参数
+
+                    // 초기화 후 파라미터 가져오기
                     const params = this.fsrsService.getParameters();
-                    
-                    // 更新目标保持率滑动条
+
+                    // 목표 유지율 슬라이더 업데이트
                     const retentionSlider = this.containerEl.querySelector('.setting-item:nth-child(4) .slider') as HTMLInputElement;
                     const retentionValue = this.containerEl.querySelector('.setting-item:nth-child(4) .slider-value') as HTMLElement;
                     if (retentionSlider && retentionValue) {
@@ -195,13 +195,13 @@ export class FlashcardSettingsTab {
                         retentionValue.textContent = `${Math.round(params.request_retention * 100)}%`;
                     }
                     
-                    // 更新最大间隔输入框
+                    // 최대 간격 입력창 업데이트
                     const maxIntervalInput = this.containerEl.querySelector('.setting-item:nth-child(5) input[type="number"]') as HTMLInputElement;
                     if (maxIntervalInput) {
                         maxIntervalInput.value = String(params.maximum_interval);
                     }
                     
-                    // 更新每日新卡片滑动条
+                    // 일일 새 카드 슬라이더 업데이트
                     const newCardsSlider = this.containerEl.querySelector('.setting-item:nth-child(2) .slider') as HTMLInputElement;
                     const newCardsValue = this.containerEl.querySelector('.setting-item:nth-child(2) .slider-value') as HTMLElement;
                     if (newCardsSlider && newCardsValue) {
@@ -209,7 +209,7 @@ export class FlashcardSettingsTab {
                         newCardsValue.textContent = String(params.newCardsPerDay);
                     }
                     
-                    // 更新每日复习卡片滑动条
+                    // 일일 복습 카드 슬라이더 업데이트
                     const reviewsSlider = this.containerEl.querySelector('.setting-item:nth-child(3) .slider') as HTMLInputElement;
                     const reviewsValue = this.containerEl.querySelector('.setting-item:nth-child(3) .slider-value') as HTMLElement;
                     if (reviewsSlider && reviewsValue) {
@@ -217,7 +217,7 @@ export class FlashcardSettingsTab {
                         reviewsValue.textContent = String(params.reviewsPerDay);
                     }
                     
-                    // 更新 FSRS 权重参数文本区域
+                    // FSRS 가중치 파라미터 텍스트 영역 업데이트
                     const textareaEl = this.containerEl.querySelector('.fsrs-weights-textarea') as HTMLTextAreaElement;
                     if (textareaEl) {
                         textareaEl.value = JSON.stringify(params.w);
@@ -226,22 +226,22 @@ export class FlashcardSettingsTab {
                     new Notice(t('FSRS parameters have been reset to default values'));
                 }));
 
-        // FSRS 算法参数编辑
+        // FSRS 알고리즘 파라미터 편집
         const fsrsParamsContainer = container.createEl('div', {
             cls: 'fsrs-params-container'
         });
 
-        // 添加 FSRS 参数说明
+        // FSRS 파라미터 설명 추가
         fsrsParamsContainer.createEl('p', {
             text: t('FSRS weight parameter. The default value is obtained from a smaller sample; if adjustment is needed, please use the FSRS optimizer for calculation.'),
             cls: 'setting-item-description'
         });
 
-        // 获取当前参数
+        // 현재 파라미터 가져오기
         const params = this.fsrsService.getParameters();
         const wParamsString = JSON.stringify(params.w);
 
-        // 创建文本区域设置
+        // 텍스트 영역 설정 생성
         new Setting(fsrsParamsContainer)
             .setName(t('FSRS parameters'))
             .setDesc(t('Edit the 21 FSRS algorithm weights. Format: JSON array of numbers.'))
@@ -251,38 +251,38 @@ export class FlashcardSettingsTab {
                     .setPlaceholder('[0.4872, 1.4003, ...]')
                     .onChange(async (value) => {
                         try {
-                            // 尝试解析用户输入的 JSON
+                            // 사용자 입력 JSON 파싱 시도
                             const newParams = JSON.parse(value);
-                            
-                            // 验证参数是否有效（必须是 21 个数字的数组）
-                            if (Array.isArray(newParams) && 
-                                newParams.length === 21 && 
+
+                            // 파라미터 유효성 검사 (21개 숫자 배열이어야 함)
+                            if (Array.isArray(newParams) &&
+                                newParams.length === 21 &&
                                 newParams.every(p => typeof p === 'number')) {
-                                
-                                // 更新参数
+
+                                // 파라미터 업데이트
                                 const currentParams = this.fsrsService.getParameters();
                                 currentParams.w = newParams;
                                 this.fsrsService.setParameters(currentParams);
                                 await this.plugin.saveSettings();
-                                
-                                // 显示成功提示
+
+                                // 성공 알림 표시
                                 new Notice(t('FSRS weights updated successfully'));
                             } else {
-                                // 显示错误提示
+                                // 오류 알림 표시
                                 new Notice(t('Invalid format. Must be an array of 21 numbers.'), 5000);
                             }
                         } catch {
-                            // JSON 解析错误
+                            // JSON 파싱 오류
                             new Notice(t('Invalid JSON format. Please check your input.'), 5000);
                         }
                     });
                 
-                // 设置文本区域样式
+                // 텍스트 영역 스타일 설정
                 textarea.inputEl.rows = 2;
                 textarea.inputEl.cols = 32;
                 textarea.inputEl.addClass('fsrs-weights-textarea');
             });
 
-        // 不再需要按钮容器和验证按钮
+        // 버튼 컨테이너 및 유효성 검사 버튼 더 이상 불필요
     }
 }

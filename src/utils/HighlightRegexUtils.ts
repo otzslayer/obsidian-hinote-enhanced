@@ -1,21 +1,21 @@
 /**
- * 高亮正则工具类
- * 提供高亮格式的正则匹配和替换功能
+ * 하이라이트 정규식 유틸리티 클래스
+ * 하이라이트 형식의 정규식 매칭 및 대체 기능 제공
  */
 export class HighlightRegexUtils {
     /**
-     * 转义正则表达式中的特殊字符
+     * 정규식의 특수 문자 이스케이프
      */
     static escapeRegExp(string: string): string {
         return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
     
     /**
-     * 移除文本中的高亮格式，保留纯文本
-     * @param content 文件内容
-     * @param highlightText 要移除格式的高亮文本
-     * @param customRegex 自定义正则表达式（可选）
-     * @returns 移除格式后的内容
+     * 텍스트에서 하이라이트 형식을 제거하고 순수 텍스트만 남김
+     * @param content 파일 내용
+     * @param highlightText 형식을 제거할 하이라이트 텍스트
+     * @param customRegex 사용자 정의 정규식 (선택 사항)
+     * @returns 형식이 제거된 내용
      */
     static removeHighlightFormat(
         content: string,
@@ -26,7 +26,7 @@ export class HighlightRegexUtils {
         let newContent = content;
         let replaced = false;
         
-        // 1. 尝试标准的 Markdown 高亮格式 ==text==
+        // 1. 표준 Markdown 하이라이트 형식 ==text== 시도
         const markdownHighlightRegex = new RegExp(`==\\s*(${escapedText})\\s*==`, 'g');
         const mdResult = newContent.replace(markdownHighlightRegex, highlightText);
         if (mdResult !== newContent) {
@@ -34,7 +34,7 @@ export class HighlightRegexUtils {
             replaced = true;
         }
         
-        // 2. 尝试 <mark>text</mark> 格式
+        // 2. <mark>text</mark> 형식 시도
         if (!replaced) {
             const markTagRegex = new RegExp(`<mark[^>]*>(${escapedText})</mark>`, 'g');
             const markResult = newContent.replace(markTagRegex, highlightText);
@@ -44,7 +44,7 @@ export class HighlightRegexUtils {
             }
         }
         
-        // 3. 尝试 <span>text</span> 格式
+        // 3. <span>text</span> 형식 시도
         if (!replaced) {
             const spanTagRegex = new RegExp(`<span[^>]*>(${escapedText})</span>`, 'g');
             const spanResult = newContent.replace(spanTagRegex, highlightText);
@@ -54,18 +54,18 @@ export class HighlightRegexUtils {
             }
         }
         
-        // 4. 如果提供了自定义正则表达式，尝试使用
+        // 4. 사용자 정의 정규식이 제공된 경우 시도
         if (!replaced && customRegex) {
             try {
                 const customRegexObj = new RegExp(customRegex, 'g');
                 const customResult = newContent.replace(customRegexObj, (match, ...groups) => {
-                    // 检查匹配的文本是否包含我们要查找的高亮文本
+                    // 매칭된 텍스트가 찾으려는 하이라이트 텍스트를 포함하는지 확인
                     for (const group of groups) {
                         if (typeof group === 'string' && group.includes(highlightText)) {
                             return highlightText;
                         }
                     }
-                    return match; // 如果没有找到匹配的组，保持原样
+                    return match; // 매칭되는 그룹이 없으면 원본 유지
                 });
                 
                 if (customResult !== newContent) {
@@ -73,7 +73,7 @@ export class HighlightRegexUtils {
                     replaced = true;
                 }
             } catch (error) {
-                console.error('自定义正则表达式错误:', error);
+                console.error('사용자 정의 정규식 오류:', error);
             }
         }
         
@@ -81,13 +81,13 @@ export class HighlightRegexUtils {
     }
     
     /**
-     * 在指定范围内移除高亮格式
-     * @param content 文件内容
-     * @param highlightText 要移除格式的高亮文本
-     * @param startPos 开始位置
-     * @param endPos 结束位置
-     * @param customRegex 自定义正则表达式（可选）
-     * @returns 移除格式后的内容
+     * 지정된 범위 내에서 하이라이트 형식 제거
+     * @param content 파일 내용
+     * @param highlightText 형식을 제거할 하이라이트 텍스트
+     * @param startPos 시작 위치
+     * @param endPos 종료 위치
+     * @param customRegex 사용자 정의 정규식 (선택 사항)
+     * @returns 형식이 제거된 내용
      */
     static removeHighlightFormatInRange(
         content: string,
@@ -96,15 +96,15 @@ export class HighlightRegexUtils {
         endPos: number,
         customRegex?: string
     ): string {
-        // 定义搜索范围（前后各扩展100个字符）
+        // 검색 범위 정의 (앞뒤로 각 100자 확장)
         const searchStart = Math.max(0, startPos - 100);
         const searchEnd = Math.min(content.length, endPos + 100);
         const searchRange = content.substring(searchStart, searchEnd);
         
-        // 在搜索范围内移除高亮格式
+        // 검색 범위 내에서 하이라이트 형식 제거
         const processedRange = this.removeHighlightFormat(searchRange, highlightText, customRegex);
         
-        // 如果有变化，替换原内容
+        // 변경사항이 있으면 원본 내용 대체
         if (processedRange !== searchRange) {
             return content.substring(0, searchStart) + processedRange + content.substring(searchEnd);
         }
@@ -113,7 +113,7 @@ export class HighlightRegexUtils {
     }
     
     /**
-     * 获取常用的高亮格式正则表达式列表
+     * 자주 사용되는 하이라이트 형식 정규식 목록 반환
      */
     static getCommonHighlightPatterns(text: string): RegExp[] {
         const escapedText = this.escapeRegExp(text);

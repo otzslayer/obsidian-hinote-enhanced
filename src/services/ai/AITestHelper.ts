@@ -3,21 +3,21 @@ import { t } from '../../i18n';
 import type { IAIService } from './types';
 
 /**
- * AI 服务测试辅助工具
- * 提供统一的测试反馈和错误处理
+ * AI 서비스 테스트 보조 도구
+ * 통일된 테스트 피드백 및 오류 처리를 제공합니다
  */
 export class AITestHelper {
     /**
-     * 统一的连接测试（带用户反馈）
+     * 통합 연결 테스트 (사용자 피드백 포함)
      */
     static async testConnection(
         service: IAIService,
         providerName: string
     ): Promise<boolean> {
-        // 显示测试中的提示
+        // 테스트 중 안내 메시지 표시
         const loadingNotice = new Notice(
             `⏳ ${t('Testing')} ${providerName} ${t('connection')}...`, 
-            0  // 不自动关闭
+            0  // 자동으로 닫히지 않음
         );
 
         try {
@@ -52,7 +52,7 @@ export class AITestHelper {
     }
 
     /**
-     * 检查 API Key 是否已输入
+     * API Key 입력 여부 확인
      */
     static checkApiKey(apiKey: string | undefined, providerName: string): boolean {
         if (!apiKey || apiKey.trim() === '') {
@@ -66,7 +66,7 @@ export class AITestHelper {
     }
 
     /**
-     * 检查 Host 是否已输入（用于 Ollama 等）
+     * 호스트 주소 입력 여부 확인 (Ollama 등에 사용)
      */
     static checkHost(host: string | undefined, providerName: string): boolean {
         if (!host || host.trim() === '') {
@@ -80,12 +80,12 @@ export class AITestHelper {
     }
 
     /**
-     * 获取友好的错误消息
+     * 사용자 친화적인 오류 메시지 가져오기
      */
     private static getErrorMessage(error: unknown): string {
         const message = error instanceof Error ? error.message : String(error);
 
-        // 根据错误类型返回友好的消息
+        // 오류 유형에 따라 사용자 친화적인 메시지 반환
         if (message.includes('401') || message.includes('Unauthorized')) {
             return t('Invalid API Key');
         } else if (message.includes('403') || message.includes('Forbidden')) {
@@ -102,26 +102,26 @@ export class AITestHelper {
             return t('Server error');
         }
 
-        // 返回原始错误消息（截断过长的消息）
+        // 원본 오류 메시지 반환 (너무 긴 메시지는 잘라냅니다)
         return message.length > 100 ? message.substring(0, 100) + '...' : message;
     }
 
     /**
-     * 显示成功消息
+     * 성공 메시지 표시
      */
     static showSuccess(message: string): void {
         new Notice(`✓ ${message}`, 3000);
     }
 
     /**
-     * 显示错误消息
+     * 오류 메시지 표시
      */
     static showError(message: string): void {
         new Notice(`✗ ${message}`, 5000);
     }
 
     /**
-     * 显示警告消息
+     * 경고 메시지 표시
      */
     static showWarning(message: string): void {
         new Notice(`⚠️ ${message}`, 4000);

@@ -10,7 +10,7 @@ import {
 } from "./FlashcardReviewQueue";
 
 /**
- * 闪卡操作类，负责处理卡片的翻转、评分等操作
+ * 플래시카드 작업 클래스, 카드 뒤집기, 평가 등의 작업 처리 담당
  */
 export class FlashcardOperations {
     private component: FlashcardComponentContext;
@@ -20,13 +20,13 @@ export class FlashcardOperations {
     }
     
     /**
-     * 翻转卡片
+     * 카드 뒤집기
      */
     public flipCard(): void {
         const flipped = !this.component.isCardFlipped();
         this.component.setCardFlipped(flipped);
-        
-        // 只需要切换卡片的 CSS 类，所有的样式和动画效果都由 CSS 处理
+
+        // 카드의 CSS 클래스만 전환하면 됨, 모든 스타일 및 애니메이션은 CSS에서 처리
         const cardElement = activeDocument.querySelector('.flashcard');
         if (cardElement) {
             if (flipped) {
@@ -40,7 +40,7 @@ export class FlashcardOperations {
     }
     
     /**
-     * 下一张卡片
+     * 다음 카드
      */
     public nextCard(): void {
         const cards = this.component.getCards();
@@ -58,85 +58,85 @@ export class FlashcardOperations {
     }
     
     /**
-     * 对卡片进行评分
-     * @param rating 评分
+     * 카드 평가
+     * @param rating 평가 점수
      */
     public rateCard(rating: FSRSRating): void {
         const cards = this.component.getCards();
         const currentIndex = this.component.getCurrentIndex();
-        
+
         if (cards.length === 0 || currentIndex >= cards.length) {
             return;
         }
-        
+
         const currentCard = cards[currentIndex];
         if (!currentCard) return;
-        
-        // 调用 FSRS 管理器进行评分，使用统一的学习进度跟踪方法
+
+        // FSRS 매니저로 평가, 통합된 학습 진도 추적 메서드 사용
         this.component.getFsrsManager().trackStudyProgress(currentCard.id, rating);
-        
-        // 移除当前卡片
+
+        // 현재 카드 제거
         cards.splice(currentIndex, 1);
-        
-        // 如果没有更多卡片，显示完成消息
+
+        // 카드가 더 없으면 완료 메시지 표시
         if (cards.length === 0) {
-            // 检查当前分组
+            // 현재 그룹 확인
             const groupName = this.component.getCurrentGroupName();
             const message = getCompletionMessage(this.component.getFsrsManager(), groupName);
-            
-            // 设置分组完成消息
+
+            // 그룹 완료 메시지 설정
             this.component.setGroupCompletionMessage(groupName, message);
-            
-            // 更新进度
+
+            // 진도 업데이트
             this.component.updateProgress();
-            
-            // 重新渲染
+
+            // 다시 렌더링
             this.component.getRenderer().render();
-            
-            // 不再显示通知，因为已经在界面上显示了完成消息
-            
+
+            // 화면에 완료 메시지가 이미 표시되므로 알림 더 이상 표시 안 함
+
             return;
         }
-        
-        // 调整当前索引
+
+        // 현재 인덱스 조정
         if (currentIndex >= cards.length) {
             this.component.setCurrentIndex(0);
         }
-        
-        // 重置翻转状态
+
+        // 뒤집기 상태 초기화
         this.component.setCardFlipped(false);
-        
-        // 保存状态
+
+        // 상태 저장
         this.component.saveState();
-        
-        // 更新进度
+
+        // 진도 업데이트
         this.component.updateProgress();
-        
-        // 重新渲染
+
+        // 다시 렌더링
         this.component.getRenderer().render();
     }
     
     /**
-     * 刷新当前卡片列表，考虑每日学习限制
-     * 注意：此方法只从已有的卡片中获取数据，不会自动创建新卡片
+     * 현재 카드 목록 새로고침, 일일 학습 제한 고려
+     * 참고: 이 메서드는 기존 카드에서만 데이터를 가져오며 새 카드를 자동으로 생성하지 않음
      */
     public refreshCardList(): void {
-        // 获取当前分组
+        // 현재 그룹 가져오기
         const groupName = this.component.getCurrentGroupName();
         const fsrsManager = this.component.getFsrsManager();
-        
-        // 获取分组 ID
+
+        // 그룹 ID 가져오기
         const group = findGroupByName(fsrsManager, groupName);
         if (!group) {
-            console.error(`未找到名称为 ${groupName} 的分组`);
+            console.error(`이름이 ${groupName}인 그룹을 찾을 수 없음`);
             return;
         }
-        
-        // 检查分组中是否有今天需要学习的卡片
+
+        // 그룹에 오늘 학습할 카드가 있는지 확인
         const allCards = fsrsManager.getCardsByGroupId(group.id);
         const cardsForToday = getDueCardsForToday(allCards, fsrsManager);
-        
-        // 如果没有今天需要学习的卡片，显示完成消息
+
+        // 오늘 학습할 카드가 없으면 완료 메시지 표시
         if (cardsForToday.length === 0) {
             const message = getCompletionMessage(fsrsManager, groupName);
             this.component.setGroupCompletionMessage(groupName, message);
@@ -144,24 +144,24 @@ export class FlashcardOperations {
             this.component.updateProgress();
             resetGroupProgressForCompletion(fsrsManager, groupName, message);
             this.component.getRenderer().render();
-            
-            // 保存状态
+
+            // 상태 저장
             this.component.saveState();
             return;
         }
-        
-        // 直接使用已筛选好的今天需要学习的卡片
+
+        // 오늘 학습할 카드로 바로 사용
         const cards = cardsForToday;
-        
-        // 获取保存的UI状态（在设置卡片列表之前）
+
+        // 저장된 UI 상태 가져오기 (카드 목록 설정 전)
         const savedProgress = this.component.getGroupProgress(groupName);
-        
-        // 有卡片需要学习，确保清除完成消息
+
+        // 학습할 카드가 있으면 완료 메시지 초기화
         clearGroupCompletionMessage(fsrsManager, groupName);
-        
-        // 设置卡片列表
+
+        // 카드 목록 설정
         this.component.setCards(cards);
-        
+
         if (cards.length > 0) {
             const restoredPosition = restoreReviewPosition(cards, savedProgress);
             this.component.setCurrentIndex(restoredPosition.currentIndex);
@@ -171,8 +171,8 @@ export class FlashcardOperations {
             const message = getCompletionMessage(fsrsManager, groupName);
             this.component.setGroupCompletionMessage(groupName, message);
         }
-        
-        // 保存状态
+
+        // 상태 저장
         this.component.saveState();
     }
 }

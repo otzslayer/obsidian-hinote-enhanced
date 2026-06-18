@@ -20,51 +20,51 @@ import {
 import { IdGenerator } from '../../utils/IdGenerator';
 
 /**
- * FSRSAdapter 类
- * 用于将 ts-fsrs 库与现有的 FSRS 系统进行适配
+ * FSRSAdapter 클래스
+ * ts-fsrs 라이브러리를 기존 FSRS 시스템과 연동하기 위한 어댑터
  */
 export class FSRSAdapter {
     private fsrsInstance: ReturnType<typeof fsrs>;
     private params: TsFSRSParameters;
 
     constructor(customParams: Partial<FSRSParameters> = {}) {
-        // 将自定义参数转换为 ts-fsrs 库所需的格式
+        // 커스텀 파라미터를 ts-fsrs 라이브러리에 필요한 형식으로 변환
         this.params = this.convertToTsFSRSParams(customParams);
         this.fsrsInstance = fsrs(this.params);
     }
 
     /**
-     * 将自定义参数转换为 ts-fsrs 库所需的格式
+     * 커스텀 파라미터를 ts-fsrs 라이브러리 형식으로 변환
      */
     private convertToTsFSRSParams(customParams: Partial<FSRSParameters>): TsFSRSParameters {
-        // 从自定义参数中提取相关配置
-        const { 
-            request_retention = 0.9, 
+        // 커스텀 파라미터에서 관련 설정 추출
+        const {
+            request_retention = 0.9,
             maximum_interval = 36500
         } = customParams;
 
-        // 使用 ts-fsrs 的 generatorParameters 生成参数
+        // ts-fsrs의 generatorParameters로 파라미터 생성
         return generatorParameters({
             request_retention,
             maximum_interval,
-            // 启用短期记忆模式，使 Again 评分能够有分钟或小时级别的间隔
+            // 단기 기억 모드 활성화, Again 평가 시 분 또는 시간 단위 간격 가능
             enable_fuzz: true,
             enable_short_term: true,
-            // 使用默认的 w 参数，这是 FSRS 算法的核心参数
+            // 기본 w 파라미터 사용, FSRS 알고리즘의 핵심 파라미터
             w: customParams.w || []
         });
     }
 
     /**
-     * 将 FlashcardState 转换为 ts-fsrs 的 Card 类型
+     * FlashcardState를 ts-fsrs의 Card 타입으로 변환
      */
     public toTsFSRSCard(card: FlashcardState): Card {
-        // 如果是新卡片，使用 createEmptyCard
+        // 새 카드이면 createEmptyCard 사용
         if (card.lastReview === 0) {
             return createEmptyCard(new Date(card.createdAt));
         }
 
-        // 确定卡片状态
+        // 카드 상태 결정
         let state: State = State.New;
         if (card.reviews > 0) {
             if (card.lapses > 0) {
@@ -74,7 +74,7 @@ export class FSRSAdapter {
             }
         }
 
-        // 创建 ts-fsrs Card 对象
+        // ts-fsrs Card 객체 생성
         return {
             due: new Date(card.nextReview),
             stability: card.stability,
@@ -85,12 +85,12 @@ export class FSRSAdapter {
             lapses: card.lapses,
             state: state,
             last_review: card.lastReview ? new Date(card.lastReview) : undefined,
-            learning_steps: 0 // 添加缺失的learning_steps属性，使用数字类型
+            learning_steps: 0 // 누락된 learning_steps 속성 추가, 숫자 타입 사용
         };
     }
 
     /**
-     * 将 FSRSRating 转换为 ts-fsrs 的 Rating
+     * FSRSRating을 ts-fsrs의 Rating으로 변환
      */
     public convertRating(rating: FSRSRating): Rating {
         switch (rating) {
@@ -108,7 +108,7 @@ export class FSRSAdapter {
     }
 
     /**
-     * 将 ts-fsrs 的 Card 和 ReviewLog 转换回 FlashcardState
+     * ts-fsrs의 Card와 ReviewLog를 FlashcardState로 역변환
      */
     public fromTsFSRSCard(originalCard: FlashcardState, recordItem: RecordLogItem): FlashcardState {
         const { card, log } = recordItem;
@@ -120,7 +120,7 @@ export class FSRSAdapter {
             ...originalCard,
             difficulty: card.difficulty,
             stability: card.stability,
-            retrievability: Math.exp(Math.log(0.9) * elapsedDays / card.stability), // 计算可提取性
+            retrievability: Math.exp(Math.log(0.9) * elapsedDays / card.stability), // 인출 가능성 계산
             lastReview: log.review.getTime(),
             nextReview: card.due.getTime(),
             reviews: card.reps,
@@ -137,7 +137,7 @@ export class FSRSAdapter {
     }
 
     /**
-     * 将 ts-fsrs 的 Rating 转换回 FSRSRating
+     * ts-fsrs의 Rating을 FSRSRating으로 역변환
      */
     private convertTsFSRSRatingToFSRSRating(rating: Rating): FSRSRating {
         switch (rating) {
@@ -155,7 +155,7 @@ export class FSRSAdapter {
     }
 
     /**
-     * 初始化新卡片
+     * 새 카드 초기화
      */
     public initializeCard(text: string, answer: string, filePath?: string): FlashcardState {
         const now = Date.now();
@@ -179,42 +179,42 @@ export class FSRSAdapter {
     }
 
     /**
-     * 复习卡片
+     * 카드 복습
      */
     public reviewCard(card: FlashcardState, rating: FSRSRating): FlashcardState {
-        // 转换为 ts-fsrs 卡片
+        // ts-fsrs 카드로 변환
         const tsCard = this.toTsFSRSCard(card);
         const tsRating = this.convertRating(rating);
         const now = new Date();
-        
-        // 使用 ts-fsrs 的 next 方法进行评分
-        // 确保 tsRating 不是 Rating.Manual，因为 next 方法期望一个 Grade 类型
-        // Grade 类型是排除了 Rating.Manual 的 Rating 类型
+
+        // ts-fsrs의 next 메서드로 평가
+        // tsRating이 Rating.Manual이 아닌지 확인 (next 메서드는 Grade 타입 기대)
+        // Grade 타입은 Rating.Manual을 제외한 Rating 타입
         if (tsRating !== Rating.Manual) {
             const result = this.fsrsInstance.next(tsCard, now, tsRating as Grade);
-            
-            // 转换回 FlashcardState
+
+            // FlashcardState로 역변환
             return this.fromTsFSRSCard(card, result);
         } else {
-            // 如果是 Manual 评分，返回原始卡片
+            // Manual 평가인 경우 원래 카드 반환
             return card;
         }
     }
 
     /**
-     * 获取卡片在不同评分下的预测结果
+     * 카드의 다양한 평가 점수에 따른 예측 결과 가져오기
      */
     public getSchedulingCards(card: FlashcardState): Record<FSRSRating, FlashcardState> {
-        // 转换为 ts-fsrs 卡片
+        // ts-fsrs 카드로 변환
         const tsCard = this.toTsFSRSCard(card);
         const now = new Date();
-        
-        // 使用 ts-fsrs 的 repeat 方法获取所有可能的评分结果
-        // 在 ts-fsrs 4.x 版本中，repeat 返回的是一个 Record<Grade, RecordLogItem>
+
+        // ts-fsrs의 repeat 메서드로 모든 가능한 평가 결과 가져오기
+        // ts-fsrs 4.x 버전에서 repeat은 Record<Grade, RecordLogItem> 반환
         const recordLog = this.fsrsInstance.repeat(tsCard, now);
-        
-        // 转换回 FlashcardState 并按评分分类
-        // 使用类型断言确保类型安全
+
+        // FlashcardState로 역변환 후 평가 점수별 분류
+        // 타입 안전성을 위해 타입 단언 사용
         return {
             [FSRS_RATING.AGAIN]: this.fromTsFSRSCard(card, recordLog[Rating.Again as Grade]),
             [FSRS_RATING.HARD]: this.fromTsFSRSCard(card, recordLog[Rating.Hard as Grade]),
@@ -224,21 +224,21 @@ export class FSRSAdapter {
     }
 
     /**
-     * 判断卡片是否到期
+     * 카드 만기 여부 판단
      */
     public isDue(card: FlashcardState): boolean {
         return Date.now() >= card.nextReview;
     }
 
     /**
-     * 获取当前参数
+     * 현재 파라미터 가져오기
      */
     public getParameters(): TsFSRSParameters {
         return { ...this.params };
     }
 
     /**
-     * 设置参数
+     * 파라미터 설정
      */
     public setParameters(params: Partial<FSRSParameters>): void {
         this.params = this.convertToTsFSRSParams(params);

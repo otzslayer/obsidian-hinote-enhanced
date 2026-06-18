@@ -6,8 +6,8 @@ import CommentPlugin from '../../../../main';
 import { t } from '../../../i18n';
 
 /**
- * 高亮渲染管理器
- * 负责高亮卡片的渲染和显示
+ * 하이라이트 렌더링 매니저
+ * 하이라이트 카드의 렌더링 및 표시 담당
  */
 export class HighlightRenderManager {
     private static readonly MASONRY_MIN_COLUMN_WIDTH = 250;
@@ -16,16 +16,16 @@ export class HighlightRenderManager {
     private container: HTMLElement;
     private plugin: CommentPlugin;
     private searchInput: HTMLInputElement;
-    private selectionManager: SelectionManager | null = null;  // 保存 SelectionManager 实例
-    
-    // 回调函数
+    private selectionManager: SelectionManager | null = null;  // SelectionManager 인스턴스 저장
+
+    // 콜백 함수
     private onHighlightClick: ((h: HighlightInfo) => Promise<void>) | null = null;
     private onCommentAdd: ((element: HTMLElement, h: HighlightInfo) => void) | null = null;
     private onCommentEdit: ((element: HTMLElement, h: HighlightInfo, c: CommentItem) => void) | null = null;
     private onExport: ((h: HighlightInfo) => void) | null = null;
     private onAIResponse: ((h: HighlightInfo, content: string) => Promise<void>) | null = null;
     
-    // 状态
+    // 상태
     private currentFile: TFile | null = null;
     private isDraggedToMainView: boolean = false;
     private highlightsWithFlashcards: Set<string> = new Set();
@@ -47,7 +47,7 @@ export class HighlightRenderManager {
     }
     
     /**
-     * 设置回调函数
+     * 콜백 함수 설정
      */
     setCallbacks(callbacks: {
         onHighlightClick?: (h: HighlightInfo) => Promise<void>;
@@ -74,7 +74,7 @@ export class HighlightRenderManager {
     }
     
     /**
-     * 更新状态
+     * 상태 업데이트
      */
     updateState(state: {
         currentFile?: TFile | null;
@@ -97,26 +97,26 @@ export class HighlightRenderManager {
     }
     
     /**
-     * 渲染高亮列表
+     * 하이라이트 목록 렌더링
      */
     renderHighlights(
-        highlightsToRender: HighlightInfo[], 
+        highlightsToRender: HighlightInfo[],
         append = false,
         selectionManager?: SelectionManager
     ) {
-        // 保存 SelectionManager 实例
+        // SelectionManager 인스턴스 저장
         if (selectionManager) {
             this.selectionManager = selectionManager;
         }
-        
+
         if (!append) {
             defaultHighlightCardRegistry.clearAll();
-            
+
             this.container.empty();
             this.currentBatch = 0;
             this.renderSequence = 0;
-            
-            // 清除多选状态
+
+            // 다중 선택 상태 초기화
             if (this.selectionManager) {
                 this.selectionManager.clearSelection();
             }
@@ -126,8 +126,8 @@ export class HighlightRenderManager {
             this.renderEmptyState();
             return;
         }
-        
-        // 初始化选择功能
+
+        // 선택 기능 초기화
         if (this.selectionManager && !append) {
             this.selectionManager.initialize();
         }
@@ -228,10 +228,10 @@ export class HighlightRenderManager {
     }
     
     /**
-     * 渲染单个高亮卡片
+     * 단일 하이라이트 카드 렌더링
      */
     private renderHighlightCard(container: HTMLElement, highlight: HighlightInfo) {
-        // 在具体文件视图下，确保高亮有 filePath
+        // 특정 파일 뷰에서 하이라이트에 filePath가 있는지 확인
         if (this.currentFile && !highlight.filePath) {
             highlight.filePath = this.currentFile.path;
         }
@@ -268,13 +268,13 @@ export class HighlightRenderManager {
                 }
             },
             this.isDraggedToMainView,
-            // 当显示全部高亮时（currentFile 为 null），使用高亮的 fileName，否则使用当前文件名
+            // 전체 하이라이트 표시 시 (currentFile이 null이면) 하이라이트의 fileName 사용, 아니면 현재 파일명 사용
             this.currentFile === null ? highlight.fileName : this.currentFile.basename,
-            this.selectionManager ?? undefined,  // 传入 SelectionManager 实例，null 转为 undefined
+            this.selectionManager ?? undefined,  // SelectionManager 인스턴스 전달, null은 undefined로 변환
             defaultHighlightCardRegistry
         );
         
-        // 如果高亮已经创建了闪卡，立即更新UI状态
+        // 하이라이트에 플래시카드가 이미 생성된 경우 즉시 UI 상태 업데이트
         if (highlight.id && this.highlightsWithFlashcards.has(highlight.id)) {
             window.setTimeout(() => {
                 if (highlight.id) {
@@ -283,12 +283,12 @@ export class HighlightRenderManager {
             }, 0);
         }
 
-        // 根据位置更新样式
+        // 위치에 따라 스타일 업데이트
         const cardElement = highlightCard.getElement();
         cardElement.dataset.masonryOrder = String(this.renderSequence++);
         if (this.isDraggedToMainView) {
             cardElement.classList.add('in-main-view');
-            // 找到文本内容元素并移除点击提示
+            // 텍스트 내용 요소를 찾아 클릭 힌트 제거
             const textContent = cardElement.querySelector('.highlight-text-content');
             if (textContent) {
                 textContent.removeAttribute('title');
@@ -299,10 +299,10 @@ export class HighlightRenderManager {
     }
     
     /**
-     * 渲染空状态
+     * 빈 상태 렌더링
      */
     private renderEmptyState() {
-        // 检查是否有搜索内容
+        // 검색어 존재 여부 확인
         const hasSearchTerm = this.searchInput && this.searchInput.value.trim() !== '';
         
         this.container.createEl("div", {
@@ -314,7 +314,7 @@ export class HighlightRenderManager {
     }
     
     /**
-     * 清空容器
+     * 컨테이너 비우기
      */
     clear() {
         if (this.resizeTimer !== null) {
@@ -333,14 +333,14 @@ export class HighlightRenderManager {
     }
     
     /**
-     * 获取当前批次
+     * 현재 배치 가져오기
      */
     getCurrentBatch(): number {
         return this.currentBatch;
     }
     
     /**
-     * 设置当前批次
+     * 현재 배치 설정
      */
     setCurrentBatch(batch: number) {
         this.currentBatch = batch;

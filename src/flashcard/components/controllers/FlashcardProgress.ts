@@ -11,7 +11,7 @@ import {
 } from "./FlashcardProgressStats";
 
 /**
- * 闪卡进度管理器，负责处理进度统计和显示
+ * 플래시카드 진도 매니저, 진도 통계 및 표시 처리 담당
  */
 export class FlashcardProgressManager {
     private component: FlashcardComponentContext;
@@ -21,8 +21,8 @@ export class FlashcardProgressManager {
     }
     
     /**
-     * 获取分组进度
-     * @returns 分组进度信息
+     * 그룹 진도 가져오기
+     * @returns 그룹 진도 정보
      */
     public getGroupProgress(): FlashcardProgress {
         const groupId = this.component.getCurrentGroupId();
@@ -33,42 +33,42 @@ export class FlashcardProgressManager {
     }
     
     /**
-     * 计算记忆保持率
-     * @param cards 卡片列表
-     * @returns 记忆保持率
+     * 기억 유지율 계산
+     * @param cards 카드 목록
+     * @returns 기억 유지율
      */
     public calculateRetention(cards: FlashcardState[]) {
         return calculateRetention(cards);
     }
     
     /**
-     * 更新进度显示
+     * 진도 표시 업데이트
      */
     public updateProgress() {
         const progressContainer = this.component.getProgressContainer();
         if (!progressContainer) return;
-        
+
         progressContainer.empty();
-        
-        // 获取进度数据
+
+        // 진도 데이터 가져오기
         const progress = this.getGroupProgress();
-        
-        // 创建进度文本容器
+
+        // 진도 텍스트 컨테이너 생성
         const progressText = progressContainer.createEl("div", { cls: "flashcard-progress-text" });
-        
-        // 添加分组名称
+
+        // 그룹 이름 추가
         progressText.createSpan({
             text: this.component.getCurrentGroupName() || t('Groups'),
             cls: "group-name"
         });
 
-        // 添加分隔符
+        // 구분자 추가
         progressText.createSpan({
             text: "|",
             cls: "separator"
         });
-        
-        // 添加统计信息
+
+        // 통계 정보 추가
         const stats = [
             { label: t('Due'), value: progress.due },
             { label: t('New'), value: progress.newCards },
@@ -77,7 +77,7 @@ export class FlashcardProgressManager {
         ];
 
         stats.forEach((stat, index) => {
-            // 添加分隔符
+            // 구분자 추가
             if (index > 0) {
                 progressText.createSpan({
                     text: "|",
@@ -92,7 +92,7 @@ export class FlashcardProgressManager {
                 cls: "stat-value"
             });
             
-            // 为 Retention 添加问号图标和提示
+            // Retention에 물음표 아이콘 및 툴팁 추가
             if (stat.label === t('Retention')) {
                 const helpIcon = statEl.createSpan({ cls: "help-icon" });
                 setIcon(helpIcon, "help-circle");
@@ -103,21 +103,21 @@ export class FlashcardProgressManager {
             }
         });
         
-        // 创建进度条容器
+        // 진도 바 컨테이너 생성
         const progressBarContainer = progressContainer.createEl('div', { cls: 'flashcard-progress-bar-container' });
-        
-        // 创建进度条
+
+        // 진도 바 생성
         const progressBar = progressBarContainer.createEl('div', { cls: 'flashcard-progress-bar' });
         
         const percent = calculateProgressPercent(progress, this.component.getCards().length);
         
-        // 设置进度条宽度
+        // 진도 바 너비 설정
         progressBar.setCssProps({ width: `${percent}%` });
-        
-        // 添加当前卡片索引信息
+
+        // 현재 카드 인덱스 정보 추가
         const indexContainer = progressContainer.createEl('div', { cls: 'flashcard-index-container' });
-        
-        // 获取当前分组ID
+
+        // 현재 그룹 ID 가져오기
         const groupId = this.component.getCurrentGroupId();
         
         const remainingCards = this.component.getCards().length;

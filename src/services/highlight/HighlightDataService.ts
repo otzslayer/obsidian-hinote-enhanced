@@ -3,13 +3,13 @@ import { HighlightInfo } from '../../types/highlight';
 import { HighlightService } from '../HighlightService';
 
 /**
- * 高亮数据服务
- * 负责高亮数据的加载、处理和匹配
- * 
- * 职责：
- * - 加载单个文件或所有文件的高亮数据
- * - 合并高亮文本和评论数据
- * - 标记高亮的来源（全局搜索、Canvas等）
+ * 하이라이트 데이터 서비스
+ * 하이라이트 데이터의 로드, 처리 및 매칭을 담당합니다
+ *
+ * 역할:
+ * - 단일 파일 또는 모든 파일의 하이라이트 데이터 로드
+ * - 하이라이트 텍스트와 댓글 데이터 병합
+ * - 하이라이트의 출처 표시 (전역 검색, Canvas 등)
  */
 export class HighlightDataService {
     private app: App;
@@ -24,7 +24,7 @@ export class HighlightDataService {
     }
     
     /**
-     * 加载单个文件的高亮数据
+     * 단일 파일의 하이라이트 데이터를 로드합니다
      */
     async loadFileHighlights(file: TFile): Promise<HighlightInfo[]> {
         if (!this.highlightService.shouldProcessFile(file)) {
@@ -36,7 +36,7 @@ export class HighlightDataService {
     }
     
     /**
-     * 加载所有文件的高亮数据
+     * 모든 파일의 하이라이트 데이터를 로드합니다
      */
     async loadAllHighlights(searchTerm: string = '', searchType: string = ''): Promise<HighlightInfo[]> {
         const allHighlights: HighlightInfo[] = [];
@@ -64,7 +64,7 @@ export class HighlightDataService {
     }
     
     /**
-     * 标记高亮为全局搜索结果
+     * 하이라이트를 전역 검색 결과로 표시합니다
      */
     markAsGlobalSearch(highlights: HighlightInfo[], isGlobal: boolean = true): HighlightInfo[] {
         return highlights.map(h => ({
@@ -74,7 +74,7 @@ export class HighlightDataService {
     }
     
     /**
-     * 标记高亮为 Canvas 来源
+     * 하이라이트를 Canvas 출처로 표시합니다
      */
     markAsCanvasSource(highlights: HighlightInfo[], canvasFile: TFile): HighlightInfo[] {
         return highlights.map(h => ({

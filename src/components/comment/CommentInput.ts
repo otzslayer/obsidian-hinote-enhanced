@@ -23,7 +23,7 @@ export class CommentInput {
     private inlineAI: InlineAICommentHandler;
     private saveController: CommentInputSaveController;
     private boundHandleOutsideClick: (e: MouseEvent) => void;
-    private commentEl: Element | null = null; // 保存批注元素引用，用于移除 editing 类
+    private commentEl: Element | null = null; // 주석 요소 참조 저장, editing 클래스 제거에 사용
     private isOpen = false;
 
     constructor(
@@ -81,7 +81,7 @@ export class CommentInput {
         this.commentEl = renderedInput.commentEl || null;
         this.setupKeyboardEvents(renderedInput.editContext);
 
-        // 延迟一下再聚焦，确保DOM已经完全渲染
+        // DOM이 완전히 렌더링된 후 포커스, 약간의 지연 적용
         window.setTimeout(() => {
             this.textarea.focus();
             this.textarea.setSelectionRange(this.textarea.value.length, this.textarea.value.length);
@@ -99,8 +99,8 @@ export class CommentInput {
         this.textarea = renderedInput.textarea;
         this.actionHint = renderedInput.actionHint;
         this.setupKeyboardEvents(renderedInput.editContext);
-        
-        // 延迟一下再聚焦，确保DOM已经完全渲染
+
+        // DOM이 완전히 렌더링된 후 포커스, 약간의 지연 적용
         window.setTimeout(() => {
             this.textarea.focus();
         }, 50);
@@ -121,7 +121,7 @@ export class CommentInput {
         });
     }
 
-    // 自动调整文本框高度以适应内容
+    // 내용에 맞게 텍스트 영역 높이 자동 조정
     private autoResizeTextarea() {
         autoResizeCommentTextarea(this.textarea);
     }
@@ -135,47 +135,47 @@ export class CommentInput {
                          !clickedElement.closest('.hi-note-actions-hint');
         
         if (isOutside) {
-            // 立即阻止事件传播，避免触发卡片点击
+            // 카드 클릭 트리거 방지를 위해 이벤트 전파 즉시 차단
             e.preventDefault();
             e.stopPropagation();
             
             const content = this.textarea.value.trim();
             
             if (content) {
-                // 有内容时保存
+                // 내용이 있으면 저장
                 void this.saveController.saveCurrentContent();
             } else {
-                // 没有内容时取消
+                // 내용이 없으면 취소
                 this.cancel();
             }
         }
     }
 
     /**
-     * 取消输入（不保存）
-     * @param editContext 编辑模式的上下文信息，用于恢复原始内容
+     * 입력 취소 (저장 없음)
+     * @param editContext 원본 내용 복원을 위한 편집 모드 컨텍스트 정보
      */
     private cancel(editContext?: { contentEl?: HTMLElement, footer?: Element } | null) {
-        // 立即通知 HighlightCard 输入框已关闭，确保状态同步
+        // HighlightCard에 입력창이 닫혔음을 즉시 알려 상태 동기화
         this.notifyClosed();
         restoreOrRemoveCommentInput(this.getElements(), this.existingComment, editContext);
-        
-        // 清理事件监听器
+
+        // 이벤트 리스너 정리
         activeDocument.removeEventListener('click', this.boundHandleOutsideClick);
         this.saveController.reset();
-        
-        // 调用取消回调
+
+        // 취소 콜백 호출
         this.options.onCancel();
     }
-    
+
     /**
-     * 销毁输入框（保存后调用）
+     * 입력창 소멸 (저장 후 호출)
      */
     public destroy() {
-        // 立即通知 HighlightCard 输入框已关闭
+        // HighlightCard에 입력창이 닫혔음을 즉시 알림
         this.notifyClosed();
-        
-        // 清理事件监听器
+
+        // 이벤트 리스너 정리
         activeDocument.removeEventListener('click', this.boundHandleOutsideClick);
         this.saveController.reset();
         
@@ -184,28 +184,28 @@ export class CommentInput {
     }
     
     /**
-     * 安全销毁输入框（用于删除评论后调用）
-     * 检查 DOM 元素是否仍然存在，避免操作已删除的元素
+     * 입력창 안전 소멸 (댓글 삭제 후 호출)
+     * DOM 요소가 여전히 존재하는지 확인하여 이미 삭제된 요소 조작 방지
      */
     public destroySafe() {
         try {
-            // 立即通知 HighlightCard 输入框已关闭
+            // HighlightCard에 입력창이 닫혔음을 즉시 알림
             this.notifyClosed();
-            
-            // 清理事件监听器
+
+            // 이벤트 리스너 정리
             activeDocument.removeEventListener('click', this.boundHandleOutsideClick);
             this.saveController.reset();
-            
+
             removeCommentInputElements(this.getElements(), true);
             this.commentEl = null;
         } catch (error) {
-            // 捕获任何错误，避免应用冻结
-            console.error('[CommentInput] 安全销毁时出错:', error);
+            // 오류 캐치, 앱 동결 방지
+            console.error('[CommentInput] 안전 소멸 중 오류:', error);
         }
     }
-    
+
     /**
-     * 处理保存逻辑
+     * 저장 로직 처리
      */
     private async handleSave() {
         await this.saveController.saveCurrentContent();
@@ -223,7 +223,7 @@ export class CommentInput {
                 this.destroySafe();
             }, 0);
         } catch (error) {
-            console.error('删除评论失败:', error);
+            console.error('댓글 삭제 실패:', error);
             activeDocument.addEventListener('click', this.boundHandleOutsideClick);
             this.saveController.reset();
         }

@@ -8,7 +8,7 @@ interface CommentResolverOptions {
 }
 
 /**
- * 将当前文档中提取到的高亮，与仓库里保存的评论数据进行匹配。
+ * 현재 문서에서 추출된 하이라이트를 저장소에 저장된 댓글 데이터와 매칭합니다.
  */
 export class HighlightCommentResolver {
     constructor(private highlightRepository: HighlightRepository) {}

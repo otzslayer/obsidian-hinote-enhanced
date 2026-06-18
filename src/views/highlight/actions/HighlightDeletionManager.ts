@@ -11,8 +11,8 @@ type LegacyHighlightSettings = PluginSettings & {
 };
 
 /**
- * 高亮删除管理器
- * 负责高亮的删除逻辑，包括文件操作和格式移除
+ * 하이라이트 삭제 매니저
+ * 파일 조작 및 형식 제거를 포함한 하이라이트 삭제 로직 담당
  */
 export class HighlightDeletionManager {
     private plugin: CommentPlugin;
@@ -22,11 +22,11 @@ export class HighlightDeletionManager {
     }
     
     /**
-     * 删除高亮（包括文件中的格式和存储的数据）
-     * @param highlight 高亮信息
-     * @param skipConfirmation 是否跳过确认对话框
-     * @param skipNotice 是否跳过成功通知
-     * @returns 删除是否成功
+     * 하이라이트 삭제 (파일의 형식 및 저장된 데이터 포함)
+     * @param highlight 하이라이트 정보
+     * @param skipConfirmation 확인 다이얼로그 건너뛰기 여부
+     * @param skipNotice 성공 알림 건너뛰기 여부
+     * @returns 삭제 성공 여부
      */
     async deleteHighlight(
         highlight: HighlightInfo,
@@ -34,7 +34,7 @@ export class HighlightDeletionManager {
         skipNotice: boolean = false
     ): Promise<boolean> {
         try {
-            // 显示确认对话框
+            // 확인 다이얼로그 표시
             if (!skipConfirmation) {
                 const confirmDelete = await showConfirmModal(this.plugin.app, {
                     title: t('Delete highlight'),
@@ -45,17 +45,17 @@ export class HighlightDeletionManager {
                 }
             }
             
-            // 删除文件中的高亮格式
+            // 파일의 하이라이트 형식 삭제
             if (highlight.filePath) {
                 await this.removeHighlightFromFile(highlight);
-                
-                // 从 HighlightManager 中删除高亮
+
+                // HighlightManager에서 하이라이트 삭제
                 const file = this.plugin.app.vault.getAbstractFileByPath(highlight.filePath);
                 if (file instanceof TFile) {
                     await this.plugin.highlightManager.removeHighlight(file, highlight);
                 }
-                
-                // 触发高亮删除事件
+
+                // 하이라이트 삭제 이벤트 발생
                 this.plugin.eventManager.emitHighlightDelete(
                     highlight.filePath,
                     highlight.text || '',
@@ -69,7 +69,7 @@ export class HighlightDeletionManager {
             
             return true;
         } catch (error) {
-            console.error('删除高亮时出错:', error);
+            console.error('하이라이트 삭제 중 오류:', error);
             if (!skipNotice) {
                 new Notice(t(`Failed to delete highlight: ${error.message}`));
             }
@@ -78,22 +78,22 @@ export class HighlightDeletionManager {
     }
     
     /**
-     * 从文件中移除高亮格式
-     * @param highlight 高亮信息
+     * 파일에서 하이라이트 형식 제거
+     * @param highlight 하이라이트 정보
      */
     private async removeHighlightFromFile(highlight: HighlightInfo): Promise<void> {
         if (!highlight.filePath) return;
-        
+
         const file = this.plugin.app.vault.getAbstractFileByPath(highlight.filePath);
         if (!(file instanceof TFile)) return;
-        
+
         const highlightText = highlight.text;
-        
-        // 获取自定义正则表达式（如果有）
+
+        // 커스텀 정규식 가져오기 (있는 경우)
         const customRegex = (this.plugin.settings as LegacyHighlightSettings).customHighlightRegex;
-        
-        // 使用 vault.process() 原子性地修改文件内容
-        // 这会正确同步已打开的编辑器视图，不会导致编辑器状态重置或焦点丢失
+
+        // vault.process()로 파일 내용을 원자적으로 수정
+        // 열린 에디터 뷰를 올바르게 동기화하며 에디터 상태 리셋 또는 포커스 손실을 방지
         await this.plugin.app.vault.process(file, (fileContent) => {
             if (typeof highlight.position === 'number') {
                 const endPos = highlight.position + (highlight.originalLength || highlightText.length);
@@ -115,18 +115,18 @@ export class HighlightDeletionManager {
     }
     
     /**
-     * 完全删除高亮（当没有批注时使用）
-     * @param highlight 高亮信息
+     * 하이라이트 완전 삭제 (주석이 없을 때 사용)
+     * @param highlight 하이라이트 정보
      */
     async deleteHighlightCompletely(highlight: HighlightInfo): Promise<void> {
         try {
             if (highlight.filePath) {
                 const file = this.plugin.app.vault.getAbstractFileByPath(highlight.filePath);
                 if (file instanceof TFile) {
-                    // 从 HighlightManager 中删除高亮
+                    // HighlightManager에서 하이라이트 삭제
                     await this.plugin.highlightManager.removeHighlight(file, highlight);
-                    
-                    // 触发高亮删除事件
+
+                    // 하이라이트 삭제 이벤트 발생
                     this.plugin.eventManager.emitHighlightDelete(
                         highlight.filePath,
                         highlight.text || '',
@@ -135,7 +135,7 @@ export class HighlightDeletionManager {
                 }
             }
         } catch (error) {
-            console.error('完全删除高亮时出错:', error);
+            console.error('하이라이트 완전 삭제 중 오류:', error);
             throw error;
         }
     }

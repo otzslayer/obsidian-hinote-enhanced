@@ -15,11 +15,11 @@ interface StoredHighlightUpdate {
 }
 
 /**
- * 高亮匹配器
- * 职责：
- * 1. 将从文件中提取的高亮与存储的评论数据进行匹配合并
- * 2. 使用统一策略（ID、block+text、文本+位置、上下文、唯一文本）进行匹配
- * 3. 高置信匹配成功后异步更新存储中的定位锚点，防止偏移累积
+ * 하이라이트 매처
+ * 역할:
+ * 1. 파일에서 추출된 하이라이트와 저장된 댓글 데이터를 매칭하여 병합합니다
+ * 2. 통합 전략 (ID, block+text, text+position, context, unique text)으로 매칭합니다
+ * 3. 높은 신뢰도 매칭 성공 후 저장소의 위치 앵커를 비동기로 업데이트하여 오프셋 누적을 방지합니다
  */
 export class HighlightMatcher {
     constructor(
@@ -27,7 +27,7 @@ export class HighlightMatcher {
     ) {}
 
     /**
-     * 使用多种策略匹配高亮和候选评论。
+     * 여러 전략을 사용하여 하이라이트와 후보 댓글을 매칭합니다.
      */
     static findMatch(
         target: HiNote,
@@ -37,15 +37,15 @@ export class HighlightMatcher {
     }
 
     /**
-     * 使用统一匹配策略查找候选高亮。
+     * 통합 매칭 전략으로 후보 하이라이트를 검색합니다.
      */
     static findExactMatch(target: HiNote, candidates: HiNote[]): HiNote | null {
         return findStoredHighlightMatch(target, candidates)?.highlight || null;
     }
 
     /**
-     * 查找与给定高亮最匹配的存储高亮
-     * 使用统一策略进行匹配，禁止纯位置匹配。
+     * 주어진 하이라이트와 가장 잘 일치하는 저장된 하이라이트를 검색합니다
+     * 통합 전략으로 매칭하며 순수 위치 매칭은 허용하지 않습니다.
      */
     public findMatchingHighlight(file: TFile, highlight: HiNote, highlightRepository: HighlightRepository): HiNote | null {
         const fileHighlights = highlightRepository.getCachedHighlights(file.path) || [];
@@ -53,7 +53,7 @@ export class HighlightMatcher {
     }
     
     /**
-     * 批量合并高亮和评论数据（统一的匹配逻辑）
+     * 하이라이트와 댓글 데이터를 일괄 병합합니다 (통합 매칭 로직)
      */
     public mergeHighlightsWithComments(
         highlights: HighlightInfo[],
@@ -65,10 +65,10 @@ export class HighlightMatcher {
         }
         
         const usedCommentIds = new Set<string>();
-        // 收集需要更新定位锚点的高亮，在合并完成后批量异步更新存储
+        // 위치 앵커를 업데이트해야 하는 하이라이트를 수집하여 병합 완료 후 일괄 비동기로 저장소를 업데이트합니다
         const highlightUpdates: StoredHighlightUpdate[] = [];
         
-        // 合并高亮和评论数据
+        // 하이라이트와 댓글 데이터를 병합합니다
         const mergedHighlights = highlights.map(highlight => {
             const match = findStoredHighlightMatch(highlight, storedComments, { usedIds: usedCommentIds });
             const storedComment = match?.highlight;
@@ -81,12 +81,12 @@ export class HighlightMatcher {
             return this.createHighlightInfo(highlight, file);
         });
 
-        // 添加虚拟高亮
+        // 가상 하이라이트를 추가합니다
         const virtualHighlights = storedComments
             .filter(c => c.id && c.isVirtual && c.comments && c.comments.length > 0 && !usedCommentIds.has(c.id))
             .map(vh => this.createHighlightInfo(vh, file));
         
-        // 异步更新存储中的定位锚点，防止偏移累积
+        // 저장소의 위치 앵커를 비동기로 업데이트하여 오프셋 누적을 방지합니다
         if (highlightUpdates.length > 0) {
             this.applyStoredHighlightUpdates(file.path, storedComments, highlightUpdates);
         }
@@ -95,7 +95,7 @@ export class HighlightMatcher {
     }
     
     /**
-     * 记录需要更新定位锚点的高亮
+     * 위치 앵커를 업데이트해야 하는 하이라이트를 기록합니다
      */
     private trackStoredHighlightUpdate(
         updates: StoredHighlightUpdate[],
@@ -132,14 +132,14 @@ export class HighlightMatcher {
     }
     
     /**
-     * 异步批量更新存储中的定位锚点，防止偏移累积导致匹配失败
+     * 저장소의 위치 앵커를 비동기로 일괄 업데이트하여 오프셋 누적으로 인한 매칭 실패를 방지합니다
      */
     private applyStoredHighlightUpdates(
         filePath: string,
         storedComments: HiNote[],
         updates: StoredHighlightUpdate[]
     ): void {
-        // 使用 setTimeout 异步执行，不阻塞合并流程
+        // setTimeout으로 비동기 실행하여 병합 흐름을 차단하지 않습니다
         window.setTimeout(() => {
             void this.saveStoredHighlightUpdates(filePath, storedComments, updates);
         }, 100);
@@ -169,12 +169,12 @@ export class HighlightMatcher {
                 }
             }
         } catch {
-            // 静默处理，定位锚点更新失败不影响主流程
+            // 조용히 처리합니다. 위치 앵커 업데이트 실패는 주 흐름에 영향을 주지 않습니다
         }
     }
 
     /**
-     * 创建合并后的高亮信息
+     * 병합된 하이라이트 정보를 생성합니다
      */
     private createMergedHighlight(highlight: HighlightInfo, storedComment: HiNote, file: TFile): HighlightInfo {
         return {
@@ -190,7 +190,7 @@ export class HighlightMatcher {
     }
     
     /**
-     * 创建高亮信息对象
+     * 하이라이트 정보 객체를 생성합니다
      */
     private createHighlightInfo(highlight: HighlightInfo, file: TFile): HighlightInfo {
         return {

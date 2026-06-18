@@ -1,26 +1,26 @@
 /**
- * 统一的ID生成工具类
- * 确保同一内容总是生成相同的ID，避免重复和不一致
+ * 통합 ID 생성 유틸리티 클래스
+ * 동일한 내용에 대해 항상 동일한 ID가 생성되도록 하여 중복 및 불일치를 방지
  */
 export class IdGenerator {
     /**
-     * 生成高亮ID
-     * 基于文件路径、位置和文本内容生成稳定的ID
-     * @param filePath 文件路径
-     * @param position 位置
-     * @param text 高亮文本
-     * @returns 稳定的高亮ID
+     * 하이라이트 ID 생성
+     * 파일 경로, 위치, 텍스트 내용을 기반으로 안정적인 ID 생성
+     * @param filePath 파일 경로
+     * @param position 위치
+     * @param text 하이라이트 텍스트
+     * @returns 안정적인 하이라이트 ID
      */
     static generateHighlightId(filePath: string, position: number, text: string): string {
-        // 使用文件路径、位置和文本内容生成稳定的哈希
+        // 파일 경로, 위치, 텍스트 내용을 사용하여 안정적인 해시 생성
         const content = `${filePath}:${position}:${text}`;
         const hash = this.hashCode(content);
         return `highlight-${Math.abs(hash)}-${position}`;
     }
 
     /**
-     * 生成批注ID
-     * @returns 唯一的批注ID
+     * 댓글 ID 생성
+     * @returns 고유한 댓글 ID
      */
     static generateCommentId(): string {
         const timestamp = Date.now();
@@ -29,8 +29,8 @@ export class IdGenerator {
     }
 
     /**
-     * 生成闪卡ID
-     * @returns 唯一的闪卡ID
+     * 플래시카드 ID 생성
+     * @returns 고유한 플래시카드 ID
      */
     static generateCardId(): string {
         const timestamp = Date.now();
@@ -39,8 +39,8 @@ export class IdGenerator {
     }
 
     /**
-     * 生成分组ID
-     * @returns 唯一的分组ID
+     * 그룹 ID 생성
+     * @returns 고유한 그룹 ID
      */
     static generateGroupId(): string {
         const timestamp = Date.now();
@@ -49,9 +49,9 @@ export class IdGenerator {
     }
 
     /**
-     * 简单的字符串哈希函数
-     * @param str 要哈希的字符串
-     * @returns 哈希值
+     * 간단한 문자열 해시 함수
+     * @param str 해시할 문자열
+     * @returns 해시값
      */
     private static hashCode(str: string): number {
         let hash = 0;
@@ -60,43 +60,43 @@ export class IdGenerator {
         for (let i = 0; i < str.length; i++) {
             const char = str.charCodeAt(i);
             hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // 转换为32位整数
+            hash = hash & hash; // 32비트 정수로 변환
         }
         
         return hash;
     }
 
     /**
-     * 检查是否为有效的高亮ID格式
-     * @param id 要检查的ID
-     * @returns 是否为有效格式
+     * 유효한 하이라이트 ID 형식인지 확인
+     * @param id 확인할 ID
+     * @returns 유효한 형식 여부
      */
     static isValidHighlightId(id: string): boolean {
         return /^highlight-\d+-\d+$/.test(id);
     }
 
     /**
-     * 检查是否为有效的批注ID格式
-     * @param id 要检查的ID
-     * @returns 是否为有效格式
+     * 유효한 댓글 ID 형식인지 확인
+     * @param id 확인할 ID
+     * @returns 유효한 형식 여부
      */
     static isValidCommentId(id: string): boolean {
         return /^comment-\d+-[a-z0-9]+$/.test(id);
     }
 
     /**
-     * 检查是否为有效的闪卡ID格式
-     * @param id 要检查的ID
-     * @returns 是否为有效格式
+     * 유효한 플래시카드 ID 형식인지 확인
+     * @param id 확인할 ID
+     * @returns 유효한 형식 여부
      */
     static isValidCardId(id: string): boolean {
         return /^card-\d+-[a-z0-9]+$/.test(id);
     }
 
     /**
-     * 从高亮ID中提取位置信息
-     * @param highlightId 高亮ID
-     * @returns 位置信息，如果无法提取则返回null
+     * 하이라이트 ID에서 위치 정보 추출
+     * @param highlightId 하이라이트 ID
+     * @returns 위치 정보, 추출 불가 시 null 반환
      */
     static extractPositionFromHighlightId(highlightId: string): number | null {
         const match = highlightId.match(/^highlight-\d+-(\d+)$/);

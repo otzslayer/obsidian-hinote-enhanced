@@ -1,7 +1,7 @@
 import { HighlightInfo } from '../types/highlight';
 import { t } from '../i18n';
 
-// 卡片模板接口
+// 카드 템플릿 인터페이스
 export interface CardTemplate {
     id: string;
     name: string;
@@ -9,7 +9,7 @@ export interface CardTemplate {
     render: (highlight: HighlightInfo) => HTMLElement;
 }
 
-// 默认模板（使用现代风格）
+// 기본 템플릿 (모던 스타일 사용)
 export const defaultTemplate: CardTemplate = {
     id: 'default',
     name: t('Default Template'),
@@ -18,11 +18,11 @@ export const defaultTemplate: CardTemplate = {
         const cardContainer = activeDocument.createElement('div');
         cardContainer.className = 'highlight-export-card highlight-export-card-modern';
 
-        // 引用区域
+        // 인용 영역
         const quoteSection = activeDocument.createElement('div');
         quoteSection.className = 'highlight-export-quote-section';
-        
-        // 引用装饰
+
+        // 인용 장식
         const quoteDecoration = activeDocument.createElement('div');
         quoteDecoration.className = 'highlight-export-quote-decoration';
 
@@ -46,25 +46,25 @@ export const defaultTemplate: CardTemplate = {
 
         quoteSection.appendChild(quoteDecoration);
         
-        // 引用内容
+        // 인용 내용
         const quoteContent = activeDocument.createElement('div');
         quoteContent.className = 'highlight-export-quote';
         quoteContent.textContent = highlight.text;
         quoteSection.appendChild(quoteContent);
-        
+
         cardContainer.appendChild(quoteSection);
 
-        // 底部信息
+        // 하단 정보
         const footer = activeDocument.createElement('div');
         footer.className = 'highlight-export-footer';
 
-        // 来源信息
+        // 출처 정보
         const source = activeDocument.createElement('div');
         source.className = 'highlight-export-source';
         source.textContent = highlight.fileName || highlight.filePath?.split('/').pop() || 'Untitled';
         footer.appendChild(source);
 
-        // 日期信息
+        // 날짜 정보
         const date = activeDocument.createElement('div');
         date.className = 'highlight-export-date';
         const now = new Date();
@@ -82,7 +82,7 @@ export const defaultTemplate: CardTemplate = {
     }
 };
 
-// 学术模板
+// 학술 템플릿
 export const academicTemplate: CardTemplate = {
     id: 'academic',
     name: t('Academic Template'),
@@ -114,7 +114,7 @@ export const academicTemplate: CardTemplate = {
     }
 };
 
-// 社交媒体模板
+// 소셜 미디어 템플릿
 export const socialTemplate: CardTemplate = {
     id: 'social',
     name: t('Social Template'),
@@ -137,11 +137,11 @@ export const socialTemplate: CardTemplate = {
         logoSvg.setAttribute("fill", "currentColor");
         logoSvg.setAttribute("stroke", "none");
 
-        // Obsidian Logo - 钻石/宝石形状
+        // Obsidian 로고 - 다이아몬드/보석 형태
         const path = activeDocument.createElementNS("http://www.w3.org/2000/svg", "path");
         path.setAttribute("d", "M50,9.4L14.8,37.1l12.6,38.8l22.6,14.7l22.6-14.7l12.6-38.8L50,9.4z M50,19.5l25.5,20l-9.4,28.9L50,80.6 L33.9,68.4l-9.4-28.9L50,19.5z");
         
-        // 内部细节
+        // 내부 세부 요소
         const innerPath = activeDocument.createElementNS("http://www.w3.org/2000/svg", "path");
         innerPath.setAttribute("d", "M50,19.5l-25.5,20l9.4,28.9L50,80.6V19.5z");
         innerPath.setAttribute("fill-opacity", "0.3");
@@ -177,19 +177,19 @@ export const socialTemplate: CardTemplate = {
     }
 };
 
-// 模板注册表
+// 템플릿 레지스트리
 export const templates: CardTemplate[] = [
     defaultTemplate,
     academicTemplate,
     socialTemplate
 ];
 
-// 获取模板
+// 템플릿 가져오기
 export function getTemplate(id: string): CardTemplate {
     return templates.find(t => t.id === id) || defaultTemplate;
 }
 
-// 注册新模板（如果后续需要添加其他模板）
+// 새 템플릿 등록 (추후 다른 템플릿 추가가 필요한 경우)
 export function registerTemplate(template: CardTemplate) {
     if (!templates.find(t => t.id === template.id)) {
         templates.push(template);

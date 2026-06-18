@@ -5,12 +5,12 @@ import CommentPlugin from "../../../../main";
 import { LicenseManager } from "../../../services/LicenseManager";
 
 /**
- * 闪卡视图管理器
- * 职责：
- * 1. 管理闪卡模式的切换
- * 2. 创建和销毁闪卡组件
- * 3. 管理闪卡状态标记
- * 4. 处理闪卡相关的 UI 更新
+ * 플래시카드 뷰 매니저
+ * 담당:
+ * 1. 플래시카드 모드 전환 관리
+ * 2. 플래시카드 컴포넌트 생성 및 소멸
+ * 3. 플래시카드 상태 마커 관리
+ * 4. 플래시카드 관련 UI 업데이트 처리
  */
 export class FlashcardViewManager {
     private flashcardComponent: FlashcardComponent | null = null;
@@ -23,40 +23,40 @@ export class FlashcardViewManager {
     ) {}
 
     /**
-     * 获取闪卡模式状态
+     * 플래시카드 모드 상태 가져오기
      */
     isInFlashcardMode(): boolean {
         return this.isFlashcardMode;
     }
 
     /**
-     * 设置闪卡模式
+     * 플래시카드 모드 설정
      */
     setFlashcardMode(enabled: boolean): void {
         this.isFlashcardMode = enabled;
     }
 
     /**
-     * 获取闪卡组件
+     * 플래시카드 컴포넌트 가져오기
      */
     getFlashcardComponent(): FlashcardComponent | null {
         return this.flashcardComponent;
     }
 
     /**
-     * 创建闪卡组件
-     * @param container 闪卡容器
+     * 플래시카드 컴포넌트 생성
+     * @param container 플래시카드 컨테이너
      */
     createFlashcardComponent(
         container: HTMLElement,
         licenseManager?: LicenseManager
     ): FlashcardComponent | null {
-        // 如果已存在，先销毁
+        // 이미 존재하는 경우 먼저 소멸
         if (this.flashcardComponent) {
             this.destroyFlashcardComponent();
         }
 
-        // 创建新的闪卡组件
+        // 새 플래시카드 컴포넌트 생성
         this.flashcardComponent = new FlashcardComponent(
             container,
             this.plugin
@@ -80,7 +80,7 @@ export class FlashcardViewManager {
     }
 
     /**
-     * 销毁闪卡组件
+     * 플래시카드 컴포넌트 소멸
      */
     destroyFlashcardComponent(): void {
         if (this.flashcardComponent) {
@@ -91,19 +91,19 @@ export class FlashcardViewManager {
     }
 
     /**
-     * 退出闪卡模式
+     * 플래시카드 모드 종료
      */
     exitFlashcardMode(): void {
         this.destroyFlashcardComponent();
     }
 
     /**
-     * 更新闪卡标记
-     * 标记哪些高亮已经创建了闪卡
-     * @param highlights 高亮列表
+     * 플래시카드 마커 업데이트
+     * 플래시카드가 생성된 하이라이트를 마킹
+     * @param highlights 하이라이트 목록
      */
     updateFlashcardMarkers(highlights: HighlightInfo[]): void {
-        // 清空之前的标记
+        // 이전 마커 초기화
         this.highlightsWithFlashcards.clear();
 
         if (!this.plugin || !this.plugin.fsrsManager) {
@@ -111,13 +111,13 @@ export class FlashcardViewManager {
         }
 
         const fsrsManager = this.plugin.fsrsManager;
-        
-        // 遍历所有高亮，记录已创建闪卡的高亮 ID
+
+        // 모든 하이라이트 순회하여 플래시카드가 생성된 하이라이트 ID 기록
         for (const highlight of highlights) {
             if (highlight.id) {
-                // 检查是否存在闪卡
+                // 플래시카드 존재 여부 확인
                 const existingCards = fsrsManager.findCardsBySourceId(highlight.id, 'highlight');
-                // 如果存在闪卡，将高亮 ID 添加到集合中
+                // 플래시카드가 있으면 하이라이트 ID를 집합에 추가
                 if (existingCards && existingCards.length > 0) {
                     this.highlightsWithFlashcards.add(highlight.id);
                 }
@@ -126,44 +126,44 @@ export class FlashcardViewManager {
     }
 
     /**
-     * 获取闪卡标记集合
+     * 플래시카드 마커 집합 가져오기
      */
     getFlashcardMarkers(): Set<string> {
         return this.highlightsWithFlashcards;
     }
 
     /**
-     * 检查高亮是否有闪卡
+     * 하이라이트에 플래시카드가 있는지 확인
      */
     hasFlashcard(highlightId: string): boolean {
         return this.highlightsWithFlashcards.has(highlightId);
     }
 
     /**
-     * 处理返回按钮逻辑（移动端闪卡模式）
-     * @returns true 表示已处理，false 表示未处理
+     * 뒤로가기 버튼 로직 처리 (모바일 플래시카드 모드)
+     * @returns true: 처리됨, false: 처리되지 않음
      */
     handleBackButton(): boolean {
         if (!this.isFlashcardMode || !this.flashcardComponent) {
             return false;
         }
 
-        // 检查闪卡渲染器的状态
+        // 플래시카드 렌더러 상태 확인
         const renderer = this.flashcardComponent.getRenderer();
         if (renderer) {
-            // 如果在卡片内容页面，先返回到分组列表
+            // 카드 콘텐츠 페이지에 있는 경우 먼저 그룹 목록으로 돌아감
             if (!renderer.isShowingSidebar()) {
                 renderer.showSidebar();
-                return true; // 已处理，不继续返回
+                return true; // 처리됨, 계속 돌아가지 않음
             }
-            // 如果已经在分组列表页面，返回 false，让外部处理返回到文件列表
+            // 이미 그룹 목록 페이지에 있는 경우 false 반환, 외부에서 파일 목록으로 돌아가도록 처리
         }
 
-        return false; // 未处理或已在分组列表
+        return false; // 처리되지 않았거나 이미 그룹 목록에 있음
     }
 
     /**
-     * 销毁闪卡视图管理器
+     * 플래시카드 뷰 매니저 소멸
      */
     destroy(): void {
         this.destroyFlashcardComponent();

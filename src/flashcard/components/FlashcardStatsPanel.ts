@@ -2,7 +2,7 @@ import { FSRSManager } from "../services/FSRSManager";
 import { DailyStats } from "../types/FSRSTypes";
 
 /**
- * 闪卡统计面板，显示学习统计数据和热力图
+ * 플래시카드 통계 패널, 학습 통계 데이터 및 히트맵 표시
  */
 export class FlashcardStatsPanel {
     private containerEl: HTMLElement;
@@ -14,36 +14,36 @@ export class FlashcardStatsPanel {
     }
     
     /**
-     * 渲染统计面板
+     * 통계 패널 렌더링
      */
     render() {
         this.containerEl.empty();
         this.containerEl.addClass('flashcard-stats-panel');
-        
-        // 创建统计数据区域
+
+        // 통계 데이터 영역 생성
         this.renderStatsArea();
-        
-        // 创建热力图区域
+
+        // 히트맵 영역 생성
         this.renderHeatmap();
     }
-    
+
     /**
-     * 渲染统计数据区域
+     * 통계 데이터 영역 렌더링
      */
     private renderStatsArea() {
         const statsArea = this.containerEl.createDiv('flashcard-stats-area');
-        
-        // 获取学习进度数据
+
+        // 학습 진도 데이터 가져오기
         const progress = this.fsrsManager.getProgress();
-        
-        // 创建统计项
+
+        // 통계 항목 생성
         this.createStatItem(statsArea, progress.newCards.toString(), 'New', 'flashcard-stat-new');
         this.createStatItem(statsArea, progress.learned.toString(), 'Learning', 'flashcard-stat-learning');
         this.createStatItem(statsArea, progress.due.toString(), 'Review', 'flashcard-stat-due');
     }
     
     /**
-     * 创建单个统计项
+     * 단일 통계 항목 생성
      */
     private createStatItem(container: HTMLElement, value: string, label: string, className: string) {
         const statItem = container.createDiv(`flashcard-stat-item ${className}`);
@@ -55,66 +55,66 @@ export class FlashcardStatsPanel {
     }
     
     /**
-     * 渲染热力图区域
+     * 히트맵 영역 렌더링
      */
     private renderHeatmap() {
-        // 直接在主容器中创建热力图
+        // 메인 컨테이너에 직접 히트맵 생성
         this.createHeatmap(this.containerEl, this.fsrsManager.getDailyStats());
     }
-    
+
     /**
-     * 创建热力图
+     * 히트맵 생성
      */
     private createHeatmap(container: HTMLElement, dailyStats: DailyStats[]) {
-        // 创建热力图网格（直接在容器中创建，减少嵌套）
+        // 히트맵 그리드 생성 (컨테이너에 직접 생성, 중첩 최소화)
         const grid = container.createDiv('flashcard-heatmap-grid');
-        
-        // 添加调试信息 - 当前日期
+
+        // 디버그 정보 추가 - 현재 날짜
         const today = new Date();
-        
-        // 获取过去84天的日期（7行*12列）
+
+        // 과거 84일의 날짜 가져오기 (7행 * 12열)
         const startDate = new Date(today);
-        startDate.setDate(today.getDate() - 83); // 调整为83天，确保包含当天
-        
-        // 创建日期映射，用于快速查找特定日期的数据
+        startDate.setDate(today.getDate() - 83); // 83일로 조정하여 당일 포함
+
+        // 특정 날짜 데이터를 빠르게 조회하기 위한 날짜 맵 생성
         const dateMap = new Map();
-        
-        // 手动添加当天的数据（如果不存在）
+
+        // 당일 데이터 수동 추가 (없는 경우)
         const todayDate = new Date(today);
         todayDate.setHours(0, 0, 0, 0);
         const todayTimestamp = todayDate.getTime();
         const todayKey = `${todayDate.getFullYear()}-${todayDate.getMonth() + 1}-${todayDate.getDate()}`;
-                
-        // 检查是否有当天的数据
+
+        // 당일 데이터 존재 여부 확인
         let hasTodayData = false;
-        
-        // 使用真实的学习数据
+
+        // 실제 학습 데이터 사용
         const allStats = [...dailyStats];
 
-        // 处理所有数据
+        // 모든 데이터 처리
         allStats.forEach(stat => {
-            // 将时间戳转换为日期对象
+            // 타임스탬프를 날짜 객체로 변환
             const date = new Date(stat.date);
-            
-            // 获取日期的年、月、日
+
+            // 날짜의 연, 월, 일 가져오기
             const year = date.getFullYear();
             const month = date.getMonth() + 1;
             const day = date.getDate();
-            
-            // 创建日期键
+
+            // 날짜 키 생성
             const dateKey = `${year}-${month}-${day}`;
-            
-            // 检查是否是当天的数据
+
+            // 당일 데이터인지 확인
             if (dateKey === todayKey) {
                 hasTodayData = true;
             }
-            
-            // 存储到映射中（如果有重复的日期，使用最后一条数据）
+
+            // 맵에 저장 (날짜 중복 시 마지막 데이터 사용)
             dateMap.set(dateKey, stat);
         });
-        
-        // 如果没有当天的数据，手动添加一个空的记录
-        // 这样即使当天没有学习数据，也会显示一个空单元格
+
+        // 당일 데이터가 없으면 빈 레코드를 수동으로 추가
+        // 당일 학습 데이터가 없어도 빈 셀이 표시되도록 함
         if (!hasTodayData) {
             dateMap.set(todayKey, {
                 date: todayTimestamp,
@@ -129,35 +129,35 @@ export class FlashcardStatsPanel {
             });
         }
         
-        // 创建热力图单元格
+        // 히트맵 셀 생성
         const rows = 7;
         const cols = 12;
-        
-        // 重新设计热力图布局，确保当天在正确位置
-        // 先计算当天是周几（0是周日，1-6是周一到周六）
+
+        // 히트맵 레이아웃 재설계, 당일이 올바른 위치에 표시되도록 함
+        // 당일의 요일 계산 (0은 일요일, 1-6은 월요일-토요일)
         const todayDayOfWeek = today.getDay();
-        // 在热力图中，周一在第0行，周六在第5行，周日在第6行
-        // 计算当前周的周一的日期
+        // 히트맵에서 월요일은 0행, 토요일은 5행, 일요일은 6행
+        // 이번 주 월요일 날짜 계산
         const thisWeekMonday = new Date(today);
         thisWeekMonday.setDate(today.getDate() - ((todayDayOfWeek === 0 ? 7 : todayDayOfWeek) - 1));
-                
-        // 计算热力图第一列第一行（左上角）的日期
-        // 往前推算11周
+
+        // 히트맵 첫 번째 열 첫 번째 행 (좌상단) 날짜 계산
+        // 11주 전으로 거슬러 올라가기
         const firstCellDate = new Date(thisWeekMonday);
         firstCellDate.setDate(firstCellDate.getDate() - 11 * 7);
- 
-        // 创建一个二维数组来存储所有单元格的日期
+
+        // 모든 셀의 날짜를 저장하는 2차원 배열 생성
         const cellDates = [];
-        
-        // 首先填充每一列的周一日期
+
+        // 먼저 각 열의 월요일 날짜 채우기
         const mondayDates = [];
         for (let col = 0; col < cols; col++) {
             const mondayDate = new Date(firstCellDate);
             mondayDate.setDate(mondayDate.getDate() + col * 7);
             mondayDates.push(mondayDate);
         }
-        
-        // 然后对每一列，填充其他每一天
+
+        // 각 열에 대해 나머지 날짜 채우기
         for (let col = 0; col < cols; col++) {
             const colDates = [];
             for (let row = 0; row < rows; row++) {
@@ -167,65 +167,65 @@ export class FlashcardStatsPanel {
             }
             cellDates.push(colDates);
         }
-        
-        // 现在我们按行和列来填充热力图
+
+        // 행과 열로 히트맵 채우기
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < cols; col++) {
                 const date = cellDates[col][row];
-                
-                // 获取日期的年、月、日
+
+                // 날짜의 연, 월, 일 가져오기
                 const year = date.getFullYear();
                 const month = date.getMonth() + 1;
                 const day = date.getDate();
-                
-                // 创建日期键
+
+                // 날짜 키 생성
                 const dateKey = `${year}-${month}-${day}`;
-                
-                // 从映射中获取统计数据
+
+                // 맵에서 통계 데이터 가져오기
                 const stat = dateMap.get(dateKey);
-                
-                // 创建单元格
+
+                // 셀 생성
                 const cell = grid.createDiv('flashcard-heatmap-cell');
-                
-                // 检查是否是当天的单元格
+
+                // 당일 셀인지 확인
                 const isTodayCell = dateKey === todayKey;
-                
-                // 根据学习活动设置颜色深浅
+
+                // 학습 활동에 따라 색상 농도 설정
                 if (stat) {
-                    // 新卡片学习通常需要更多精力，所以权重更高
+                    // 새 카드 학습은 일반적으로 더 많은 노력이 필요하므로 가중치 높음
                     let intensity = stat.newCardsLearned * 1.5 + stat.cardsReviewed;
-                    
-                    // 如果有评分记录，考虑难度因素
+
+                    // 평가 기록이 있으면 난이도 요소 고려
                     if (stat.reviewCount > 0) {
-                        // 困难卡片权重更高
+                        // 어려운 카드 가중치 높음
                         const difficultyFactor = (stat.againCount * 1.5 + stat.hardCount * 1.2 + stat.goodCount + stat.easyCount * 0.8) / stat.reviewCount;
-                        intensity = intensity * (difficultyFactor + 0.5); // 加0.5是为了保证最小影响
+                        intensity = intensity * (difficultyFactor + 0.5); // 최소 영향 보장을 위해 0.5 추가
                     }
-                    
-                    // 限制最大值
+
+                    // 최댓값 제한
                     intensity = Math.min(intensity, 20);
-                    const level = Math.ceil(intensity / 4); // 0-5级深浅
+                    const level = Math.ceil(intensity / 4); // 0-5단계 농도
                     cell.addClass(`flashcard-heatmap-level-${level}`);
-                    
-                    // 添加更详细的提示信息，包括评分分布
+
+                    // 평가 분포를 포함한 더 자세한 툴팁 추가
                     let tooltipText = `${date.toLocaleDateString()}: Learned ${stat.newCardsLearned} new cards, reviewed ${stat.cardsReviewed} cards`;
                     
-                    // 如果有评分记录，添加评分分布信息
+                    // 평가 기록이 있으면 평가 분포 정보 추가
                     if (stat.reviewCount > 0) {
                         tooltipText += `\nRating distribution: Again(${stat.againCount}), Hard(${stat.hardCount}), Good(${stat.goodCount}), Easy(${stat.easyCount})`;
                     }
                     
                     cell.setAttribute('title', tooltipText);
                 } else {
-                    // 不再为当天使用特殊样式
+                    // 당일에 더 이상 특수 스타일 사용하지 않음
                     if (isTodayCell) {
-                        // 使用默认样式
+                        // 기본 스타일 사용
                         cell.addClass('flashcard-heatmap-level-0');
                     } else if (date > today) {
-                        // 未来日期
+                        // 미래 날짜
                         cell.addClass('flashcard-heatmap-level-0');
                     } else {
-                        // 过去的空单元格
+                        // 과거의 빈 셀
                         cell.addClass('flashcard-heatmap-level-0');
                     }
                 }
@@ -235,9 +235,9 @@ export class FlashcardStatsPanel {
     }
     
     /**
-     * 添加缩放控制 - 已删除，使用固定天数
+     * 확대/축소 컨트롤 추가 - 삭제됨, 고정 일수 사용
      */
     private addZoomControl(container: HTMLElement, heatmapContainer: HTMLElement) {
-        // 不再需要缩放控制，使用固定天数
+        // 확대/축소 컨트롤 더 이상 불필요, 고정 일수 사용
     }
 }

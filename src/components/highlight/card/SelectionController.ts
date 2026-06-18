@@ -48,7 +48,7 @@ export class HighlightCardSelectionController {
     selectCard(event?: MouseEvent): void {
         const selectionManager = this.options.getSelectionManager();
         if (!selectionManager) {
-            console.error('[HighlightCard] SelectionManager 未传入，无法进行选择操作');
+            console.error('[HighlightCard] SelectionManager가 전달되지 않아 선택 작업을 수행할 수 없습니다.');
             return;
         }
 

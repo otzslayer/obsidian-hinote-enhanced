@@ -5,17 +5,17 @@ interface WorkspaceSplitLike {
 }
 
 /**
- * 视图位置检测器
- * 负责检测视图是否在主区域，并处理位置变化
+ * 뷰 위치 감지기
+ * 뷰가 메인 영역에 있는지 감지하고 위치 변경을 처리 담당
  */
 export class ViewPositionDetector {
     private app: App;
     private leaf: WorkspaceLeaf;
-    
-    // 回调函数
+
+    // 콜백 함수
     private onPositionChange: ((isInMainView: boolean, wasInAllHighlightsView: boolean) => Promise<void>) | null = null;
-    
-    // 状态
+
+    // 상태
     private isDraggedToMainView: boolean = false;
     
     constructor(app: App, leaf: WorkspaceLeaf) {
@@ -24,7 +24,7 @@ export class ViewPositionDetector {
     }
     
     /**
-     * 设置回调函数
+     * 콜백 함수 설정
      */
     setCallbacks(callbacks: {
         onPositionChange?: (isInMainView: boolean, wasInAllHighlightsView: boolean) => Promise<void>;
@@ -35,7 +35,7 @@ export class ViewPositionDetector {
     }
     
     /**
-     * 更新状态
+     * 상태 업데이트
      */
     updateState(state: {
         isDraggedToMainView?: boolean;
@@ -46,21 +46,21 @@ export class ViewPositionDetector {
     }
     
     /**
-     * 检查视图位置
+     * 뷰 위치 확인
      */
     async checkViewPosition(wasInAllHighlightsView: boolean): Promise<void> {
-        // 获取根布局
+        // 루트 레이아웃 가져오기
         const root = this.app.workspace.rootSplit;
         if (!root) return;
-        
-        // 检查当前视图是否在主区域
+
+        // 현재 뷰가 메인 영역에 있는지 확인
         const isInMainView = this.isViewInMainArea(this.leaf, root);
-        
-        // 如果位置发生变化
+
+        // 위치가 변경된 경우
         if (this.isDraggedToMainView !== isInMainView) {
             this.isDraggedToMainView = isInMainView;
-            
-            // 触发位置变化回调
+
+            // 위치 변경 콜백 호출
             if (this.onPositionChange) {
                 await this.onPositionChange(isInMainView, wasInAllHighlightsView);
             }
@@ -68,7 +68,7 @@ export class ViewPositionDetector {
     }
     
     /**
-     * 递归检查视图是否在主区域
+     * 재귀적으로 뷰가 메인 영역에 있는지 확인
      */
     private isViewInMainArea(leaf: WorkspaceLeaf, parent: unknown): boolean {
         if (!parent) return false;
@@ -91,7 +91,7 @@ export class ViewPositionDetector {
     }
     
     /**
-     * 获取当前位置状态
+     * 현재 위치 상태 가져오기
      */
     isDraggedToMain(): boolean {
         return this.isDraggedToMainView;

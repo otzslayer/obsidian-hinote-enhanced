@@ -6,8 +6,8 @@ import { FileListDataSource } from "./FileListDataSource";
 import { FileListItemRenderer } from "./FileListItemRenderer";
 
 /**
- * 文件列表管理器
- * 负责管理文件列表的创建、更新和交互
+ * 파일 목록 매니저
+ * 파일 목록의 생성, 업데이트 및 상호작용을 관리
  */
 export class FileListManager {
     private container: HTMLElement;
@@ -15,13 +15,13 @@ export class FileListManager {
     private dataSource: FileListDataSource;
     private itemRenderer: FileListItemRenderer;
     
-    // 回调函数
+    // 콜백 함수
     private onFileSelect: ((file: TFile | null) => void) | null = null;
     private onFlashcardModeToggle: ((enabled: boolean) => void) | null = null;
     private onAllHighlightsSelect: (() => void) | null = null;
     private onRefreshView: (() => Promise<void>) | null = null;
     
-    // 状态
+    // 상태
     private currentFile: TFile | null = null;
     private isFlashcardMode: boolean = false;
     private isMobileView: boolean = false;
@@ -52,7 +52,7 @@ export class FileListManager {
     }
     
     /**
-     * 设置回调函数
+     * 콜백 함수 설정
      */
     setCallbacks(callbacks: {
         onFileSelect?: (file: TFile | null) => void;
@@ -75,7 +75,7 @@ export class FileListManager {
     }
     
     /**
-     * 更新状态
+     * 상태 업데이트
      */
     updateState(state: {
         currentFile?: TFile | null;
@@ -102,32 +102,32 @@ export class FileListManager {
     }
     
     /**
-     * 创建或更新文件列表
-     * @param forceRefresh 是否强制刷新（清除缓存并重新获取）
+     * 파일 목록 생성 또는 업데이트
+     * @param forceRefresh 강제 새로고침 여부 (캐시 초기화 후 재조회)
      */
     async updateFileList(forceRefresh: boolean = false) {
-        // 如果强制刷新，清除缓存
+        // 강제 새로고침 시 캐시 초기화
         if (forceRefresh) {
             this.invalidateCache();
         }
-        
-        // 如果文件列表已经存在且不是强制刷新，只更新选中状态
+
+        // 파일 목록이 이미 존재하고 강제 새로고침이 아닌 경우 선택 상태만 업데이트
         if (this.container.children.length > 0 && !forceRefresh) {
             this.updateFileListSelection();
             return;
         }
 
-        // 创建或重新创建文件列表
+        // 파일 목록 생성 또는 재생성
         await this.createFileList();
     }
     
     /**
-     * 创建文件列表
+     * 파일 목록 생성
      */
     private async createFileList() {
         this.container.empty();
-        
-        // 创建文件列表标题
+
+        // 파일 목록 헤더 생성
         const titleContainer = this.container.createEl("div", {
             cls: "highlight-file-list-header"
         });
@@ -137,29 +137,29 @@ export class FileListManager {
             cls: "highlight-file-list-title"
         });
         
-        // 添加点击刷新功能
+        // 클릭 새로고침 기능 추가
         titleEl.setCssProps({ cursor: 'pointer' });
         titleEl.addEventListener("click", () => {
             void this.refreshFromTitle();
         });
 
-        // 创建文件列表
+        // 파일 목록 생성
         const fileList = this.container.createEl("div", {
             cls: "highlight-file-list"
         });
 
-        // 添加"全部"选项
+        // "전체" 항목 추가
         this.itemRenderer.createAllHighlightsItem(fileList);
 
-        // 添加闪卡选项
+        // 플래시카드 항목 추가
         this.itemRenderer.createFlashcardItem(fileList);
 
-        // 添加分隔线
+        // 구분선 추가
         fileList.createEl("div", {
             cls: "highlight-file-list-separator"
         });
 
-        // 获取所有包含高亮的文件并创建列表项
+        // 하이라이트가 포함된 모든 파일을 가져와 목록 항목 생성
         const files = await this.dataSource.getFilesWithHighlights();
         this.itemRenderer.updateAllHighlightsCount(fileList);
 
@@ -169,30 +169,30 @@ export class FileListManager {
     }
 
     private async refreshFromTitle(): Promise<void> {
-        // 刷新文件列表
+        // 파일 목록 새로고침
         await this.updateFileList(true);
-        // 刷新主视图的高亮卡片
+        // 메인 뷰의 하이라이트 카드 새로고침
         if (this.onRefreshView) {
             await this.onRefreshView();
         }
     }
     
     /**
-     * 更新文件列表的选中状态
+     * 파일 목록 선택 상태 업데이트
      */
     updateFileListSelection() {
         this.itemRenderer.updateSelection(this.container);
     }
     
     /**
-     * 清除缓存
+     * 캐시 초기화
      */
     invalidateCache(): void {
         this.dataSource.invalidateCache();
     }
     
     /**
-     * 清理资源
+     * 리소스 정리
      */
     destroy() {
         this.itemRenderer.destroy();

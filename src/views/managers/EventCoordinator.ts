@@ -4,7 +4,7 @@ import { HighlightInfo as HiNote } from "../../types/highlight";
 import type { EventManager } from "../../services/EventManager";
 
 /**
- * 事件回调接口
+ * 이벤트 콜백 인터페이스
  */
 export interface EventCallbacks {
     onFileOpen?: (file: TFile, isInCanvas: boolean) => void;
@@ -16,12 +16,12 @@ export interface EventCallbacks {
 }
 
 /**
- * 事件协调器
- * 职责：
- * 1. 统一管理所有事件监听器
- * 2. 文件事件（打开、修改、创建、删除）
- * 3. 自定义事件（评论输入、多选）
- * 4. 布局变化事件
+ * 이벤트 코디네이터
+ * 담당:
+ * 1. 모든 이벤트 리스너 통합 관리
+ * 2. 파일 이벤트 (열기, 수정, 생성, 삭제)
+ * 3. 커스텀 이벤트 (댓글 입력, 다중 선택)
+ * 4. 레이아웃 변경 이벤트
  */
 export class EventCoordinator {
     private callbacks: EventCallbacks = {};
@@ -33,45 +33,45 @@ export class EventCoordinator {
     ) {}
 
     /**
-     * 设置回调函数
+     * 콜백 함수 설정
      */
     setCallbacks(callbacks: EventCallbacks): void {
         this.callbacks = { ...this.callbacks, ...callbacks };
     }
 
     /**
-     * 注册所有事件监听器
+     * 모든 이벤트 리스너 등록
      */
     registerAllEvents(
         getCurrentFile: () => TFile | null,
         isDraggedToMainView: () => boolean
     ): void {
-        // 监听文档切换
+        // 문서 전환 감지
         this.registerFileOpenEvent(getCurrentFile, isDraggedToMainView);
 
-        // 监听文档修改
+        // 문서 수정 감지
         this.registerFileModifyEvent(getCurrentFile, isDraggedToMainView);
 
-        // 监听文件创建和删除
+        // 파일 생성 및 삭제 감지
         this.registerFileCreateEvent();
         this.registerFileDeleteEvent();
 
-        // 监听布局变化
+        // 레이아웃 변경 감지
         this.registerLayoutChangeEvent();
 
-        // 监听评论输入事件
+        // 댓글 입력 이벤트 감지
         this.registerCommentInputEvent();
     }
 
     /**
-     * 注册文件打开事件
+     * 파일 열기 이벤트 등록
      */
     private registerFileOpenEvent(
         getCurrentFile: () => TFile | null,
         isDraggedToMainView: () => boolean
     ): void {
         const ref = this.app.workspace.on('file-open', (file) => {
-            // 只在非主视图时同步文件
+            // 메인 뷰가 아닐 때만 파일 동기화
             if (file && !isDraggedToMainView()) {
                 const activeMarkdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
                 const isInCanvas = !activeMarkdownView && this.app.workspace.getActiveFile()?.path !== file.path;
@@ -87,7 +87,7 @@ export class EventCoordinator {
     }
 
     /**
-     * 注册文件修改事件
+     * 파일 수정 이벤트 등록
      */
     private registerFileModifyEvent(
         getCurrentFile: () => TFile | null,
@@ -96,7 +96,7 @@ export class EventCoordinator {
         const ref = this.app.vault.on('modify', (file) => {
             const currentFile = getCurrentFile();
             
-            // 只在非主视图时同步文件
+            // 메인 뷰가 아닐 때만 파일 동기화
             if (file === currentFile && !isDraggedToMainView() && file instanceof TFile) {
                 const activeMarkdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
                 const isInCanvas = !activeMarkdownView && this.app.workspace.getActiveFile()?.path !== file.path;
@@ -112,7 +112,7 @@ export class EventCoordinator {
     }
 
     /**
-     * 注册文件创建事件
+     * 파일 생성 이벤트 등록
      */
     private registerFileCreateEvent(): void {
         const ref = this.app.vault.on('create', () => {
@@ -126,7 +126,7 @@ export class EventCoordinator {
     }
 
     /**
-     * 注册文件删除事件
+     * 파일 삭제 이벤트 등록
      */
     private registerFileDeleteEvent(): void {
         const ref = this.app.vault.on('delete', () => {
@@ -140,7 +140,7 @@ export class EventCoordinator {
     }
 
     /**
-     * 注册布局变化事件
+     * 레이아웃 변경 이벤트 등록
      */
     private registerLayoutChangeEvent(): void {
         const ref = this.app.workspace.on('layout-change', () => {
@@ -154,7 +154,7 @@ export class EventCoordinator {
     }
 
     /**
-     * 注册评论输入事件
+     * 댓글 입력 이벤트 등록
      */
     private registerCommentInputEvent(): void {
         const ref = this.eventManager.on('comment-input:open', (highlightId, text) => {
@@ -168,10 +168,10 @@ export class EventCoordinator {
     }
 
     /**
-     * 注册键盘事件（用于多选）
+     * 키보드 이벤트 등록 (다중 선택용)
      */
     registerKeyboardEvents(highlightContainer: HTMLElement): void {
-        // 按住 Shift 键进行多选
+        // Shift 키를 누른 채 다중 선택
         const keydownHandler = (e: KeyboardEvent) => {
             if (e.key === 'Shift') {
                 highlightContainer.addClass('multi-select-mode');
@@ -189,7 +189,7 @@ export class EventCoordinator {
     }
 
     /**
-     * 处理评论输入显示
+     * 댓글 입력 표시 처리
      */
     handleCommentInputDisplay(
         highlightId: string,
@@ -197,17 +197,17 @@ export class EventCoordinator {
         highlightContainer: HTMLElement,
         onShowCommentInput: (card: HTMLElement, highlight: HiNote) => void
     ): void {
-        // 等待一下确保视图已经更新
+        // 뷰가 업데이트될 때까지 잠시 대기
         window.setTimeout(() => {
-            // 移除所有卡片的选中状态
+            // 모든 카드의 선택 상태 제거
             highlightContainer.querySelectorAll('.highlight-card').forEach(card => {
                 card.removeClass('selected');
             });
 
-            // 首先尝试直接通过高亮 ID 查找卡片实例
+            // 먼저 하이라이트 ID로 카드 인스턴스 직접 검색 시도
             let cardInstance = defaultHighlightCardRegistry.findByHighlightId(highlightId);
             
-            // 如果没找到，尝试通过文本内容查找
+            // 찾지 못한 경우 텍스트 내용으로 검색 시도
             if (!cardInstance) {
                 const highlightCard = Array.from(highlightContainer.querySelectorAll('.highlight-card'))
                     .find(card => {
@@ -216,18 +216,18 @@ export class EventCoordinator {
                     });
 
                 if (highlightCard) {
-                    // 添加选中状态
+                    // 선택 상태 추가
                     highlightCard.addClass('selected');
-                    
-                    // 查找 HighlightCard 实例
+
+                    // HighlightCard 인스턴스 검색
                     cardInstance = defaultHighlightCardRegistry.findByElement(highlightCard as HTMLElement);
-                    
-                    // 滚动到评论区域
+
+                    // 댓글 영역으로 스크롤
                     highlightCard.scrollIntoView({ behavior: "smooth" });
                 }
             }
             
-            // 如果找到了卡片实例，显示评论输入框
+            // 카드 인스턴스를 찾은 경우 댓글 입력창 표시
             if (cardInstance) {
                 cardInstance.showCommentInput();
             }
@@ -235,10 +235,10 @@ export class EventCoordinator {
     }
 
     /**
-     * 销毁事件协调器
+     * 이벤트 코디네이터 소멸
      */
     destroy(): void {
-        // 清理事件引用
+        // 이벤트 참조 정리
         this.eventRefs = [];
         this.callbacks = {};
     }

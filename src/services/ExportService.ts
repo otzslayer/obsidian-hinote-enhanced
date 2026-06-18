@@ -22,27 +22,27 @@ export class ExportService {
     }
     
     /**
-     * 获取插件实例
+     * 플러그인 설정 인스턴스를 가져옵니다
      */
     private getPluginSettings(): PluginSettings | undefined {
         return this.getSettings?.();
     }
     
     /**
-     * 创建导出文件
-     * @param fileName 文件名（不含扩展名）
-     * @param content 文件内容
-     * @param exportPath 导出路径
+     * 내보낼 파일을 생성합니다
+     * @param fileName 파일 이름 (확장자 제외)
+     * @param content 파일 내용
+     * @param exportPath 내보내기 경로
      */
     private async createExportFile(fileName: string, content: string, exportPath: string): Promise<TFile> {
         return this.fileWriter.createMarkdownFile(fileName, content, exportPath);
     }
     
     /**
-     * 导出选中的多个高亮为 Markdown 文件
-     * @param highlights 要导出的高亮数组
-     * @returns 返回创建的新文件
-     * @throws 如果没有高亮或创建文件失败
+     * 선택된 여러 하이라이트를 Markdown 파일로 내보냅니다
+     * @param highlights 내보낼 하이라이트 배열
+     * @returns 생성된 새 파일
+     * @throws 하이라이트가 없거나 파일 생성에 실패한 경우
      */
     async exportHighlightsAsMarkdown(highlights: HighlightInfo[]): Promise<TFile> {
         if (!highlights || highlights.length === 0) {
@@ -51,7 +51,7 @@ export class ExportService {
         
         const settings = this.getPluginSettings();
         
-        // 按文件分组高亮
+        // 파일별로 하이라이트를 그룹화합니다
         const highlightsByFile: Record<string, HighlightInfo[]> = {};
         
         for (const highlight of highlights) {
@@ -64,10 +64,10 @@ export class ExportService {
             highlightsByFile[highlight.filePath].push(highlight);
         }
         
-        // 生成内容
+        // 내용을 생성합니다
         const contentParts: string[] = [];
         
-        // 为每个文件生成内容
+        // 각 파일별로 내용을 생성합니다
         for (const filePath in highlightsByFile) {
             const file = this.app.vault.getAbstractFileByPath(filePath);
             if (!(file instanceof TFile)) continue;
@@ -75,18 +75,18 @@ export class ExportService {
             contentParts.push(`## ${file.basename}`);
             contentParts.push("");
             
-            // 使用模板或默认方式生成内容
+            // 템플릿 또는 기본 방식으로 내용을 생성합니다
             const fileHighlights = highlightsByFile[filePath];
             const customTemplate = settings?.export?.exportTemplate;
             
-            // 如果有自定义模板且不为空，使用模板解析方式
+            // 사용자 정의 템플릿이 있고 비어 있지 않으면 템플릿 방식을 사용합니다
             if (customTemplate && customTemplate.trim() !== '') {
                 const templateContent = await this.contentRenderer.generateContentFromTemplate(file, fileHighlights, customTemplate);
                 if (templateContent.trim() !== '') {
                     contentParts.push(templateContent);
                 }
             } else {
-                // 如果没有自定义模板或模板为空，使用原来的方式
+                // 사용자 정의 템플릿이 없거나 비어 있으면 기본 방식을 사용합니다
                 const defaultContent = await this.contentRenderer.generateDefaultContent(file, fileHighlights);
                 contentParts.push(defaultContent);
             }
@@ -94,7 +94,7 @@ export class ExportService {
         
         const content = contentParts.join("\n");
         
-        // 获取导出路径并创建文件
+        // 내보내기 경로를 가져와 파일을 생성합니다
         const exportPath = settings?.export?.exportPath || '';
         const fileName = `Selected Highlights ${window.moment().format("YYYYMMDDHHmmss")}`;
         
@@ -102,21 +102,21 @@ export class ExportService {
     }
 
     /**
-     * 导出文件的高亮和评论内容为新的笔记
-     * @param sourceFile 源文件
-     * @returns 返回创建的新文件
+     * 파일의 하이라이트와 댓글 내용을 새 노트로 내보냅니다
+     * @param sourceFile 원본 파일
+     * @returns 생성된 새 파일
      */
     async exportHighlightsToNote(sourceFile: TFile): Promise<TFile> {
-        // 获取文件的所有高亮和评论
+        // 파일의 모든 하이라이트와 댓글을 가져옵니다
         const highlights = await this.getFileHighlights(sourceFile);
         if (!highlights || highlights.length === 0) {
             throw new Error(t("No highlights found in the current file."));
         }
 
-        // 生成导出内容
+        // 내보낼 내용을 생성합니다
         const content = await this.generateExportContent(sourceFile, highlights);
 
-        // 获取导出路径并创建文件
+        // 내보내기 경로를 가져와 파일을 생성합니다
         const settings = this.getPluginSettings();
         const exportPath = settings?.export?.exportPath || '';
         const fileName = `${sourceFile.basename} - HiNote ${window.moment().format("YYYYMMDDHHmmss")}`;
@@ -125,7 +125,7 @@ export class ExportService {
     }
 
     /**
-     * 获取文件的所有高亮和评论
+     * 파일의 모든 하이라이트와 댓글을 가져옵니다
      */
     private async getFileHighlights(file: TFile): Promise<HighlightInfo[]> {
         const content = await this.app.vault.read(file);
@@ -134,7 +134,7 @@ export class ExportService {
     }
 
     /**
-     * 生成导出内容
+     * 내보낼 내용을 생성합니다
      */
     private async generateExportContent(file: TFile, highlights: HighlightInfo[]): Promise<string> {
         const settings = this.getPluginSettings();

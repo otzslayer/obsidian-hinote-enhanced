@@ -52,7 +52,7 @@ export class InlineAICommentHandler {
             this.options.resizeTextarea();
             new Notice(t("AI response generated"));
         } catch (error) {
-            console.error("AI内联生成失败:", error);
+            console.error("AI 인라인 생성 실패:", error);
             textarea.value = this.originalContent;
             const message = error instanceof Error ? error.message : String(error);
             new Notice(t(`AI generation failed: ${message}`));
