@@ -137,6 +137,29 @@ describe('parseInlineComments — ^ in middle is not a timestamp', () => {
 });
 
 // ────────────────────────────────────────────────────────────
+// Scenario 5b: timestamp with seconds + legacy minute-only back-compat
+// ────────────────────────────────────────────────────────────
+describe('parseInlineComments — timestamp with seconds (and back-compat)', () => {
+    it('parses an HH:mm:ss timestamp', () => {
+        const note = '==x=={>>note ^2026-06-18 12:34:56^<<}';
+        const matches = [mkMatch('x', note)];
+        const { pairedComments } = parseInlineComments(note, matches);
+        const block = pairedComments[0].comments[0];
+        expect(block.timestamp).toBe('2026-06-18 12:34:56');
+        expect(block.text).toBe('note');
+    });
+
+    it('still parses a legacy HH:mm timestamp', () => {
+        const note = '==x=={>>note ^2026-06-18 12:34^<<}';
+        const matches = [mkMatch('x', note)];
+        const { pairedComments } = parseInlineComments(note, matches);
+        const block = pairedComments[0].comments[0];
+        expect(block.timestamp).toBe('2026-06-18 12:34');
+        expect(block.text).toBe('note');
+    });
+});
+
+// ────────────────────────────────────────────────────────────
 // Scenario 6: orphan — {>>...<<} with no preceding highlight (KTD5)
 // ────────────────────────────────────────────────────────────
 describe('parseInlineComments — orphan comment', () => {

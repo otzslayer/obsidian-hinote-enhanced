@@ -139,6 +139,10 @@ export class CommentService {
         const comment = highlight.comments.find(c => c.id === commentId);
         if (!comment) return;
 
+        // 내용이 동일하면 (편집 모드에 진입했다가 수정 없이 저장/포커스 아웃한 경우 등)
+        // 아무 작업도 하지 않습니다. 그렇지 않으면 변경이 없어도 타임스탬프가 갱신됩니다.
+        if (comment.content === content) return;
+
         const oldContent = comment.content;
         const now = Date.now();
         const timestamp = formatTimestamp(now);
