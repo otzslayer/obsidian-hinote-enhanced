@@ -1,22 +1,18 @@
 import { Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import type { Range } from "@codemirror/state";
-import { MarkdownView, TFile } from "obsidian";
+import { MarkdownView } from "obsidian";
 import { CommentWidget, CommentWidgetHelper } from "../components/comment";
-import { HighlightRepository } from "../repositories/HighlightRepository";
 import { HighlightService } from "../services/HighlightService";
-import { HighlightCommentResolver } from "../services/highlight";
 import { HighlightInfo as HiNote } from "../types/highlight";
 import type { HiNotePluginContext } from "../types/plugin";
 
 interface EditorHighlightDecorationOptions {
     plugin: HiNotePluginContext;
     highlightService: HighlightService;
-    highlightRepository: HighlightRepository;
 }
 
 export function createEditorHighlightDecorations(options: EditorHighlightDecorationOptions) {
-    const { plugin, highlightService, highlightRepository } = options;
-    const highlightCommentResolver = new HighlightCommentResolver(highlightRepository);
+    const { plugin, highlightService } = options;
 
     return ViewPlugin.fromClass(class {
         decorations: DecorationSet;
@@ -40,17 +36,16 @@ export function createEditorHighlightDecorations(options: EditorHighlightDecorat
             }
 
             const decorations: Range<Decoration>[] = [];
+            // Comments are now parsed inline by extractHighlights — no sidecar join needed.
             const highlights = highlightService.extractHighlights(view.state.doc.toString(), file);
 
             for (const highlight of highlights) {
                 if (highlight.position === undefined) continue;
 
-                const commentHighlight = highlightCommentResolver.normalizeHighlight(highlight);
-                commentHighlight.comments = highlightCommentResolver.getCommentsForHighlight(file, commentHighlight, {
-                    onTextChanged: (storedHighlight, currentHighlight) => {
-                        emitHighlightTextChange(plugin, file, storedHighlight, currentHighlight);
-                    }
-                });
+                const commentHighlight: HiNote = {
+                    ...highlight,
+                    comments: highlight.comments ?? [],
+                };
 
                 const highlightEndPos = highlight.position + (highlight.originalLength ?? highlight.text.length + 4);
 
@@ -82,20 +77,4 @@ function createCommentWidget(plugin: HiNotePluginContext, highlight: HiNote): De
 
 function shouldShowCommentWidget(plugin: HiNotePluginContext): boolean {
     return plugin.settings.showCommentWidget !== false;
-}
-
-function emitHighlightTextChange(
-    plugin: HiNotePluginContext,
-    file: TFile,
-    storedHighlight: HiNote,
-    currentHighlight: HiNote
-): void {
-    if (storedHighlight.text === currentHighlight.text) return;
-
-    plugin.eventManager.emitHighlightUpdate(
-        file.path,
-        storedHighlight.text,
-        currentHighlight.text,
-        currentHighlight.id ?? storedHighlight.id ?? ''
-    );
 }

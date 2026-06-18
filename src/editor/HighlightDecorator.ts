@@ -71,7 +71,6 @@ export class HighlightDecorator {
         const highlightPlugin = createEditorHighlightDecorations({
             plugin: this.plugin,
             highlightService: this.highlightService,
-            highlightRepository: this.highlightRepository
         });
 
         this.highlightPlugin = highlightPlugin;

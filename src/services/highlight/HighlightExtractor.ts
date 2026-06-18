@@ -1,9 +1,11 @@
 import { App, TFile } from "obsidian";
-import type { HighlightInfo } from '../../types/highlight';
+import type { HighlightInfo, CommentItem } from '../../types/highlight';
 import type { PluginSettings } from '../../types/settings';
 import { ExcludePatternMatcher } from '../ExcludePatternMatcher';
 import { BlockIdService } from '../BlockIdService';
 import { IdGenerator } from '../../utils/IdGenerator';
+import { parseInlineComments, type HighlightMatch, type InlineCommentBlock } from '../comment/inline/InlineCommentParser';
+import { parseFileLevelComments, type FileLevelComment } from '../comment/inline/FrontmatterComments';
 
 /**
  * 高亮提取器
@@ -77,8 +79,13 @@ export class HighlightExtractor {
             );
         }
         
-        // 按位置排序
-        return highlights.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+        // Sort by position before inline-comment pairing so match indices are stable.
+        highlights.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+
+        // Attach inline {>>...<<} comments from the note text (replaces sidecar join).
+        this.attachInlineComments(content, highlights);
+
+        return highlights;
     }
     
     /**
@@ -326,6 +333,55 @@ export class HighlightExtractor {
      */
     clearContentCache(): void {
         this.contentCache.clear();
+    }
+
+    /**
+     * Parse inline {>>...<<} comment blocks from `content` and attach them to the
+     * corresponding `HighlightInfo` entries (replaces the sidecar HighlightCommentResolver join).
+     * Orphan blocks (no preceding highlight) are silently preserved in the note text;
+     * they are not auto-deleted per KTD5.
+     */
+    private attachInlineComments(content: string, highlights: HighlightInfo[]): void {
+        if (highlights.length === 0) return;
+
+        const highlightMatches: HighlightMatch[] = highlights.map(h => ({
+            text: h.text,
+            start: h.position ?? 0,
+            end: (h.position ?? 0) + (h.originalLength ?? h.text.length + 4),
+        }));
+
+        const { pairedComments } = parseInlineComments(content, highlightMatches);
+
+        for (const paired of pairedComments) {
+            const highlight = highlights.find(h => h.position === paired.highlightStart);
+            if (highlight) {
+                highlight.comments = paired.comments.map(b => this.blockToCommentItem(b));
+            }
+        }
+    }
+
+    private blockToCommentItem(block: InlineCommentBlock): CommentItem {
+        const ms = block.timestamp ? this.parseTimestampToMs(block.timestamp) : Date.now();
+        return {
+            id: IdGenerator.generateCommentId(),
+            content: block.isAI ? `🤖 ${block.text}` : block.text,
+            createdAt: ms,
+            updatedAt: ms,
+        };
+    }
+
+    private parseTimestampToMs(ts: string): number {
+        // "YYYY-MM-DD HH:mm" → ISO 8601 for reliable Date parsing
+        return new Date(ts.replace(' ', 'T') + ':00').getTime();
+    }
+
+    /**
+     * Extract file-level comments from frontmatter (R5, KTD4).
+     * Returns an empty array when no {text, ts}-shaped comments are present.
+     */
+    public extractFileLevelComments(file: TFile): FileLevelComment[] {
+        const cache = this.app.metadataCache.getFileCache(file);
+        return parseFileLevelComments(cache?.frontmatter ?? null);
     }
 
     /**
