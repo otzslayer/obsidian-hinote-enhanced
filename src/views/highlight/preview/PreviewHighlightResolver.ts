@@ -28,14 +28,13 @@ export class PreviewHighlightResolver {
     constructor() {}
 
 
-    enrichHighlightsWithComments(
+    enrichHighlightsWithLines(
         rawHighlights: HiNote[],
         file: TFile,
         content: string
     ): PreviewHighlight[] {
         return rawHighlights
             .map(highlight => this.enrichHighlight(highlight, file))
-            .filter(highlight => !!highlight.comments?.length)
             .map(highlight => ({
                 ...highlight,
                 line: this.getLineForPosition(content, highlight.position)

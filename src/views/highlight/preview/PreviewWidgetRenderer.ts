@@ -43,10 +43,10 @@ export class PreviewWidgetRenderer {
 
         if (rawHighlights.length === 0) return;
 
-        // 하이라이트 전처리: 댓글 가져오기 및 줄 번호 계산
-        const highlightsWithComments = this.highlightResolver.enrichHighlightsWithComments(rawHighlights, file, content);
+        // 하이라이트 전처리: 줄 번호 계산 (코멘트 없는 하이라이트도 포함)
+        const allHighlights = this.highlightResolver.enrichHighlightsWithLines(rawHighlights, file, content);
 
-        if (highlightsWithComments.length === 0) return;
+        if (allHighlights.length === 0) return;
 
         // DOM 요소 순회하여 매칭
         marks.forEach((mark) => {
@@ -57,11 +57,11 @@ export class PreviewWidgetRenderer {
 
             // 매칭되는 하이라이트 검색
             const match = this.highlightResolver.findMatchingHighlight(
-                text, 
-                mark, 
-                element, 
-                context, 
-                highlightsWithComments
+                text,
+                mark,
+                element,
+                context,
+                allHighlights
             );
 
             if (match) {
@@ -100,8 +100,14 @@ export class PreviewWidgetRenderer {
             // 정리 옵저버 생성
             CommentWidgetHelper.createCleanupObserver(widget, tooltip);
         } else {
-            // 코멘트 없음: 호버 시 버튼 노출
-            CommentWidgetHelper.setupEmptyCommentHover(widget, button);
+            // 코멘트 없음: mark 요소(하이라이트 텍스트) 위에 호버 시 버튼 노출
+            // widget이 width:0인 상태라 widget-hover는 면적이 없으므로 mark에 부착
+            mark.addEventListener("mouseenter", () => {
+                button.removeClass("hi-note-button-hidden");
+            });
+            mark.addEventListener("mouseleave", () => {
+                button.addClass("hi-note-button-hidden");
+            });
 
             // 클릭 이벤트: 인라인 추가
             button.addEventListener('click', (e) => {
