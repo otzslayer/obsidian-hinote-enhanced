@@ -85,9 +85,9 @@ export class HighlightContent extends Component {
             // 렌더링 실패 시 일반 텍스트 렌더링으로 대체
             const lines = text.split('\n');
             lines.forEach((line: string, index: number) => {
-                const p = textContent.createEl(“p”, {
+                const p = textContent.createEl("p", {
                     text: line,
-                    cls: “highlight-text-line”
+                    cls: "highlight-text-line"
                 });
 
                 // 마지막 줄이 아니면 줄바꿈 추가
@@ -99,10 +99,10 @@ export class HighlightContent extends Component {
 
         // 전역 검색 결과가 아니고 메인 뷰가 아닌 경우 클릭 이벤트 추가
         if (!this.highlight.isGlobalSearch && !this.isInMainView) {
-            // 툴팁 텍스트를 “하이라이트로 이동”으로 설정
+            // 툴팁 텍스트를 "하이라이트로 이동"으로 설정
             textContent.setAttribute('aria-label', t('Jump to highlight'));
 
-            textContent.addEventListener(“mousedown”, (e) => {
+            textContent.addEventListener("mousedown", (e) => {
                 // 링크를 클릭한 경우 하이라이트 클릭 이벤트 미발생
                 if ((e.target as HTMLElement).closest('a')) {
                     return;
