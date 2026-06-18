@@ -124,6 +124,63 @@ describe('deleteComment', () => {
     });
 });
 
+// ── Scenario 3b: anchor robust to stale ordinal (content-based fallback) ──
+
+describe('anchor robustness — stale ordinal, unique content', () => {
+    it('deleteComment removes the correct block when ordinal is stale but content is unique', () => {
+        const note = `==hl=={>>first ^2023-01-01 10:00^<<}{>>second ^2023-01-01 11:00^<<} text`;
+        const match = mkMatch('hl', note);
+        // Caller's array was reordered: it thinks 'first' sits at ordinal 1.
+        const target: SerializeTarget = { highlightText: 'hl', ordinal: 1, currentText: 'first' };
+        const result = deleteComment(note, match, target);
+        expect(result).toContain('{>>second ^2023-01-01 11:00^<<}'); // second kept
+        expect(result).not.toContain('{>>first ^');                  // first removed
+    });
+
+    it('updateComment edits the correct block when ordinal is stale but content is unique', () => {
+        const note = `==hl=={>>first ^2023-01-01 10:00^<<}{>>second ^2023-01-01 11:00^<<} text`;
+        const match = mkMatch('hl', note);
+        const target: SerializeTarget = { highlightText: 'hl', ordinal: 0, currentText: 'second' };
+        const result = updateComment(note, match, target, 'updated-second', FIXED_TS);
+        expect(result).toContain('{>>first ^2023-01-01 10:00^<<}'); // first unchanged
+        expect(result).toContain(`{>>updated-second ^${FIXED_TS}^<<}`);
+        expect(result).not.toContain('{>>second ^');
+    });
+
+    it('still aborts when content does not match any block (anchor mismatch preserved)', () => {
+        const note = `==hl=={>>actual ^2023-01-01 10:00^<<} text`;
+        const match = mkMatch('hl', note);
+        const target: SerializeTarget = { highlightText: 'hl', ordinal: 5, currentText: 'wrong' };
+        expect(deleteComment(note, match, target)).toBe(note);
+    });
+
+    it('aborts when multiple identical-content blocks and ordinal is out of range (ambiguous)', () => {
+        const note = `==hl=={>>dup ^2023-01-01 10:00^<<}{>>dup ^2023-01-01 11:00^<<} text`;
+        const match = mkMatch('hl', note);
+        const target: SerializeTarget = { highlightText: 'hl', ordinal: 9, currentText: 'dup' };
+        expect(deleteComment(note, match, target)).toBe(note);
+    });
+
+    // Cross-highlight safety: the content fallback must stay within the target
+    // highlight's own contiguous blocks, never reaching an identical comment on a
+    // different highlight.
+    it('content fallback targets the right highlight, not a later one with identical content', () => {
+        const note = `==H1=={>>foo ^2023-01-01 10:00^<<} mid ==H2=={>>foo ^2023-01-01 11:00^<<} end`;
+        const match = mkMatch('H1', note);
+        const target: SerializeTarget = { highlightText: 'H1', ordinal: 9, currentText: 'foo' };
+        const result = deleteComment(note, match, target);
+        expect(result).toContain('==H2=={>>foo ^2023-01-01 11:00^<<}'); // H2's foo intact
+        expect(result).not.toContain('==H1=={>>foo');                   // H1's foo removed
+    });
+
+    it('does not delete a later highlight\'s comment when the target highlight has no own block', () => {
+        const note = `==H1== mid ==H2=={>>foo ^2023-01-01 11:00^<<} end`;
+        const match = mkMatch('H1', note);
+        const target: SerializeTarget = { highlightText: 'H1', ordinal: 0, currentText: 'foo' };
+        expect(deleteComment(note, match, target)).toBe(note); // unchanged — H2's foo untouched
+    });
+});
+
 // ── Scenario 4: round-trip parse → serialize → parse ─────
 
 describe('round-trip', () => {

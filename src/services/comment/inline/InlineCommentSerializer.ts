@@ -127,11 +127,29 @@ function findBlock(
     const entry = pairedComments.find(p => p.highlightStart === match.start);
     if (!entry) return null;
 
-    const block = entry.comments[target.ordinal];
-    if (!block) return null;
+    // Restrict to THIS highlight's own contiguous {>>...<<} chain. parseInlineComments
+    // with a single match attaches every downstream block to it (findPrecedingHighlight),
+    // so without this bound the content fallback below could match a later highlight's
+    // comment. Use the same contiguous boundary the serializer uses on insert.
+    const ownEnd = findInsertPosition(noteText, match);
+    const ownComments = entry.comments.filter(c => c.startOffset < ownEnd);
 
-    // Anchor check: the block's text must match what the caller expects (KTD3).
-    if (block.text !== target.currentText) return null;
+    // Fast path: the block at the expected ordinal when its text matches (KTD3). This
+    // is also the only reliable disambiguator when several own-blocks share identical text.
+    const atOrdinal = ownComments[target.ordinal];
+    if (atOrdinal && atOrdinal.text === target.currentText) {
+        return { startOffset: atOrdinal.startOffset, endOffset: atOrdinal.endOffset };
+    }
 
-    return { startOffset: block.startOffset, endOffset: block.endOffset };
+    // Fallback: identify the block by content among this highlight's own blocks. The
+    // ordinal is derived from the in-memory comment array, which can drift out of note
+    // order (e.g. display-time sorting), so a stale ordinal must not abort a valid
+    // edit/delete. Matching by content keeps the operation correct as long as the content
+    // uniquely identifies the block. Ambiguous (0 or >1 matches) → abort with anchor mismatch.
+    const byContent = ownComments.filter(c => c.text === target.currentText);
+    if (byContent.length === 1) {
+        return { startOffset: byContent[0].startOffset, endOffset: byContent[0].endOffset };
+    }
+
+    return null;
 }
