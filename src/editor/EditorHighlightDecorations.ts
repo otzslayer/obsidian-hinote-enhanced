@@ -1,6 +1,6 @@
 import { Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import type { Range } from "@codemirror/state";
-import { MarkdownView } from "obsidian";
+import { editorInfoField, MarkdownView } from "obsidian";
 import { CommentWidget, CommentInput } from "../components/comment";
 import { findInsertPosition, serializeBlock } from "../services/comment/inline/InlineCommentSerializer";
 import { HighlightService } from "../services/HighlightService";
@@ -8,6 +8,7 @@ import { HighlightInfo as HiNote } from "../types/highlight";
 import type { HiNotePluginContext } from "../types/plugin";
 import type CommentPlugin from "../../main";
 import { formatTimestamp } from "../utils/timestamp";
+import { findInlineCommentRanges } from "./inlineCommentRanges";
 
 interface EditorHighlightDecorationOptions {
     plugin: HiNotePluginContext;
@@ -31,37 +32,38 @@ export function createEditorHighlightDecorations(options: EditorHighlightDecorat
         }
 
         private buildDecorations(view: EditorView): DecorationSet {
-            const activeView = plugin.app.workspace.getActiveViewOfType(MarkdownView);
-            const file = activeView?.file;
+            const file = view.state.field(editorInfoField, false)?.file ?? null;
 
             if (!file || !highlightService.shouldProcessFile(file)) {
                 return Decoration.none;
             }
 
+            const showSyntax = plugin.settings.showInlineCommentSyntax === true;
             const decorations: Range<Decoration>[] = [];
             const docText = view.state.doc.toString();
             // Comments are now parsed inline by extractHighlights — no sidecar join needed.
             const highlights = highlightService.extractHighlights(docText, file);
 
-            for (const highlight of highlights) {
-                if (highlight.position === undefined) continue;
+            if (!showSyntax) {
+                for (const highlight of highlights) {
+                    if (highlight.position === undefined) continue;
 
-                const commentHighlight: HiNote = {
-                    ...highlight,
-                    comments: highlight.comments ?? [],
-                };
+                    const commentHighlight: HiNote = {
+                        ...highlight,
+                        comments: highlight.comments ?? [],
+                    };
 
-                const highlightEndPos = highlight.position + (highlight.originalLength ?? highlight.text.length + 4);
+                    const highlightEndPos = highlight.position + (highlight.originalLength ?? highlight.text.length + 4);
 
-                if (shouldShowCommentWidget(plugin)) {
-                    decorations.push(createCommentWidget(plugin, commentHighlight).range(highlightEndPos));
+                    if (shouldShowCommentWidget(plugin)) {
+                        decorations.push(createCommentWidget(plugin, commentHighlight).range(highlightEndPos));
+                    }
                 }
-            }
 
-            // Hide raw {>>...<<} blocks in live preview (R7, KTD).
-            // Source mode shows them as-is; this hides them only in the CM render layer.
-            for (const range of findInlineCommentRanges(docText)) {
-                decorations.push(Decoration.replace({}).range(range.from, range.to));
+                // Hide raw {>>...<<} blocks when syntax is toggled OFF.
+                for (const range of findInlineCommentRanges(docText)) {
+                    decorations.push(Decoration.replace({}).range(range.from, range.to));
+                }
             }
 
             return Decoration.set(decorations.sort((a, b) => a.from - b.from));
@@ -131,13 +133,3 @@ function shouldShowCommentWidget(plugin: HiNotePluginContext): boolean {
     return plugin.settings.showCommentWidget !== false;
 }
 
-/** Return all {>>...<<} block ranges in `text` for live-preview hiding. */
-function findInlineCommentRanges(text: string): Array<{ from: number; to: number }> {
-    const ranges: Array<{ from: number; to: number }> = [];
-    const re = /\{>>([\s\S]*?)<<\}/g;
-    let m: RegExpExecArray | null;
-    while ((m = re.exec(text)) !== null) {
-        ranges.push({ from: m.index, to: m.index + m[0].length });
-    }
-    return ranges;
-}
