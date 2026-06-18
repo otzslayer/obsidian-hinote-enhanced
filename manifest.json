@@ -1,6 +1,6 @@
 {
-	"id": "hi-note",
-	"name": "HiNote",
+	"id": "hi-note-enhanced",
+	"name": "HiNote Enhanced",
 	"version": "0.5.7",
 	"minAppVersion": "1.8.0",
 	"description": "Add comments to highlighted notes, use AI for thinking, and flashcards for memory.",

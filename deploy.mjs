@@ -1,8 +1,9 @@
-import { copyFileSync, existsSync, mkdirSync } from "fs";
+import { existsSync, mkdirSync } from "fs";
 import { join } from "path";
+import { execFileSync } from "child_process";
 
-const VAULT = "/mnt/d/Documents/Jay's Vault";
-const PLUGIN_ID = "hi-note";
+const VAULT = "/mnt/d/Documents/Vault";
+const PLUGIN_ID = "hi-note-enhanced";
 const DEST = join(VAULT, ".obsidian", "plugins", PLUGIN_ID);
 
 const FILES = ["main.js", "manifest.json", "styles.css"];
@@ -16,7 +17,7 @@ mkdirSync(DEST, { recursive: true });
 
 for (const file of FILES) {
 	if (!existsSync(file)) continue;
-	copyFileSync(file, join(DEST, file));
+	execFileSync("cp", [file, join(DEST, file)]);
 	console.log(`복사 완료: ${file} → ${DEST}`);
 }
 

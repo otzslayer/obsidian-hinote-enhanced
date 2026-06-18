@@ -133,7 +133,7 @@ export class FileListManager {
         });
 
         const titleEl = titleContainer.createEl("div", {
-            text: "HiNote",
+            text: "HiNote Enhanced",
             cls: "highlight-file-list-title"
         });
         

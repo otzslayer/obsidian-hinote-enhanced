@@ -156,7 +156,7 @@ export default {
 
 //main
 
-    "Open HiNote window": "Open HiNote window",
+    "Open HiNote window": "Open HiNote Enhanced window",
 
 // Settings
     'General': 'Highlight',

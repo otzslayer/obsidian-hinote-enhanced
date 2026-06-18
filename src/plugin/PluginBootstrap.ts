@@ -22,7 +22,7 @@ export function registerPluginViews(plugin: CommentPlugin): void {
 export function registerPluginRibbon(plugin: CommentPlugin, windowManager: WindowManager): void {
     plugin.addRibbonIcon(
         'highlighter',
-        'HiNote',
+        'HiNote Enhanced',
         async () => {
             await plugin.ensureServicesInitialized();
             await windowManager.openCommentPanelInSidebar();
