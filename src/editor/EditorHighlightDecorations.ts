@@ -36,8 +36,9 @@ export function createEditorHighlightDecorations(options: EditorHighlightDecorat
             }
 
             const decorations: Range<Decoration>[] = [];
+            const docText = view.state.doc.toString();
             // Comments are now parsed inline by extractHighlights — no sidecar join needed.
-            const highlights = highlightService.extractHighlights(view.state.doc.toString(), file);
+            const highlights = highlightService.extractHighlights(docText, file);
 
             for (const highlight of highlights) {
                 if (highlight.position === undefined) continue;
@@ -52,6 +53,12 @@ export function createEditorHighlightDecorations(options: EditorHighlightDecorat
                 if (shouldShowCommentWidget(plugin)) {
                     decorations.push(createCommentWidget(plugin, commentHighlight).range(highlightEndPos));
                 }
+            }
+
+            // Hide raw {>>...<<} blocks in live preview (R7, KTD).
+            // Source mode shows them as-is; this hides them only in the CM render layer.
+            for (const range of findInlineCommentRanges(docText)) {
+                decorations.push(Decoration.replace({}).range(range.from, range.to));
             }
 
             return Decoration.set(decorations.sort((a, b) => a.from - b.from));
@@ -77,4 +84,15 @@ function createCommentWidget(plugin: HiNotePluginContext, highlight: HiNote): De
 
 function shouldShowCommentWidget(plugin: HiNotePluginContext): boolean {
     return plugin.settings.showCommentWidget !== false;
+}
+
+/** Return all {>>...<<} block ranges in `text` for live-preview hiding. */
+function findInlineCommentRanges(text: string): Array<{ from: number; to: number }> {
+    const ranges: Array<{ from: number; to: number }> = [];
+    const re = /\{>>([\s\S]*?)<<\}/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(text)) !== null) {
+        ranges.push({ from: m.index, to: m.index + m[0].length });
+    }
+    return ranges;
 }
