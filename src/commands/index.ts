@@ -3,6 +3,7 @@ import { WindowManager } from '../plugin/WindowManager';
 import { registerOpenCommentPanelCommand } from './openCommentPanel';
 import { registerOpenMainWindowCommand } from './openMainWindow';
 import { registerAddCommentCommand } from './addComment';
+import { InlineMigrationRunner } from '../migration/InlineMigrationRunner';
 
 /**
  * 注册所有命令
@@ -21,6 +22,9 @@ export function registerCommands(
 
     // 注册添加内联评论命令 (Mod+Shift+C)
     registerAddCommentCommand(plugin);
+
+    // 注册一次性迁移命令
+    new InlineMigrationRunner(plugin.app).registerCommand(plugin);
 }
 
 /**
