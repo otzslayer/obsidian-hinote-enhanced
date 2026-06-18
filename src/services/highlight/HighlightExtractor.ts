@@ -82,8 +82,24 @@ export class HighlightExtractor {
         // Sort by position before inline-comment pairing so match indices are stable.
         highlights.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
 
-        // Attach inline {>>...<<} comments from the note text (replaces sidecar join).
+        // Attach inline {>>...<<} comments (replaces sidecar join). Also surfaces orphans.
         this.attachInlineComments(content, highlights);
+
+        // Attach frontmatter file-level comments as a virtual highlight entry (R5).
+        const fileLevelComments = this.extractFileLevelComments(file);
+        if (fileLevelComments.length > 0) {
+            highlights.push({
+                text: '',
+                position: -1,
+                isVirtual: true,
+                comments: fileLevelComments.map(c => ({
+                    id: IdGenerator.generateCommentId(),
+                    content: c.text,
+                    createdAt: this.parseTimestampToMs(c.ts),
+                    updatedAt: this.parseTimestampToMs(c.ts),
+                })),
+            });
+        }
 
         return highlights;
     }
@@ -338,25 +354,34 @@ export class HighlightExtractor {
     /**
      * Parse inline {>>...<<} comment blocks from `content` and attach them to the
      * corresponding `HighlightInfo` entries (replaces the sidecar HighlightCommentResolver join).
-     * Orphan blocks (no preceding highlight) are silently preserved in the note text;
-     * they are not auto-deleted per KTD5.
+     * Orphan blocks are added to `highlights` as virtual entries (KTD5 — isOrphan, never auto-deleted).
      */
     private attachInlineComments(content: string, highlights: HighlightInfo[]): void {
-        if (highlights.length === 0) return;
-
         const highlightMatches: HighlightMatch[] = highlights.map(h => ({
             text: h.text,
             start: h.position ?? 0,
             end: (h.position ?? 0) + (h.originalLength ?? h.text.length + 4),
         }));
 
-        const { pairedComments } = parseInlineComments(content, highlightMatches);
+        const { pairedComments, orphanComments } = parseInlineComments(content, highlightMatches);
 
         for (const paired of pairedComments) {
             const highlight = highlights.find(h => h.position === paired.highlightStart);
             if (highlight) {
                 highlight.comments = paired.comments.map(b => this.blockToCommentItem(b));
             }
+        }
+
+        // Surface orphan comment blocks in the in-memory model so the sidebar can show them
+        // as a separate group (KTD5). The plugin never auto-deletes orphans.
+        for (const orphan of orphanComments) {
+            highlights.push({
+                text: '',
+                position: orphan.startOffset,
+                isVirtual: true,
+                isOrphan: true,
+                comments: [this.blockToCommentItem(orphan)],
+            });
         }
     }
 

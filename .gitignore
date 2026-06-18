@@ -20,3 +20,11 @@ data.json
 
 # Exclude macOS Finder (System Explorer) View States
 .DS_Store
+
+# Claude Code & tools
+.claude/
+.codegraph/
+graphify-out/
+
+# Project docs (checked in via plans only)
+CLAUDE.md

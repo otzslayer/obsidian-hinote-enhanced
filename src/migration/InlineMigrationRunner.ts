@@ -72,18 +72,27 @@ export class InlineMigrationRunner {
 
             const noteText = await this.app.vault.read(vaultFile);
 
-            // Map HighlightInfo → StoredHighlightData
-            const stored: StoredHighlightData[] = withComments.map((h) => ({
-                text: h.text,
-                comments: (h.comments ?? []).map((c) => ({
-                    id: c.id,
-                    content: c.content,
-                    createdAt: c.createdAt,
-                    updatedAt: c.updatedAt,
-                })),
-            }));
+            // Separate virtual/file-level highlights (text === '') from real highlights.
+            const fileLevel: FileLevelComment[] = withComments
+                .filter((h) => !h.text || h.isVirtual)
+                .flatMap((h) => (h.comments ?? []).map((c) => ({
+                    text: c.content,
+                    ts: new Date(c.updatedAt).toISOString().slice(0, 16).replace('T', ' '),
+                })));
 
-            const result = migrateNoteComments(noteText, stored);
+            const stored: StoredHighlightData[] = withComments
+                .filter((h) => h.text && !h.isVirtual)
+                .map((h) => ({
+                    text: h.text,
+                    comments: (h.comments ?? []).map((c) => ({
+                        id: c.id,
+                        content: c.content,
+                        createdAt: c.createdAt,
+                        updatedAt: c.updatedAt,
+                    })),
+                }));
+
+            const result = migrateNoteComments(noteText, stored, fileLevel);
 
             for (const entry of result.report) {
                 totalComments++;
