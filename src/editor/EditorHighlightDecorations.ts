@@ -1,10 +1,13 @@
 import { Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import type { Range } from "@codemirror/state";
 import { MarkdownView } from "obsidian";
-import { CommentWidget, CommentWidgetHelper } from "../components/comment";
+import { CommentWidget, CommentInput } from "../components/comment";
+import { findInsertPosition, serializeBlock } from "../services/comment/inline/InlineCommentSerializer";
 import { HighlightService } from "../services/HighlightService";
 import { HighlightInfo as HiNote } from "../types/highlight";
 import type { HiNotePluginContext } from "../types/plugin";
+import type CommentPlugin from "../../main";
+import { formatTimestamp } from "../utils/timestamp";
 
 interface EditorHighlightDecorationOptions {
     plugin: HiNotePluginContext;
@@ -73,13 +76,55 @@ function createCommentWidget(plugin: HiNotePluginContext, highlight: HiNote): De
         widget: new CommentWidget(
             plugin,
             highlight,
-            () => {
-                void CommentWidgetHelper.openCommentPanel(plugin.app, highlight, plugin.eventManager);
-            }
+            (anchor: HTMLElement) => openInlineCommentInput(plugin, highlight, anchor)
         ),
         side: 2,
         stopEvent: (event: Event) => event.type === 'mousedown' || event.type === 'mouseup'
     });
+}
+
+/**
+ * Open the shared CommentInput next to the highlight's comment widget and, on
+ * save, write a new inline {>>...<<} comment after the highlight.
+ *
+ * The insert offset and the patched text are both taken from the LIVE editor
+ * (editor.getValue + editor.replaceRange) — the same coordinate system
+ * highlight.position came from. Reading disk via vault.read would desync against
+ * unsaved edits (e.g. a just-created Mod+Shift+S highlight not yet flushed),
+ * misplacing the comment. The sidebar reflects the change on the next autosave
+ * 'modify' event.
+ */
+function openInlineCommentInput(
+    plugin: HiNotePluginContext,
+    highlight: HiNote,
+    anchor: HTMLElement
+): void {
+    // Don't open a second input on the same widget.
+    if (anchor.querySelector('.hi-note-inline-comment-input')) return;
+
+    const editor = plugin.app.workspace.getActiveViewOfType(MarkdownView)?.editor;
+    if (!editor) return;
+
+    const container = anchor.createDiv({ cls: 'hi-note-inline-comment-input' });
+
+    new CommentInput(
+        container,
+        highlight,
+        undefined,
+        plugin as unknown as CommentPlugin,
+        {
+            onSave: async (content: string) => {
+                const noteText = editor.getValue();
+                const start = highlight.position ?? 0;
+                const end = start + (highlight.originalLength ?? highlight.text.length + 4);
+                const insertPos = findInsertPosition(noteText, { text: highlight.text, start, end });
+                const block = serializeBlock(content, formatTimestamp(Date.now()));
+                editor.replaceRange(block, editor.offsetToPos(insertPos));
+            },
+            onCancel: () => container.remove(),
+            onClosed: () => container.remove(),
+        }
+    ).show();
 }
 
 function shouldShowCommentWidget(plugin: HiNotePluginContext): boolean {

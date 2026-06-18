@@ -5,6 +5,7 @@ import { IdGenerator } from '../../utils/IdGenerator';
 import { InlineCommentWriter } from './inline/InlineCommentWriter';
 import CommentPlugin from '../../../main';
 import { t } from '../../i18n';
+import { formatTimestamp } from '../../utils/timestamp';
 
 /**
  * 댓글 서비스
@@ -276,11 +277,4 @@ export class CommentService {
         const cards = fsrsManager.findCardsBySourceId(highlightId, 'highlight');
         return cards && cards.length > 0;
     }
-}
-
-/** Format a Unix ms timestamp as "YYYY-MM-DD HH:mm". */
-function formatTimestamp(ms: number): string {
-    const d = new Date(ms);
-    const pad = (n: number) => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }

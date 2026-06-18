@@ -2241,6 +2241,31 @@ settings:
     opacity: 1;
 }
 
+/* 에디터(원본/라이브 프리뷰)에서 코멘트 버튼 클릭 시 하이라이트 옆에 뜨는 입력창 */
+.hi-note-inline-comment-input {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 1000;
+    width: 300px;
+    max-width: 90vw;
+    white-space: normal;
+    line-height: normal;
+    text-align: left;
+    cursor: default;
+    padding: 4px;
+    background-color: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 8px;
+    box-shadow: var(--shadow-s);
+}
+
+/* 팝업 컨테이너가 이미 카드 배경을 제공하므로 내부 섹션의 중복 배경/패딩 제거 */
+.hi-note-inline-comment-input .hi-notes-section {
+    background-color: transparent;
+    padding: 0;
+}
+
 /* ===================================
    9. AI FEATURES
    AI 功能

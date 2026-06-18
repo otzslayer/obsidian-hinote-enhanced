@@ -1,6 +1,7 @@
 import { MarkdownRenderer, Component, App, setIcon } from "obsidian";
 import { HighlightInfo as HiNote, CommentItem } from "../../types/highlight";
 import type { EventManager } from "../../services/EventManager";
+import { VIEW_TYPE_HINOTE } from "../../views/hinote/HiNoteView";
 
 /**
  * 주석 위젯 보조 클래스
@@ -203,7 +204,7 @@ export class CommentWidgetHelper {
      */
     static async openCommentPanel(app: App, highlight: HiNote, eventManager: EventManager): Promise<void> {
         const workspace = app.workspace;
-        const existing = workspace.getLeavesOfType("hinote-view");
+        const existing = workspace.getLeavesOfType(VIEW_TYPE_HINOTE);
 
         if (existing.length) {
             await workspace.revealLeaf(existing[0]);
@@ -212,7 +213,7 @@ export class CommentWidgetHelper {
             const leaf = workspace.getRightLeaf(false);
             if (leaf) {
                 await leaf.setViewState({
-                    type: "hinote-view",
+                    type: VIEW_TYPE_HINOTE,
                     active: true
                 });
                 await new Promise(resolve => window.setTimeout(resolve, 200));

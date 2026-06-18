@@ -15,7 +15,7 @@ export class CommentWidget extends WidgetType {
     constructor(
         private plugin: Plugin,
         private highlight: HiNote,
-        private onClick: () => void
+        private onClick: (anchor: HTMLElement) => void
     ) {
         super();
     }
@@ -93,7 +93,7 @@ export class CommentWidget extends WidgetType {
             CommentWidgetHelper.setupEmptyCommentHover(wrapper, button);
         }
 
-        CommentWidgetHelper.setupClickEvent(button, tooltip, () => this.onClick());
+        CommentWidgetHelper.setupClickEvent(button, tooltip, () => this.onClick(wrapper));
 
         // CodeMirror Widget은 독립적인 destroy 생명주기를 가지므로, 언로드를 위해 리스너 참조 보관.
         this.cleanupResizePositioning = CommentWidgetHelper.registerResizePositioning(wrapper, tooltip);

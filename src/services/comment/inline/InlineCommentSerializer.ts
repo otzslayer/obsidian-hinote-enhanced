@@ -93,16 +93,25 @@ function sanitizeText(text: string): string {
  * Position in `noteText` where the next block for `match` should be inserted.
  * That is: after the last existing comment block attached to `match`, or
  * immediately after `match.end` if none exist.
+ *
+ * Exported so editor-side callers can compute the insert offset against the live
+ * editor snapshot (not disk), keeping the offset and the text in the same
+ * coordinate system.
  */
-function findInsertPosition(noteText: string, match: HighlightMatch): number {
-    const { pairedComments } = parseInlineComments(noteText, [match]);
-    const entry = pairedComments.find(p => p.highlightStart === match.start);
-    if (!entry || entry.comments.length === 0) {
-        return match.end;
+export function findInsertPosition(noteText: string, match: HighlightMatch): number {
+    // A highlight's own comments are the {>>...<<} blocks contiguous with its end
+    // (the serializer writes them zero-gap; whitespace between is also tolerated).
+    // Scan forward ONLY over that contiguous chain. Parsing with a single match
+    // would mis-attribute a LATER highlight's comment blocks to this highlight and
+    // insert after them — landing the comment on the wrong highlight.
+    const CONTIGUOUS_BLOCK_RE = /^\s*\{>>[\s\S]*?<<\}/;
+    let pos = match.end;
+    let block = CONTIGUOUS_BLOCK_RE.exec(noteText.slice(pos));
+    while (block) {
+        pos += block[0].length;
+        block = CONTIGUOUS_BLOCK_RE.exec(noteText.slice(pos));
     }
-    // Insert after the last block's endOffset
-    const last = entry.comments[entry.comments.length - 1];
-    return last.endOffset;
+    return pos;
 }
 
 /**
