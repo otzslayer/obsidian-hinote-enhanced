@@ -43,7 +43,57 @@ The highlight comment feature allows you to quickly engage with highlighted text
 
 The note comment feature allows you to add your thoughts to the entire document without relying on any highlighted text. Click the add file comment on the right side of the search bar to open the input box at the top of the highlight list.
 
->  All comments and highlight data are stored in the `.hinote` folder in the root directory of your vault, giving you complete control over your data.
+> **Inline storage & Obsidian Sync**: Comments are stored directly inside your Markdown notes as `{>>comment text ^YYYY-MM-DD HH:mm^<<}` blocks placed immediately after the highlighted text. Because comments live in `.md` files, **Obsidian Sync synchronises them natively** without any extra configuration.
+>
+> Flashcard data (Pro) continues to be stored in the `.hinote` folder and is unaffected by this change.
+
+---
+
+## Inline comment storage & sync
+
+### How comments are stored
+
+HiNote embeds comments directly in your note's Markdown source as [CriticMarkup](https://criticmarkup.com/) comment blocks:
+
+```
+==highlighted text=={>>Your comment ^2024-01-15 10:30^<<}
+```
+
+- The block is placed **immediately after** the highlight marker.
+- The `^YYYY-MM-DD HH:mm^` token at the end is the timestamp; it is updated each time the comment is edited.
+- AI-generated comments are prefixed with `🤖 ` inside the block.
+- File-level comments (not tied to a specific highlight) are stored in the note's `frontmatter` under the `comments` key as a list of `{text, ts}` objects.
+
+### Keyboard shortcut
+
+| Action | Default shortcut |
+|--------|-----------------|
+| Add comment to selection | `Mod+Shift+C` |
+
+The shortcut can be rebound in **Settings → Hotkeys**.
+
+### Obsidian Sync
+
+Comments travel with the `.md` file — no additional sync setup required. Concurrent offline edits follow the same conflict-resolution flow as any other Markdown note.
+
+### Known limitations
+
+| Situation | Behaviour |
+|-----------|-----------|
+| **Source mode** | `{>>...<<}` raw syntax is visible. HiNote cannot hide decorations in source mode. |
+| **Plugin disabled** | Raw `{>>...<<}` blocks remain in the file but are harmless plain text. |
+| **CriticMarkup plugin installed** | Both plugins may apply styling to `{>>...<<}` blocks, resulting in double decoration. |
+| **Orphan comments** | A `{>>...<<}` block whose preceding highlight marker has been deleted is tagged as an *orphan*. HiNote never auto-deletes orphans; they appear in the sidebar as a separate group. Remove them manually when no longer needed. |
+
+### Migrating existing comments
+
+If you have comments stored in the legacy `.hinote/highlights/` sidecar format, run the one-shot migration command:
+
+1. Open the **Command Palette** (`Mod+P`).
+2. Search for **"Migrate comments to inline storage"**.
+3. Review the dry-run report and click **Apply Migration**.
+
+The old `.hinote/highlights/` folder is **never deleted automatically** — it serves as a backup after migration.
 
 ---
 
