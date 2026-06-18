@@ -140,13 +140,15 @@ export class CommentInput {
             e.stopPropagation();
             
             const content = this.textarea.value.trim();
-            
+
             if (content) {
                 // 내용이 있으면 저장
                 void this.saveController.saveCurrentContent();
             } else {
-                // 내용이 없으면 취소
-                this.cancel();
+                // 내용이 없으면 취소. cancelEdit는 editContext를 포함하므로 편집 모드에서
+                // 원본 내용 div를 복원합니다. this.cancel()(editContext 없음)을 호출하면
+                // 편집 textarea만 제거되고 내용이 복원되지 않아 빈 코멘트가 남습니다.
+                this.cancelEdit();
             }
         }
     }
