@@ -2,11 +2,14 @@ import { Plugin, MarkdownView } from "obsidian";
 import type { EditorView } from "@codemirror/view";
 import { HighlightRepository } from "../repositories/HighlightRepository";
 import { HighlightService } from '../services/HighlightService';
+import { HighlightManager } from '../services/HighlightManager';
+import { CommentService } from '../services/comment/CommentService';
 import { PreviewWidgetRenderer } from '../views/highlight';
 import { createEditorHighlightDecorations } from "./EditorHighlightDecorations";
 import type { HighlightEvents } from "../services/EventManager";
 import type { EventManager } from "../services/EventManager";
 import type { HiNotePluginContext } from "../types/plugin";
+import type CommentPlugin from "../../main";
 
 interface EditorWithCodeMirror {
     cm?: EditorView;
@@ -23,14 +26,21 @@ export class HighlightDecorator {
         plugin: Plugin,
         highlightRepository: HighlightRepository,
         highlightService: HighlightService,
-        private eventManager: EventManager
+        private eventManager: EventManager,
+        highlightManager: HighlightManager
     ) {
         this.plugin = plugin as HiNotePluginContext;
         this.highlightRepository = highlightRepository;
         this.highlightService = highlightService;
+        const commentService = new CommentService(
+            plugin.app,
+            plugin as unknown as CommentPlugin,
+            highlightManager
+        );
         this.previewRenderer = new PreviewWidgetRenderer(
             this.plugin,
-            this.highlightService
+            this.highlightService,
+            commentService
         );
     }
 
@@ -51,6 +61,20 @@ export class HighlightDecorator {
             changes: [],
             effects: []
         });
+    }
+
+    /**
+     * 열린 모든 마크다운 에디터 장식 새로고침
+     * 토글 명령처럼 전역 상태 변경 후 호출
+     */
+    public refreshAllDecorations() {
+        const leaves = this.plugin.app.workspace.getLeavesOfType('markdown');
+        for (const leaf of leaves) {
+            const view = leaf.view as { editor?: { cm?: EditorView } };
+            const editorView = view.editor?.cm;
+            if (!editorView) continue;
+            editorView.dispatch({ changes: [], effects: [] });
+        }
     }
 
 

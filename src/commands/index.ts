@@ -1,7 +1,9 @@
 import { Plugin } from 'obsidian';
 import { WindowManager } from '../plugin/WindowManager';
+import type { HighlightDecorator } from '../editor/HighlightDecorator';
 import { registerOpenCommentPanelCommand } from './openCommentPanel';
 import { registerOpenMainWindowCommand } from './openMainWindow';
+import { registerToggleInlineCommentSyntaxCommand } from './toggleInlineCommentSyntax';
 import { InlineMigrationRunner } from '../migration/InlineMigrationRunner';
 
 /**
@@ -11,13 +13,17 @@ import { InlineMigrationRunner } from '../migration/InlineMigrationRunner';
 export function registerCommands(
     plugin: Plugin,
     windowManager: WindowManager,
-    ensureInitialized: () => Promise<void>
+    ensureInitialized: () => Promise<void>,
+    getDecorator: () => HighlightDecorator
 ): void {
     // 댓글 패널 열기 명령 등록 (오른쪽 사이드바)
     registerOpenCommentPanelCommand(plugin, windowManager, ensureInitialized);
 
     // 메인 창에서 댓글 패널 열기 명령 등록
     registerOpenMainWindowCommand(plugin, windowManager, ensureInitialized);
+
+    // 인라인 코멘트 문법 토글 명령 등록
+    registerToggleInlineCommentSyntaxCommand(plugin, getDecorator);
 
     // 일회성 마이그레이션 명령 등록
     new InlineMigrationRunner(plugin.app).registerCommand(plugin);
