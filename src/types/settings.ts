@@ -13,6 +13,7 @@ export interface PluginSettings extends HighlightSettings {
     comments?: Record<string, Record<string, HighlightInfo>>;
     'flashcard-license'?: FlashcardLicense;
     showCommentWidget?: boolean;
+    showInlineCommentSyntax?: boolean;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -84,5 +85,6 @@ export const DEFAULT_SETTINGS: PluginSettings = {
     export: {
         exportPath: ''
     },
-    showCommentWidget: true
+    showCommentWidget: true,
+    showInlineCommentSyntax: false
 };
