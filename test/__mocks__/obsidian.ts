@@ -86,10 +86,29 @@ export class Modal {
 
 export class PluginSettingTab {}
 export class Setting {}
+export class ItemView {}
+
+export function setIcon(_el: unknown, _icon: string): void {}
+
+export const Platform = { isMobile: false, isDesktop: true };
 export class Component {
     load = () => {};
     unload = () => {};
     register = (_fn: () => void) => {};
+}
+
+export class MarkdownRenderer {
+    // 실제 API와 동일한 시그니처. 테스트에서는 마크다운 메타문자를 제거한
+    // 텍스트를 el 에 채워 renderPlainText 가 textContent 로 plainText 를 얻게 한다.
+    static render = async (
+        _app: unknown,
+        markdown: string,
+        el: HTMLElement,
+        _sourcePath: string,
+        _component: unknown
+    ): Promise<void> => {
+        el.textContent = markdown.replace(/[*`[\]~<>$_=]/g, '');
+    };
 }
 
 export function normalizePath(path: string): string {
