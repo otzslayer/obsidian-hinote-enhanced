@@ -31,9 +31,12 @@ export function registerPluginRibbon(plugin: CommentPlugin, windowManager: Windo
 }
 
 export function registerPluginCommands(plugin: CommentPlugin, windowManager: WindowManager): void {
-    registerCommands(plugin, windowManager, async () => {
-        await plugin.ensureServicesInitialized();
-    });
+    registerCommands(
+        plugin,
+        windowManager,
+        async () => { await plugin.ensureServicesInitialized(); },
+        () => plugin.highlightDecorator
+    );
 }
 
 export function registerPluginVaultEvents(plugin: CommentPlugin): void {

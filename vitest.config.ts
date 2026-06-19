@@ -11,6 +11,8 @@ export default defineConfig({
     resolve: {
         alias: {
             obsidian: path.resolve(__dirname, 'test/__mocks__/obsidian.ts'),
+            '@codemirror/view': path.resolve(__dirname, 'test/__mocks__/@codemirror/view.ts'),
+            '@codemirror/state': path.resolve(__dirname, 'test/__mocks__/@codemirror/state.ts'),
         },
     },
 });

@@ -7,4 +7,5 @@ export interface HiNotePluginContext extends Plugin {
     settings: PluginSettings;
     eventManager: EventManager;
     highlightService: HighlightService;
+    saveSettings(): Promise<void>;
 }
