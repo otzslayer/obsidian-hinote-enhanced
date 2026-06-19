@@ -13,6 +13,9 @@ import type CommentPlugin from "../../../../main";
  */
 export class PreviewWidgetRenderer {
     private highlightResolver: PreviewHighlightResolver;
+    // 렌더된 plainText 캐시. 키는 sourcePath + 원본 마크다운 — 내용이 키라
+    // 하이라이트가 편집되면 새 키로 자동 미스되어 stale 값이 제공되지 않는다.
+    private plainTextCache = new Map<string, string>();
 
     constructor(
         private plugin: HiNotePluginContext,
@@ -85,6 +88,10 @@ export class PreviewWidgetRenderer {
     private async renderPlainText(markdown: string, sourcePath: string): Promise<string> {
         if (!markdown || !/[*`[\]~<>$_=]/.test(markdown)) return markdown.trim();
 
+        const cacheKey = `${sourcePath}\u0000${markdown}`;
+        const cached = this.plainTextCache.get(cacheKey);
+        if (cached !== undefined) return cached;
+
         // 로컬 Component 로 렌더해 자식 컴포넌트(임베드 등)를 즉시 unload — plugin
         // 수명에 매달리지 않도록(R: 리스너/리소스 정리 안전성).
         const tmp = document.createElement('div');
@@ -92,7 +99,9 @@ export class PreviewWidgetRenderer {
         component.load();
         try {
             await MarkdownRenderer.render(this.plugin.app, markdown, tmp, sourcePath, component);
-            return (tmp.textContent ?? markdown).trim();
+            const result = (tmp.textContent ?? markdown).trim();
+            this.plainTextCache.set(cacheKey, result);
+            return result;
         } catch {
             return markdown.trim();
         } finally {
