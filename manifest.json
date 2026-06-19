@@ -1,11 +1,10 @@
 {
 	"id": "hi-note-enhanced",
 	"name": "HiNote Enhanced",
-	"version": "0.5.7",
+	"version": "1.0.0",
 	"minAppVersion": "1.8.0",
 	"description": "Add comments to highlighted notes, use AI for thinking, and flashcards for memory.",
-	"author": "Kai",
-	"authorUrl": "https://github.com/CatMuse",
-	"fundingUrl": "https://ko-fi.com/catmuse",
+	"author": "Jay Han",
+	"authorUrl": "https://github.com/otzslayer",
 	"isDesktopOnly": false
 }
