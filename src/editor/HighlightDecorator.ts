@@ -6,6 +6,7 @@ import { HighlightManager } from '../services/HighlightManager';
 import { CommentService } from '../services/comment/CommentService';
 import { PreviewWidgetRenderer } from '../views/highlight';
 import { createEditorHighlightDecorations } from "./EditorHighlightDecorations";
+import { hideInlineCommentBlocks } from "./inlineCommentHider";
 import type { HighlightEvents } from "../services/EventManager";
 import type { EventManager } from "../services/EventManager";
 import type { HiNotePluginContext } from "../types/plugin";
@@ -135,54 +136,5 @@ export class HighlightDecorator {
 
         // 모든 하이라이트 댓글 버튼 제거
         activeDocument.querySelectorAll('.hi-note-widget').forEach(el => el.remove());
-    }
-}
-
-const INLINE_COMMENT_RE = /\{>>([\s\S]*?)<<\}/g;
-
-/**
- * Traverse text nodes inside `el` and wrap every {>>...<<} occurrence in a
- * visually-hidden <span> so reading-view users only see the comment marker,
- * not the raw CriticMarkup syntax (R7).
- */
-function hideInlineCommentBlocks(el: HTMLElement): void {
-    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-    const replacements: Array<{ node: Text; parts: Array<string | 'HIDE'> }> = [];
-
-    let node: Node | null;
-    while ((node = walker.nextNode()) !== null) {
-        const text = (node as Text).textContent ?? '';
-        INLINE_COMMENT_RE.lastIndex = 0;
-        if (!INLINE_COMMENT_RE.test(text)) continue;
-
-        // Build replacement parts
-        const parts: Array<string | 'HIDE'> = [];
-        let last = 0;
-        INLINE_COMMENT_RE.lastIndex = 0;
-        let m: RegExpExecArray | null;
-        while ((m = INLINE_COMMENT_RE.exec(text)) !== null) {
-            if (m.index > last) parts.push(text.slice(last, m.index));
-            parts.push('HIDE');
-            last = m.index + m[0].length;
-        }
-        if (last < text.length) parts.push(text.slice(last));
-        replacements.push({ node: node as Text, parts });
-    }
-
-    for (const { node, parts } of replacements) {
-        const parent = node.parentNode;
-        if (!parent) continue;
-        const fragment = document.createDocumentFragment();
-        for (const part of parts) {
-            if (part === 'HIDE') {
-                const span = document.createElement('span');
-                span.className = 'hi-note-inline-comment-raw';
-                span.style.display = 'none';
-                fragment.appendChild(span);
-            } else {
-                fragment.appendChild(document.createTextNode(part));
-            }
-        }
-        parent.replaceChild(fragment, node);
     }
 }

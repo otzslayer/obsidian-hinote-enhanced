@@ -1,4 +1,4 @@
-import { TFile, MarkdownPostProcessorContext } from "obsidian";
+import { TFile, MarkdownPostProcessorContext, MarkdownRenderer, Component } from "obsidian";
 import { HighlightInfo as HiNote } from "../../../types/highlight";
 import { HighlightService } from '../../../services/HighlightService';
 import { CommentWidgetHelper, CommentInput } from '../../../components/comment';
@@ -48,11 +48,18 @@ export class PreviewWidgetRenderer {
 
         if (allHighlights.length === 0) return;
 
+        // 읽기 모드에서 ==**bold**== 는 마크다운이 제거된 채 렌더되므로 mark.textContent 와
+        // 저장된 highlight.text(원본 마크다운)가 어긋난다. 비교 기준이 될 plainText 를
+        // 렌더러로 미리 계산해 채운다.
+        await Promise.all(allHighlights.map(async (highlight) => {
+            highlight.plainText = await this.renderPlainText(highlight.text, context.sourcePath);
+        }));
+
         // DOM 요소 순회하여 매칭
         marks.forEach((mark) => {
             if (mark.hasAttribute('data-hi-note-processed')) return;
 
-            const text = mark.textContent;
+            const text = mark.textContent?.trim();
             if (!text) return;
 
             // 매칭되는 하이라이트 검색
@@ -69,6 +76,29 @@ export class PreviewWidgetRenderer {
                 this.renderPreviewWidget(mark as HTMLElement, match);
             }
         });
+    }
+
+    /**
+     * highlight.text 를 읽기 모드 렌더 결과의 순수 텍스트로 변환한다.
+     * 마크다운 메타문자가 없으면 렌더 비용 없이 그대로 사용한다.
+     */
+    private async renderPlainText(markdown: string, sourcePath: string): Promise<string> {
+        if (!markdown || !/[*`[\]~<>$_=]/.test(markdown)) return markdown.trim();
+
+        // 로컬 Component 로 렌더해 자식 컴포넌트(임베드 등)를 즉시 unload — plugin
+        // 수명에 매달리지 않도록(R: 리스너/리소스 정리 안전성).
+        const tmp = document.createElement('div');
+        const component = new Component();
+        component.load();
+        try {
+            await MarkdownRenderer.render(this.plugin.app, markdown, tmp, sourcePath, component);
+            return (tmp.textContent ?? markdown).trim();
+        } catch {
+            return markdown.trim();
+        } finally {
+            component.unload();
+            tmp.remove();
+        }
     }
 
     /**

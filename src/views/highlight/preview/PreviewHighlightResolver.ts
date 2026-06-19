@@ -1,7 +1,9 @@
 import { MarkdownPostProcessorContext, TFile } from "obsidian";
 import { HighlightInfo as HiNote } from "../../../types/highlight";
 
-export type PreviewHighlight = HiNote & { line: number };
+// plainText: highlight.text 를 읽기 모드 렌더 결과(마크다운 제거)로 변환한 값.
+// mark.textContent 도 마크다운이 제거된 상태라 매칭은 이 값을 기준으로 한다.
+export type PreviewHighlight = HiNote & { line: number; plainText: string };
 
 const BLOCK_TAGS = new Set([
     'p',
@@ -37,7 +39,10 @@ export class PreviewHighlightResolver {
             .map(highlight => this.enrichHighlight(highlight, file))
             .map(highlight => ({
                 ...highlight,
-                line: this.getLineForPosition(content, highlight.position)
+                line: this.getLineForPosition(content, highlight.position),
+                // 기본값은 원본 text. 마크다운이 포함된 경우 렌더러가 채운 plainText로
+                // PreviewWidgetRenderer 가 덮어쓴다.
+                plainText: highlight.text
             }));
     }
 
@@ -51,11 +56,11 @@ export class PreviewHighlightResolver {
         const sectionInfo = this.getSectionInfo(mark, rootElement, context);
 
         if (!sectionInfo) {
-            return highlightsWithComments.find(highlight => highlight.text === text) || null;
+            return highlightsWithComments.find(highlight => highlight.plainText === text) || null;
         }
 
         return highlightsWithComments.find(highlight =>
-            highlight.text === text &&
+            highlight.plainText === text &&
             highlight.line >= sectionInfo.lineStart &&
             highlight.line <= sectionInfo.lineEnd
         ) || null;
