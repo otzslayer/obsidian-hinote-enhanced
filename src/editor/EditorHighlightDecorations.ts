@@ -1,7 +1,7 @@
 import { Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import type { Range } from "@codemirror/state";
 import { editorInfoField, MarkdownView } from "obsidian";
-import { CommentWidget, CommentInput } from "../components/comment";
+import { CommentWidget, CommentInput, applyInlineCommentInputPosition } from "../components/comment";
 import { findInsertPosition, serializeBlock } from "../services/comment/inline/InlineCommentSerializer";
 import { HighlightService } from "../services/HighlightService";
 import { HighlightInfo as HiNote } from "../types/highlight";
@@ -127,6 +127,9 @@ function openInlineCommentInput(
             onClosed: () => container.remove(),
         }
     ).show();
+
+    // 팝업이 문서 뷰 우측 경계를 넘지 않도록 위치 보정 (레이아웃 반영 후)
+    window.requestAnimationFrame(() => applyInlineCommentInputPosition(container));
 }
 
 function shouldShowCommentWidget(plugin: HiNotePluginContext): boolean {

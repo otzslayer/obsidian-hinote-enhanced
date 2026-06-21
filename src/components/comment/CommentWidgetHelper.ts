@@ -2,6 +2,7 @@ import { MarkdownRenderer, Component, App, setIcon } from "obsidian";
 import { HighlightInfo as HiNote, CommentItem } from "../../types/highlight";
 import type { EventManager } from "../../services/EventManager";
 import { VIEW_TYPE_HINOTE } from "../../views/hinote/HiNoteView";
+import { COMMENT_BOUNDARY_MARGIN } from "./constants";
 
 /**
  * 주석 위젯 보조 클래스
@@ -9,7 +10,6 @@ import { VIEW_TYPE_HINOTE } from "../../views/hinote/HiNoteView";
  */
 export class CommentWidgetHelper {
     private static readonly MAX_TOOLTIP_COMMENTS = 3;
-    private static readonly TOOLTIP_MARGIN = 8;
     private static readonly TOOLTIP_GAP = 4;
 
     /**
@@ -128,7 +128,7 @@ export class CommentWidgetHelper {
         const buttonRect = widget.getBoundingClientRect();
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
-        const margin = this.TOOLTIP_MARGIN;
+        const margin = COMMENT_BOUNDARY_MARGIN;
         const maxTooltipWidth = Math.max(160, viewportWidth - margin * 2);
 
         tooltip.addClass("hi-note-tooltip-positioned");
