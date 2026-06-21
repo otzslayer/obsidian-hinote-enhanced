@@ -78,7 +78,7 @@ export class ReadingModeHighlighter {
                     new Notice(t('Selected text not found in source (may contain inline markdown)'));
                     break;
                 case 'ambiguous':
-                    new Notice(t('Selected text is ambiguous (appears multiple times in block)'));
+                    new Notice(t('Selected text is ambiguous (appears multiple times)'));
                     break;
                 case 'overlap':
                     new Notice(t('Selection overlaps an existing highlight'));

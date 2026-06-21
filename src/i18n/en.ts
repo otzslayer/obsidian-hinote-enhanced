@@ -286,7 +286,7 @@ export default {
     "Cannot determine block range": "Cannot determine block range",
     "Multi-block selection is not supported": "Multi-block selection is not supported",
     "Selected text not found in source (may contain inline markdown)": "Selected text not found in source (may contain inline markdown)",
-    "Selected text is ambiguous (appears multiple times in block)": "Selected text is ambiguous (appears multiple times in block)",
+    "Selected text is ambiguous (appears multiple times)": "Selected text is ambiguous (appears multiple times)",
     "Selection overlaps an existing highlight": "Selection overlaps an existing highlight"
 
 };

@@ -60,6 +60,20 @@ describe('mapHighlightInsertion', () => {
         expect(result).toEqual({ ok: false, reason: 'ambiguous' });
     });
 
+    it('전역 중복: 블록 내 유일하지만 문서 다른 블록에도 등장 → ambiguous (stale 무음 오삽입 방지)', () => {
+        // line0 블록 'foo bar' 안에서 'foo'는 1회지만, line1 'baz foo' 에도 등장.
+        // stale 줄범위가 엉뚱한 블록을 가리켜도 전역 2회면 안전하게 중단되어야 한다.
+        const source = 'foo bar\nbaz foo';
+        const result = mapHighlightInsertion(source, 0, 0, 'foo', []);
+        expect(result).toEqual({ ok: false, reason: 'ambiguous' });
+    });
+
+    it('전역 유일: 다중 블록 문서에서 문서 전체 1회 → ok (정상 래핑 유지, 무회귀 확인)', () => {
+        // 'plain text' 는 MULTI_LINE_SOURCE 전체에서 1회만 등장 → 게이트 통과.
+        const result = mapHighlightInsertion(MULTI_LINE_SOURCE, 1, 1, 'plain text', []);
+        expect(result).toMatchObject({ ok: true });
+    });
+
     it('overlap: 기존 ==A== 범위와 겹치는 선택 → overlap', () => {
         // source: "==hello== world"
         // existing: position=0, originalLength=9 (== h e l l o ==)

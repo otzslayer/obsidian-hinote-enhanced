@@ -66,6 +66,18 @@ export function mapHighlightInsertion(
     const absStart = blockStart + idx;
     const absEnd = absStart + sel.length;
 
+    // 전역(문서 전체) 유일성 검증 — stale 줄범위로 인한 무음 오삽입 방지.
+    // WeakMap 줄범위는 렌더 시점, content 는 fresh read 라 그 사이 파일이 바뀌면
+    // 범위가 다른 블록을 가리킬 수 있다. 하지만 선택 텍스트가 문서에 정확히 1회만
+    // 존재하면 래핑 위치가 유일하게 결정되어 잘못 감쌀 자리가 없다.
+    // 2회 이상이면(블록 내 유일이어도) stale 오삽입 위험이 있으므로 안전하게 중단한다.
+    if (
+        sourceText.indexOf(sel) !== absStart ||
+        sourceText.indexOf(sel, absStart + 1) !== -1
+    ) {
+        return { ok: false, reason: 'ambiguous' };
+    }
+
     // 기존 하이라이트와 겹침 검사
     for (const h of existingHighlights) {
         const hStart = h.position;
