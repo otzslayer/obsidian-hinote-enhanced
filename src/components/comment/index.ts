@@ -5,3 +5,5 @@ export { CommentWidget } from './CommentWidget';
 export { CommentWidgetHelper } from './CommentWidgetHelper';
 export { InlineAICommentHandler } from './InlineAICommentHandler';
 export { UnfocusedCommentInput } from './UnfocusedCommentInput';
+export { applyInlineCommentInputPosition, computeInlineCommentInputShift } from './InlineCommentInputPosition';
+export type { InlinePopupShiftParams } from './InlineCommentInputPosition';

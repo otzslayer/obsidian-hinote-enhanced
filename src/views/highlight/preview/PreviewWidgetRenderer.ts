@@ -1,7 +1,7 @@
 import { TFile, MarkdownPostProcessorContext, MarkdownRenderer, Component } from "obsidian";
 import { HighlightInfo as HiNote } from "../../../types/highlight";
 import { HighlightService } from '../../../services/HighlightService';
-import { CommentWidgetHelper, CommentInput } from '../../../components/comment';
+import { CommentWidgetHelper, CommentInput, applyInlineCommentInputPosition } from '../../../components/comment';
 import { CommentService } from '../../../services/comment/CommentService';
 import { PreviewHighlightResolver } from "./PreviewHighlightResolver";
 import type { HiNotePluginContext } from "../../../types/plugin";
@@ -179,5 +179,8 @@ export class PreviewWidgetRenderer {
                 onClosed: () => container.remove(),
             }
         ).show();
+
+        // 팝업이 문서 뷰 우측 경계를 넘지 않도록 위치 보정 (레이아웃 반영 후)
+        window.requestAnimationFrame(() => applyInlineCommentInputPosition(container));
     }
 }
