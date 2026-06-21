@@ -285,5 +285,14 @@ export default {
     "Server error": "服务器错误",
     
     // Custom AI 相关（已存在则跳过）
-    "Detected API type": "检测到的 API 类型"
+    "Detected API type": "检测到的 API 类型",
+
+    // 阅读模式高亮命令
+    "Toggle highlight": "切换高亮",
+    "No text selected": "未选择文本",
+    "Cannot determine block range": "无法确定块范围",
+    "Multi-block selection is not supported": "不支持跨块选择",
+    "Selected text not found in source (may contain inline markdown)": "在源文件中未找到选中文本（可能包含内联 Markdown）",
+    "Selected text is ambiguous (appears multiple times in block)": "选中文本有歧义（在块中出现多次）",
+    "Selection overlaps an existing highlight": "选择与已有高亮重叠"
 };

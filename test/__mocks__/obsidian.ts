@@ -87,6 +87,10 @@ export class Modal {
 export class PluginSettingTab {}
 export class Setting {}
 export class ItemView {}
+export class MarkdownView {
+    file: unknown = null;
+    getMode = () => 'preview';
+}
 
 export function setIcon(_el: unknown, _icon: string): void {}
 

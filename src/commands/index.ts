@@ -4,6 +4,7 @@ import type { HighlightDecorator } from '../editor/HighlightDecorator';
 import { registerOpenCommentPanelCommand } from './openCommentPanel';
 import { registerOpenMainWindowCommand } from './openMainWindow';
 import { registerToggleInlineCommentSyntaxCommand } from './toggleInlineCommentSyntax';
+import { registerToggleHighlightCommand } from './toggleHighlight';
 import { InlineMigrationRunner } from '../migration/InlineMigrationRunner';
 
 /**
@@ -24,6 +25,9 @@ export function registerCommands(
 
     // 인라인 코멘트 문법 토글 명령 등록
     registerToggleInlineCommentSyntaxCommand(plugin, getDecorator);
+
+    // 통합 하이라이트 토글 명령 등록 (Mod+Shift+S)
+    registerToggleHighlightCommand(plugin, getDecorator);
 
     // 일회성 마이그레이션 명령 등록
     new InlineMigrationRunner(plugin.app).registerCommand(plugin);

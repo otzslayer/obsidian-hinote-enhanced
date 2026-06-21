@@ -7,6 +7,7 @@ import { CommentService } from '../services/comment/CommentService';
 import { PreviewWidgetRenderer } from '../views/highlight';
 import { createEditorHighlightDecorations } from "./EditorHighlightDecorations";
 import { hideInlineCommentBlocks } from "./inlineCommentHider";
+import { SectionLineRegistry } from "./SectionLineRegistry";
 import type { HighlightEvents } from "../services/EventManager";
 import type { EventManager } from "../services/EventManager";
 import type { HiNotePluginContext } from "../types/plugin";
@@ -22,6 +23,7 @@ export class HighlightDecorator {
     private highlightPlugin: ReturnType<typeof createEditorHighlightDecorations> | null = null;
     private highlightService: HighlightService;
     private previewRenderer: PreviewWidgetRenderer;
+    readonly sectionLineRegistry = new SectionLineRegistry();
 
     constructor(
         plugin: Plugin,
@@ -91,6 +93,18 @@ export class HighlightDecorator {
         this.plugin.registerMarkdownPostProcessor((element) => {
             hideInlineCommentBlocks(element);
         }, 1); // priority 1 = run before default processors
+
+        // 모든 렌더 블록의 소스 줄범위를 기록한다.
+        // processPreview의 marks.length===0 조기 반환과 무관하게 동작하도록 별도 등록.
+        this.plugin.registerMarkdownPostProcessor((element, context) => {
+            const info = context.getSectionInfo(element);
+            if (info) {
+                this.sectionLineRegistry.set(element, {
+                    lineStart: info.lineStart,
+                    lineEnd: info.lineEnd,
+                });
+            }
+        });
 
         this.plugin.registerMarkdownPostProcessor((element, context) => {
             void this.previewRenderer.processPreview(element, context);
