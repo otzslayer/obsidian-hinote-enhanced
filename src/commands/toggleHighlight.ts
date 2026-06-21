@@ -4,6 +4,11 @@ import { ReadingModeHighlighter } from '../services/highlight/ReadingModeHighlig
 import type { HighlightDecorator } from '../editor/HighlightDecorator';
 import type { HiNotePluginContext } from '../types/plugin';
 
+/** Obsidian 내부 명령 API — 공개 타입에 없어 명시적으로 좁혀 쓴다. */
+interface AppWithCommands {
+    commands?: { executeCommandById?: (id: string) => boolean };
+}
+
 /**
  * Mod+Shift+S 통합 하이라이트 토글 명령.
  *
@@ -36,7 +41,7 @@ export function registerToggleHighlightCommand(
             if (mode === 'source') {
                 // 네이티브 Toggle highlight 에 위임
                 const nativeId = 'editor:toggle-highlight';
-                const commands = (ctx.app as unknown as { commands?: { executeCommandById?: (id: string) => boolean } }).commands;
+                const commands = (ctx.app as unknown as AppWithCommands).commands;
                 const executed = commands?.executeCommandById?.(nativeId);
                 if (!executed) {
                     // 네이티브 명령 부재 시 수동 폴백
