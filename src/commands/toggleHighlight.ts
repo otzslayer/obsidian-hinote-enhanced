@@ -1,4 +1,4 @@
-import { Plugin, MarkdownView } from 'obsidian';
+import { Plugin, MarkdownView, Platform } from 'obsidian';
 import { t } from '../i18n';
 import { ReadingModeHighlighter } from '../services/highlight/ReadingModeHighlighter';
 import type { HighlightDecorator } from '../editor/HighlightDecorator';
@@ -16,6 +16,11 @@ export function registerToggleHighlightCommand(
     plugin: Plugin,
     getDecorator: () => HighlightDecorator,
 ): void {
+    // 읽기 모드 하이라이트는 Mod+Shift+S 단축키 기반 데스크톱 기능이다.
+    // 모바일/터치 트리거는 plan 의 Scope Boundaries 에서 후속 작업으로 보류했으므로,
+    // manifest 의 isDesktopOnly 는 false 로 두고(플러그인 전체는 모바일 호환) 이 명령만 데스크톱에 한정한다.
+    if (Platform.isMobile) return;
+
     const ctx = plugin as unknown as HiNotePluginContext;
 
     plugin.addCommand({

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { MarkdownView } from 'obsidian';
+import { MarkdownView, Platform } from 'obsidian';
 
 vi.mock('../../src/i18n', () => ({ t: (k: string) => k }));
 vi.mock('../../src/services/highlight/ReadingModeHighlighter', () => ({
@@ -57,6 +57,17 @@ describe('registerToggleHighlightCommand', () => {
         const cmd = addCommand.mock.calls[0][0];
         expect(cmd.id).toBe('toggle-highlight');
         expect(cmd.hotkeys).toEqual([{ modifiers: ['Mod', 'Shift'], key: 'S' }]);
+    });
+
+    it('모바일에서는 명령을 등록하지 않는다 (데스크톱 전용)', () => {
+        const { plugin, addCommand, getDecorator } = makePlugin('preview');
+        (Platform as { isMobile: boolean }).isMobile = true;
+        try {
+            registerToggleHighlightCommand(plugin as never, getDecorator);
+            expect(addCommand).not.toHaveBeenCalled();
+        } finally {
+            (Platform as { isMobile: boolean }).isMobile = false;
+        }
     });
 
     it('활성 MarkdownView 없음 → checkCallback false', () => {
