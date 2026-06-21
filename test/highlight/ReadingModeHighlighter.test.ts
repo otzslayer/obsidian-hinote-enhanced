@@ -41,8 +41,9 @@ function buildHighlighter(overrides: {
     const file = overrides.file === undefined ? new TFile('test.md') : overrides.file;
     const source = overrides.sourceContent ?? 'Hello world. Nice day.';
 
+    let writtenContent: string | undefined;
     const processStub = vi.fn().mockImplementation(async (_f: unknown, fn: (c: string) => string) => {
-        fn(source);
+        writtenContent = fn(source);
     });
 
     const app = {
@@ -87,7 +88,7 @@ function buildHighlighter(overrides: {
         registry,
     );
 
-    return { highlighter, processStub, registry };
+    return { highlighter, processStub, registry, getWritten: () => writtenContent };
 }
 
 describe('ReadingModeHighlighter', () => {
@@ -95,10 +96,12 @@ describe('ReadingModeHighlighter', () => {
         noticeMessages.length = 0;
     });
 
-    it('성공 경로: 단일 블록 평문 선택 → vault.process 호출됨', async () => {
-        const { highlighter, processStub } = buildHighlighter({});
+    it('성공 경로: 단일 블록 평문 선택 → 래핑된 newText 로 vault.process 호출됨', async () => {
+        const { highlighter, processStub, getWritten } = buildHighlighter({});
         await highlighter.highlightSelection();
         expect(processStub).toHaveBeenCalledOnce();
+        // 단순히 호출 여부가 아니라 실제로 ==…== 로 감싼 결과가 기록되는지 단언 (R1)
+        expect(getWritten()).toBe('==Hello world==. Nice day.');
         expect(noticeMessages).toHaveLength(0);
     });
 

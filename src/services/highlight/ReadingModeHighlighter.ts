@@ -54,7 +54,6 @@ export class ReadingModeHighlighter {
         }
 
         const range = anchorRange;
-        let insertionFailed = false;
 
         await this.app.vault.process(file, (content) => {
             const existing = this.highlightService.extractHighlights(content, file)
@@ -71,7 +70,6 @@ export class ReadingModeHighlighter {
 
             if (result.ok) return result.newText;
 
-            insertionFailed = true;
             switch (result.reason) {
                 case 'empty':
                     new Notice(t('No text selected'));
@@ -88,9 +86,6 @@ export class ReadingModeHighlighter {
             }
             return content;
         });
-
-        if (!insertionFailed) {
-            // 성공 — 읽기 모드가 자동으로 재렌더되어 PreviewWidgetRenderer 가 새 mark 를 처리한다
-        }
+        // 성공 시 읽기 모드가 자동으로 재렌더되어 PreviewWidgetRenderer 가 새 mark 를 처리한다.
     }
 }

@@ -49,7 +49,9 @@ export function registerToggleHighlightCommand(
                     ctx.highlightService,
                     decorator.sectionLineRegistry,
                 );
-                void highlighter.highlightSelection();
+                void highlighter.highlightSelection().catch((e) => {
+                    console.error('[HiNote] reading-mode highlight failed', e);
+                });
             }
         },
     });
