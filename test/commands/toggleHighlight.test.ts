@@ -11,14 +11,19 @@ vi.mock('../../src/services/highlight/ReadingModeHighlighter', () => ({
 import { registerToggleHighlightCommand } from '../../src/commands/toggleHighlight';
 import { ReadingModeHighlighter } from '../../src/services/highlight/ReadingModeHighlighter';
 
-function makePlugin(mode: string, hasView = true) {
-    const executeCommandById = vi.fn().mockReturnValue(true);
+function makePlugin(
+    mode: string,
+    hasView = true,
+    opts: { nativeExecuted?: boolean; selection?: string } = {},
+) {
+    const executeCommandById = vi.fn().mockReturnValue(opts.nativeExecuted ?? true);
     const addCommand = vi.fn();
+    const replaceSelection = vi.fn();
 
     const view = hasView
         ? {
               getMode: () => mode,
-              editor: { getSelection: () => 'sel', replaceSelection: vi.fn() },
+              editor: { getSelection: () => opts.selection ?? 'sel', replaceSelection },
           }
         : null;
 
@@ -36,7 +41,7 @@ function makePlugin(mode: string, hasView = true) {
     const mockDecorator = { sectionLineRegistry: {} };
     const getDecorator = () => mockDecorator as never;
 
-    return { plugin, addCommand, executeCommandById, getDecorator };
+    return { plugin, addCommand, executeCommandById, getDecorator, replaceSelection };
 }
 
 function getCheckCallback(addCommand: ReturnType<typeof vi.fn>) {
@@ -90,6 +95,36 @@ describe('registerToggleHighlightCommand', () => {
         const cb = getCheckCallback(addCommand);
         cb(false);
         expect(executeCommandById).toHaveBeenCalledWith('editor:toggle-highlight');
+    });
+
+    it('source 모드 + 네이티브 부재 + 평문 선택 → ==sel== 폴백 래핑', () => {
+        const { plugin, addCommand, getDecorator, replaceSelection } = makePlugin('source', true, {
+            nativeExecuted: false,
+            selection: 'hello',
+        });
+        registerToggleHighlightCommand(plugin as never, getDecorator);
+        getCheckCallback(addCommand)(false);
+        expect(replaceSelection).toHaveBeenCalledWith('==hello==');
+    });
+
+    it('source 모드 + 네이티브 부재 + 이미 하이라이트된 선택 → 토글오프(마커 제거)', () => {
+        const { plugin, addCommand, getDecorator, replaceSelection } = makePlugin('source', true, {
+            nativeExecuted: false,
+            selection: '==hello==',
+        });
+        registerToggleHighlightCommand(plugin as never, getDecorator);
+        getCheckCallback(addCommand)(false);
+        expect(replaceSelection).toHaveBeenCalledWith('hello');
+    });
+
+    it('source 모드 + 네이티브 부재 + 빈 선택 → 무동작(==== 삽입 안 함)', () => {
+        const { plugin, addCommand, getDecorator, replaceSelection } = makePlugin('source', true, {
+            nativeExecuted: false,
+            selection: '',
+        });
+        registerToggleHighlightCommand(plugin as never, getDecorator);
+        getCheckCallback(addCommand)(false);
+        expect(replaceSelection).not.toHaveBeenCalled();
     });
 
     it('preview 모드 → ReadingModeHighlighter.highlightSelection 호출', () => {

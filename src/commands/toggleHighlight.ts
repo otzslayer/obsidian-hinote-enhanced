@@ -44,11 +44,15 @@ export function registerToggleHighlightCommand(
                 const commands = (ctx.app as unknown as AppWithCommands).commands;
                 const executed = commands?.executeCommandById?.(nativeId);
                 if (!executed) {
-                    // 네이티브 명령 부재 시 수동 폴백
+                    // 네이티브 명령 부재 시 수동 폴백 — 네이티브 토글 동작을 흉내 낸다.
                     const editor = view.editor;
                     if (editor) {
                         const sel = editor.getSelection();
-                        editor.replaceSelection(`==${sel}==`);
+                        if (!sel) return; // 빈 선택 → 무동작 (==== 삽입 방지)
+                        const isHighlighted =
+                            sel.length >= 4 && sel.startsWith('==') && sel.endsWith('==');
+                        // 이미 ==…== 면 토글오프(마커 제거), 아니면 래핑
+                        editor.replaceSelection(isHighlighted ? sel.slice(2, -2) : `==${sel}==`);
                     }
                 }
             } else {
