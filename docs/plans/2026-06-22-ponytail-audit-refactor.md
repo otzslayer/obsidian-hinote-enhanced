@@ -32,7 +32,7 @@ npm test           # vitest run → 기존 테스트 전부 통과
 
 - [x] **Wave 1** — 순수 죽은 코드 삭제 (호출자 없음, 동작·시그니처 변경 없음)
 - [x] **Wave 2** — 지역 단순화 + 단일 구현 인터페이스 제거 (호출자 타입 갱신, 사소함)
-- [ ] **Wave 3** — 구조 변경: AI 팩토리/레지스트리 → Map 리터럴 (아키텍처 설계 필요)
+- [x] **Wave 3** — 구조 변경: AI 팩토리/레지스트리 → Map 리터럴 (아키텍처 설계 필요)
 
 > 각 Wave 완료 시 위 체크박스를 `[x]`로 바꾸고, 해당 Wave 섹션 하단의 "결과 기록"에 실제 삭제 라인 수와 빌드/테스트 결과를 적은 뒤 `/clear`.
 
@@ -162,8 +162,19 @@ AIServiceManager
 - `getRegisteredProviders()` 호출자 존재 여부 (Manager가 위임함) → 대체 구조에서 동등 기능 유지.
 - `AIServiceManager`의 `register*`/`getService` 의존 지점이 외부에 노출되는지.
 
-### 결과 기록 (실행 시 작성)
-- 삭제 라인: ___ / 빌드: ___ / 테스트: ___
+### 결과 기록
+- 삭제 라인: net -162줄 (소스 6파일, +61 / -223). `AIServiceRegistry.ts`(-66) 통째 삭제, `factories.ts` 7개 클래스 → `AI_SERVICE_FACTORIES` Record 맵(-45 net), `IAIServiceFactory` 인터페이스 제거.
+- 빌드: ✅ tsc -noEmit 타입 에러 0 / 테스트: ✅ 19 files, 136 tests all passed
+  - ⚠️ **검증 한계**: `test/`는 `services/ai`를 import하지 않아 이 경로(Manager/registry/factories)를 실행하지 않는다.
+    따라서 "테스트 통과"는 동작 보존을 직접 증명하지 못하며, **tsc 타입체크 + 수동 등가성 검증(8개 registry 호출지점 1:1 매핑)**이 실질 안전망이었다.
+- 설계 결정:
+  - 7개 `XxxServiceFactory` → `Record<AIProviderType, (settings) => IAIService>` 1개. 각 엔트리 = 기존 `create()` 본문. `getProviderType()`는 Record 키가 대체하므로 제거.
+  - `AIServiceRegistry` → `AIServiceManager` 내부로 흡수 (`instances` Map + private `getService(provider)` 지연·캐시·`isConfigured` + private `clearCache(provider?)`). 보존 의미 ①②③④ 모두 유지.
+  - `OllamaServiceAdapter`는 `factories.ts`에 유지 (이동 최소화 — 별도 파일 불필요).
+  - `getRegisteredProviders()`(외부 호출자 0이지만 public API) → `Object.keys(AI_SERVICE_FACTORIES)`로 동등 유지.
+  - 제거된 `config` 파라미터(모든 호출자가 `this.settings` 전달)·"not registered" 가드(Record가 enum 전체를 커버해 도달 불가): 둘 다 안전한 단순화.
+  - `index.ts`/`BaseAIService.ts`의 `IAIServiceFactory`·`AIServiceRegistry`·7개 팩토리 배럴 export 제거 (전부 미사용 확인).
+- 검증: 저장소 전체(`.ts`/`.mjs`/`.js`, main.ts 포함) grep로 제거 심볼 잔존 0건 확인 (Wave 1 minimatch `.mjs` 사각지대 재발 방지).
 
 ---
 

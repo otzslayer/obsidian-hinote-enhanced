@@ -1,9 +1,9 @@
 /**
- * AI 서비스 팩토리 모음
- * 각 AI 서비스에 대한 팩토리 구현을 제공합니다
+ * AI 서비스 생성자 맵
+ * 각 공급자 유형을 해당 IAIService 인스턴스 생성 함수로 매핑합니다
  */
 
-import { IAIService, IAIServiceFactory, AIProviderType, AIServiceError } from './BaseAIService';
+import { IAIService, AIProviderType, AIServiceError } from './BaseAIService';
 import type { AIMessage, AIModel } from './BaseAIService';
 import type { AISettings } from '../../types/ai';
 import { OpenAIService } from './OpenAIService';
@@ -15,143 +15,79 @@ import { OllamaService } from './OllamaService';
 import { CustomAIService } from './CustomAIService';
 
 /**
- * OpenAI 서비스 팩토리
+ * 공급자 유형별 서비스 인스턴스 생성 함수 맵
+ * 각 엔트리는 설정을 검증한 뒤 해당 IAIService 인스턴스를 생성합니다
  */
-export class OpenAIServiceFactory implements IAIServiceFactory {
-    getProviderType(): AIProviderType {
-        return AIProviderType.OPENAI;
-    }
-
-    create(settings: AISettings): IAIService {
+export const AI_SERVICE_FACTORIES: Record<AIProviderType, (settings: AISettings) => IAIService> = {
+    [AIProviderType.OPENAI]: (settings) => {
         if (!settings.openai?.apiKey) {
             throw AIServiceError.notConfigured(AIProviderType.OPENAI, 'API key not configured');
         }
-
         return new OpenAIService(
             settings.openai.apiKey,
             settings.openai.model || 'gpt-4o',
             settings.openai.baseUrl
         );
-    }
-}
+    },
 
-/**
- * Anthropic 서비스 팩토리
- */
-export class AnthropicServiceFactory implements IAIServiceFactory {
-    getProviderType(): AIProviderType {
-        return AIProviderType.ANTHROPIC;
-    }
-
-    create(settings: AISettings): IAIService {
+    [AIProviderType.ANTHROPIC]: (settings) => {
         if (!settings.anthropic?.apiKey) {
             throw AIServiceError.notConfigured(AIProviderType.ANTHROPIC, 'API key not configured');
         }
-
         return new AnthropicService(
             settings.anthropic.apiKey,
             settings.anthropic.apiAddress,
             settings.anthropic.model
         );
-    }
-}
+    },
 
-/**
- * Gemini 서비스 팩토리
- */
-export class GeminiServiceFactory implements IAIServiceFactory {
-    getProviderType(): AIProviderType {
-        return AIProviderType.GEMINI;
-    }
-
-    create(settings: AISettings): IAIService {
+    [AIProviderType.GEMINI]: (settings) => {
         if (!settings.gemini?.apiKey) {
             throw AIServiceError.notConfigured(AIProviderType.GEMINI, 'API key not configured');
         }
-
         return new GeminiService(
             settings.gemini.apiKey,
             settings.gemini.model || 'gemini-2.5-flash',
             settings.gemini.baseUrl
         );
-    }
-}
+    },
 
-/**
- * Deepseek 서비스 팩토리
- */
-export class DeepseekServiceFactory implements IAIServiceFactory {
-    getProviderType(): AIProviderType {
-        return AIProviderType.DEEPSEEK;
-    }
-
-    create(settings: AISettings): IAIService {
+    [AIProviderType.DEEPSEEK]: (settings) => {
         if (!settings.deepseek?.apiKey) {
             throw AIServiceError.notConfigured(AIProviderType.DEEPSEEK, 'API key not configured');
         }
-
         return new DeepseekService(
             settings.deepseek.apiKey,
             settings.deepseek.model || 'deepseek-chat',
             settings.deepseek.baseUrl
         );
-    }
-}
+    },
 
-/**
- * SiliconFlow 서비스 팩토리
- */
-export class SiliconFlowServiceFactory implements IAIServiceFactory {
-    getProviderType(): AIProviderType {
-        return AIProviderType.SILICONFLOW;
-    }
-
-    create(settings: AISettings): IAIService {
+    [AIProviderType.SILICONFLOW]: (settings) => {
         if (!settings.siliconflow?.apiKey) {
             throw AIServiceError.notConfigured(AIProviderType.SILICONFLOW, 'API key not configured');
         }
-
         return new SiliconFlowService(settings);
-    }
-}
+    },
 
-/**
- * Ollama 서비스 팩토리
- */
-export class OllamaServiceFactory implements IAIServiceFactory {
-    getProviderType(): AIProviderType {
-        return AIProviderType.OLLAMA;
-    }
-
-    create(settings: AISettings): IAIService {
+    [AIProviderType.OLLAMA]: (settings) => {
         if (!settings.ollama?.host) {
             throw AIServiceError.notConfigured(AIProviderType.OLLAMA, 'Host not configured');
         }
-
         // Ollama는 인터페이스가 다르기 때문에 어댑터가 필요합니다
         return new OllamaServiceAdapter(
             settings.ollama.host,
             settings.ollama.model || ''
         );
-    }
-}
+    },
 
-/**
- * Custom 서비스 팩토리
- */
-export class CustomAIServiceFactory implements IAIServiceFactory {
-    getProviderType(): AIProviderType {
-        return AIProviderType.CUSTOM;
-    }
-
-    create(settings: AISettings): IAIService {
+    [AIProviderType.CUSTOM]: (settings) => {
         if (!settings.custom?.apiKey || !settings.custom?.baseUrl || !settings.custom?.model) {
             throw AIServiceError.notConfigured(
                 AIProviderType.CUSTOM,
                 'API key, base URL, or model not configured'
             );
         }
-
         return new CustomAIService(
             settings.custom.apiKey,
             settings.custom.baseUrl,
@@ -159,8 +95,8 @@ export class CustomAIServiceFactory implements IAIServiceFactory {
             settings.custom.headers,
             settings.custom.detectedApiType
         );
-    }
-}
+    },
+};
 
 /**
  * Ollama 서비스 어댑터

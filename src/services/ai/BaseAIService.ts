@@ -1,21 +1,19 @@
 import { BaseHTTPClient } from './BaseHTTPClient';
-import { 
+import {
     IAIService,
-    IAIServiceFactory,
-    AIMessage, 
-    AIServiceConfig, 
-    AIProviderType, 
+    AIMessage,
+    AIServiceConfig,
+    AIProviderType,
     AIModel,
     AIServiceError,
     AIErrorCode
 } from './types';
 
 // 다른 서비스에서 사용할 수 있도록 타입 재내보내기
-export type { 
+export type {
     IAIService,
-    IAIServiceFactory,
-    AIMessage, 
-    AIServiceConfig, 
+    AIMessage,
+    AIServiceConfig,
     AIModel
 };
 
