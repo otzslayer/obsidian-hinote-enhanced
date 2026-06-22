@@ -1,6 +1,6 @@
 import { App, TFile } from 'obsidian';
 import { HighlightInfo as HiNote } from '../types/highlight';
-import { IHighlightRepository } from '../repositories/IHighlightRepository';
+import { HighlightRepository } from '../repositories/HighlightRepository';
 import { EventManager } from './EventManager';
 import { HighlightService } from './HighlightService';
 import { IdGenerator } from '../utils/IdGenerator';
@@ -16,7 +16,7 @@ import { IdGenerator } from '../utils/IdGenerator';
 export class HighlightManager {
     constructor(
         private app: App,
-        private repository: IHighlightRepository,
+        private repository: HighlightRepository,
         private eventManager: EventManager,
         private highlightService: HighlightService
     ) {}

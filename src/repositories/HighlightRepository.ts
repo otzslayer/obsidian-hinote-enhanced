@@ -1,7 +1,6 @@
 import { TFile } from 'obsidian';
 import { HighlightInfo as HiNote } from '../types/highlight';
 import { HiNoteDataManager } from '../storage/HiNoteDataManager';
-import { IHighlightRepository } from './IHighlightRepository';
 
 /**
  * 하이라이트 데이터 저장소 구현체
@@ -10,7 +9,7 @@ import { IHighlightRepository } from './IHighlightRepository';
  * 2. 데이터 영속성 작업 조율
  * 3. 통합된 데이터 접근 인터페이스 제공
  */
-export class HighlightRepository implements IHighlightRepository {
+export class HighlightRepository {
     private cache: Map<string, HiNote[]> = new Map();
     private dataManager: HiNoteDataManager;
 
