@@ -3,51 +3,51 @@
  * 통일된 AI 서비스 접근 인터페이스를 제공하며, 기존 AIService를 대체합니다
  */
 
-import { AIMessage, AIModel, AIProviderType } from './BaseAIService';
+import { AIMessage, AIModel, AIProviderType, IAIService } from './BaseAIService';
 import type { AISettings } from '../../types/ai';
-import { AIServiceRegistry } from './AIServiceRegistry';
-import {
-    OpenAIServiceFactory,
-    AnthropicServiceFactory,
-    GeminiServiceFactory,
-    DeepseekServiceFactory,
-    SiliconFlowServiceFactory,
-    OllamaServiceFactory,
-    CustomAIServiceFactory
-} from './factories';
+import { AI_SERVICE_FACTORIES } from './factories';
 
 export class AIServiceManager {
-    private registry: AIServiceRegistry;
+    private instances = new Map<AIProviderType, IAIService>();
     private currentProvider: AIProviderType;
     private settings: AISettings;
     
     constructor(settings: AISettings) {
         this.settings = settings;
-        this.registry = new AIServiceRegistry();
         this.currentProvider = this.parseProvider(settings.provider);
-        
-        // 모든 서비스 팩토리 등록
-        this.registerAllServices();
     }
-    
+
     /**
-     * 모든 AI 서비스 등록
+     * 서비스 인스턴스 가져오기 (지연 생성 + 캐싱)
+     * 캐시된 인스턴스가 설정 완료 상태일 때만 재사용하고, 그렇지 않으면 새로 생성합니다
      */
-    private registerAllServices(): void {
-        this.registry.register(new OpenAIServiceFactory());
-        this.registry.register(new AnthropicServiceFactory());
-        this.registry.register(new GeminiServiceFactory());
-        this.registry.register(new DeepseekServiceFactory());
-        this.registry.register(new SiliconFlowServiceFactory());
-        this.registry.register(new OllamaServiceFactory());
-        this.registry.register(new CustomAIServiceFactory());
+    private getService(provider: AIProviderType): IAIService {
+        const cached = this.instances.get(provider);
+        if (cached?.isConfigured()) {
+            return cached;
+        }
+
+        const service = AI_SERVICE_FACTORIES[provider](this.settings);
+        this.instances.set(provider, service);
+        return service;
     }
-    
+
+    /**
+     * 캐시 초기화 (설정 업데이트 시 사용)
+     */
+    private clearCache(provider?: AIProviderType): void {
+        if (provider) {
+            this.instances.delete(provider);
+        } else {
+            this.instances.clear();
+        }
+    }
+
     /**
      * 현재 서비스 인스턴스 가져오기
      */
     private getCurrentService() {
-        return this.registry.getService(this.currentProvider, this.settings);
+        return this.getService(this.currentProvider);
     }
     
     /**
@@ -71,7 +71,7 @@ export class AIServiceManager {
     async testConnection(provider?: AIProviderType): Promise<boolean> {
         const targetProvider = provider || this.currentProvider;
         try {
-            const service = this.registry.getService(targetProvider, this.settings);
+            const service = this.getService(targetProvider);
             return await service.testConnection();
         } catch {
             return false;
@@ -83,7 +83,7 @@ export class AIServiceManager {
      */
     updateModel(provider: AIProviderType, model: string): void {
         // 캐시를 지우고, 다음 조회 시 새 모델을 사용합니다
-        this.registry.clearCache(provider);
+        this.clearCache(provider);
 
         // 설정의 모델 업데이트
         switch (provider) {
@@ -117,7 +117,7 @@ export class AIServiceManager {
     async listModels(provider?: AIProviderType): Promise<AIModel[]> {
         const targetProvider = provider || this.currentProvider;
         try {
-            const service = this.registry.getService(targetProvider, this.settings);
+            const service = this.getService(targetProvider);
             return await service.listModels();
         } catch (error) {
             console.error(`Failed to list models for ${targetProvider}:`, error);
@@ -144,7 +144,7 @@ export class AIServiceManager {
      * 등록된 모든 공급자 가져오기
      */
     getRegisteredProviders(): AIProviderType[] {
-        return this.registry.getRegisteredProviders();
+        return Object.keys(AI_SERVICE_FACTORIES) as AIProviderType[];
     }
     
     /**
@@ -198,6 +198,6 @@ export class AIServiceManager {
     updateSettings(settings: AISettings): void {
         this.settings = settings;
         this.currentProvider = this.parseProvider(settings.provider);
-        this.registry.clearCache();
+        this.clearCache();
     }
 }

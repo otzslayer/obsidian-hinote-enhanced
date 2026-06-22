@@ -27,23 +27,6 @@ export class HighlightMatcher {
     ) {}
 
     /**
-     * 여러 전략을 사용하여 하이라이트와 후보 댓글을 매칭합니다.
-     */
-    static findMatch(
-        target: HiNote,
-        candidates: HiNote[]
-    ): HiNote | null {
-        return findStoredHighlightMatch(target, candidates)?.highlight || null;
-    }
-
-    /**
-     * 통합 매칭 전략으로 후보 하이라이트를 검색합니다.
-     */
-    static findExactMatch(target: HiNote, candidates: HiNote[]): HiNote | null {
-        return findStoredHighlightMatch(target, candidates)?.highlight || null;
-    }
-
-    /**
      * 주어진 하이라이트와 가장 잘 일치하는 저장된 하이라이트를 검색합니다
      * 통합 전략으로 매칭하며 순수 위치 매칭은 허용하지 않습니다.
      */

@@ -1,5 +1,3 @@
-import type { AISettings } from '../../types/ai';
-
 /**
  * AI 서비스 타입 정의
  * 통일된 AI 서비스 인터페이스 및 타입
@@ -158,24 +156,4 @@ export interface IAIService {
      * 설정 완료 여부 확인
      */
     isConfigured(): boolean;
-}
-
-/**
- * AI 서비스 팩토리 인터페이스
- */
-export interface IAIServiceFactory {
-    /**
-     * 서비스 인스턴스 생성
-     */
-    create(settings: AISettings): IAIService;
-
-    /**
-     * 해당 공급자 지원 여부 확인
-     */
-    supports(provider: AIProviderType): boolean;
-
-    /**
-     * 공급자 유형 가져오기
-     */
-    getProviderType(): AIProviderType;
 }

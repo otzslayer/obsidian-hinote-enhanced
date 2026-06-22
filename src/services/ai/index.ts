@@ -4,7 +4,6 @@
 
 // 핵심 관리자
 export { AIServiceManager } from './AIServiceManager';
-export { AIServiceRegistry } from './AIServiceRegistry';
 
 // 기본 클래스
 export { BaseAIService } from './BaseAIService';
@@ -22,7 +21,6 @@ export {
 
 export type {
     IAIService,
-    IAIServiceFactory,
     AIMessage,
     AIServiceConfig,
     AIModel
@@ -36,14 +34,3 @@ export { DeepseekService } from './DeepseekService';
 export { SiliconFlowService } from './SiliconFlowService';
 export { OllamaService } from './OllamaService';
 export { CustomAIService } from './CustomAIService';
-
-// 팩토리 클래스 (커스텀 등록이 필요한 경우)
-export {
-    OpenAIServiceFactory,
-    AnthropicServiceFactory,
-    GeminiServiceFactory,
-    DeepseekServiceFactory,
-    SiliconFlowServiceFactory,
-    OllamaServiceFactory,
-    CustomAIServiceFactory
-} from './factories';
