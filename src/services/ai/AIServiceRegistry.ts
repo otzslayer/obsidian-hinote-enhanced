@@ -63,6 +63,4 @@ export class AIServiceRegistry {
     getRegisteredProviders(): AIProviderType[] {
         return Array.from(this.factories.keys());
     }
-    
-
 }
