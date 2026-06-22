@@ -31,7 +31,7 @@ npm test           # vitest run → 기존 테스트 전부 통과
 ## 진행 상태
 
 - [x] **Wave 1** — 순수 죽은 코드 삭제 (호출자 없음, 동작·시그니처 변경 없음)
-- [ ] **Wave 2** — 지역 단순화 + 단일 구현 인터페이스 제거 (호출자 타입 갱신, 사소함)
+- [x] **Wave 2** — 지역 단순화 + 단일 구현 인터페이스 제거 (호출자 타입 갱신, 사소함)
 - [ ] **Wave 3** — 구조 변경: AI 팩토리/레지스트리 → Map 리터럴 (아키텍처 설계 필요)
 
 > 각 Wave 완료 시 위 체크박스를 `[x]`로 바꾸고, 해당 Wave 섹션 하단의 "결과 기록"에 실제 삭제 라인 수와 빌드/테스트 결과를 적은 뒤 `/clear`.
@@ -122,8 +122,9 @@ npm test           # vitest run → 기존 테스트 전부 통과
   - FSRSService를 지우면 ts-fsrs 라이브러리 타입이 설정 UI/통계 계층으로 누출됨 → 유지가 옳다.
   - `getReviewableCards`, `resetParameters`도 어댑터에 없는 고유 메서드.
 
-### 결과 기록 (실행 시 작성)
-- 삭제 라인: ___ / 빌드: ___ / 테스트: ___
+### 결과 기록
+- 삭제 라인: -77줄 (`IHighlightRepository.ts` -76, 참조 교체 +/-1) / 빌드: ✅ 타입 에러 0 / 테스트: ✅ 19 files, 136 tests all passed
+- 커밋: 9ca114a (refactor/ponytail-audit-refactor)
 
 ---
 
