@@ -110,16 +110,6 @@ export class BaseHTTPClient {
     }
 
     /**
-     * 표준 JSON 요청 헤더 생성
-     */
-    static buildJSONHeaders(additionalHeaders?: Record<string, string>): Record<string, string> {
-        return {
-            'Content-Type': 'application/json',
-            ...additionalHeaders
-        };
-    }
-
-    /**
      * 인증이 포함된 요청 헤더 생성
      */
     static buildAuthHeaders(apiKey: string, authType: 'Bearer' | 'ApiKey' = 'Bearer'): Record<string, string> {

@@ -22,10 +22,6 @@ export class OpenAIServiceFactory implements IAIServiceFactory {
         return AIProviderType.OPENAI;
     }
 
-    supports(provider: AIProviderType): boolean {
-        return provider === AIProviderType.OPENAI;
-    }
-
     create(settings: AISettings): IAIService {
         if (!settings.openai?.apiKey) {
             throw AIServiceError.notConfigured(AIProviderType.OPENAI, 'API key not configured');
@@ -45,10 +41,6 @@ export class OpenAIServiceFactory implements IAIServiceFactory {
 export class AnthropicServiceFactory implements IAIServiceFactory {
     getProviderType(): AIProviderType {
         return AIProviderType.ANTHROPIC;
-    }
-
-    supports(provider: AIProviderType): boolean {
-        return provider === AIProviderType.ANTHROPIC;
     }
 
     create(settings: AISettings): IAIService {
@@ -72,10 +64,6 @@ export class GeminiServiceFactory implements IAIServiceFactory {
         return AIProviderType.GEMINI;
     }
 
-    supports(provider: AIProviderType): boolean {
-        return provider === AIProviderType.GEMINI;
-    }
-
     create(settings: AISettings): IAIService {
         if (!settings.gemini?.apiKey) {
             throw AIServiceError.notConfigured(AIProviderType.GEMINI, 'API key not configured');
@@ -95,10 +83,6 @@ export class GeminiServiceFactory implements IAIServiceFactory {
 export class DeepseekServiceFactory implements IAIServiceFactory {
     getProviderType(): AIProviderType {
         return AIProviderType.DEEPSEEK;
-    }
-
-    supports(provider: AIProviderType): boolean {
-        return provider === AIProviderType.DEEPSEEK;
     }
 
     create(settings: AISettings): IAIService {
@@ -122,10 +106,6 @@ export class SiliconFlowServiceFactory implements IAIServiceFactory {
         return AIProviderType.SILICONFLOW;
     }
 
-    supports(provider: AIProviderType): boolean {
-        return provider === AIProviderType.SILICONFLOW;
-    }
-
     create(settings: AISettings): IAIService {
         if (!settings.siliconflow?.apiKey) {
             throw AIServiceError.notConfigured(AIProviderType.SILICONFLOW, 'API key not configured');
@@ -141,10 +121,6 @@ export class SiliconFlowServiceFactory implements IAIServiceFactory {
 export class OllamaServiceFactory implements IAIServiceFactory {
     getProviderType(): AIProviderType {
         return AIProviderType.OLLAMA;
-    }
-
-    supports(provider: AIProviderType): boolean {
-        return provider === AIProviderType.OLLAMA;
     }
 
     create(settings: AISettings): IAIService {
@@ -166,10 +142,6 @@ export class OllamaServiceFactory implements IAIServiceFactory {
 export class CustomAIServiceFactory implements IAIServiceFactory {
     getProviderType(): AIProviderType {
         return AIProviderType.CUSTOM;
-    }
-
-    supports(provider: AIProviderType): boolean {
-        return provider === AIProviderType.CUSTOM;
     }
 
     create(settings: AISettings): IAIService {

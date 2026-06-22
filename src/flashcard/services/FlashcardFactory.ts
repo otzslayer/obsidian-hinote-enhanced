@@ -32,22 +32,7 @@ export class FlashcardFactory {
      * @returns 생성된 카드
      */
     public createCard(text: string, answer: string, filePath?: string): FlashcardState {
-        // FSRS 서비스로 카드 생성
-        try {
-            // initializeCard 메서드로 카드 생성
-            const card = this.fsrsService.initializeCard(text, answer, filePath);
-            return card;
-        } catch (err) {
-            console.error('카드 생성 중 오류:', err);
-            // 생성 실패 시 재시도
-            try {
-                return this.fsrsService.initializeCard(text, answer, filePath);
-            } catch (e) {
-                console.error('두 번째 카드 생성 시도 실패:', e);
-                // 여전히 실패하면 가장 간단한 방법으로 카드 생성
-                return this.fsrsService.initializeCard(text, answer, filePath);
-            }
-        }
+        return this.fsrsService.initializeCard(text, answer, filePath);
     }
     
     /**

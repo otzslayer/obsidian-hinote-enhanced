@@ -170,11 +170,6 @@ export interface IAIServiceFactory {
     create(settings: AISettings): IAIService;
 
     /**
-     * 해당 공급자 지원 여부 확인
-     */
-    supports(provider: AIProviderType): boolean;
-
-    /**
      * 공급자 유형 가져오기
      */
     getProviderType(): AIProviderType;

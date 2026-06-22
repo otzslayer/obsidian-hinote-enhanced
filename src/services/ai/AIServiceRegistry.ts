@@ -19,13 +19,6 @@ export class AIServiceRegistry {
     }
     
     /**
-     * 서비스 팩토리 일괄 등록
-     */
-    registerAll(factories: IAIServiceFactory[]): void {
-        factories.forEach(factory => this.register(factory));
-    }
-    
-    /**
      * 서비스 인스턴스 가져오기 (지연 로딩)
      */
     getService(provider: AIProviderType, config: AISettings): IAIService {
@@ -54,13 +47,6 @@ export class AIServiceRegistry {
     }
     
     /**
-     * 서비스 등록 여부 확인
-     */
-    isRegistered(provider: AIProviderType): boolean {
-        return this.factories.has(provider);
-    }
-    
-    /**
      * 캐시 초기화 (설정 업데이트 시 사용)
      */
     clearCache(provider?: AIProviderType): void {
@@ -78,10 +64,5 @@ export class AIServiceRegistry {
         return Array.from(this.factories.keys());
     }
     
-    /**
-     * 생성된 모든 서비스 인스턴스 가져오기
-     */
-    getActiveServices(): AIProviderType[] {
-        return Array.from(this.instances.keys());
-    }
+
 }
