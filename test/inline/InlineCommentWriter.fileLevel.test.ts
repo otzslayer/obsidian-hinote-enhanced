@@ -111,6 +111,76 @@ describe('InlineCommentWriter.updateFileLevelCommentAt', () => {
     });
 });
 
+// ── deleteAllFileLevelComments ───────────────────────────────
+
+describe('InlineCommentWriter.deleteAllFileLevelComments', () => {
+    it('HiNote 항목만 존재 시 전부 제거 → comments:[], success:true', async () => {
+        const { app, getFm } = mkApp();
+        seed(getFm(), [
+            { text: 'a', ts: '2026-06-23 10:00' },
+            { text: 'b', ts: '2026-06-23 10:01' },
+        ]);
+        const writer = new InlineCommentWriter(app);
+
+        const result = await writer.deleteAllFileLevelComments(mkFile());
+
+        expect(result.success).toBe(true);
+        const comments = getFm().comments as unknown[];
+        expect(comments).toEqual([]);
+    });
+
+    it('foreign 항목 보존: HiNote 항목만 제거됨, success:true', async () => {
+        const { app, getFm } = mkApp();
+        (getFm() as Record<string, unknown>).comments = [
+            { note: 'foreign' },
+            { text: 'a', ts: '2026-06-23 10:00' },
+            { text: 'b', ts: '2026-06-23 10:01' },
+        ];
+        const writer = new InlineCommentWriter(app);
+
+        const result = await writer.deleteAllFileLevelComments(mkFile());
+
+        expect(result.success).toBe(true);
+        const comments = getFm().comments as unknown[];
+        expect(comments).toHaveLength(1);
+        expect(comments[0]).toMatchObject({ note: 'foreign' });
+    });
+
+    it('comments 키 없음 → success:true, graceful no-op', async () => {
+        const { app } = mkApp();
+        const writer = new InlineCommentWriter(app);
+
+        const result = await writer.deleteAllFileLevelComments(mkFile());
+
+        expect(result.success).toBe(true);
+    });
+
+    it('빈 배열 → success:true, graceful no-op', async () => {
+        const { app, getFm } = mkApp();
+        (getFm() as Record<string, unknown>).comments = [];
+        const writer = new InlineCommentWriter(app);
+
+        const result = await writer.deleteAllFileLevelComments(mkFile());
+
+        expect(result.success).toBe(true);
+        const comments = getFm().comments as unknown[];
+        expect(comments).toEqual([]);
+    });
+
+    it('processFrontMatter가 throw 시 success:false, reason 포함', async () => {
+        const { app } = mkApp();
+        app.fileManager.processFrontMatter = vi.fn(async () => {
+            throw new Error('disk full');
+        });
+        const writer = new InlineCommentWriter(app);
+
+        const result = await writer.deleteAllFileLevelComments(mkFile());
+
+        expect(result.success).toBe(false);
+        expect(result.reason).toBe('disk full');
+    });
+});
+
 // ── deleteFileLevelCommentAt ─────────────────────────────────
 
 describe('InlineCommentWriter.deleteFileLevelCommentAt', () => {

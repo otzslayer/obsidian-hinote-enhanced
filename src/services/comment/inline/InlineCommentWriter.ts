@@ -127,6 +127,18 @@ export class InlineCommentWriter {
         return ok ? { success: true } : { success: false, reason: 'anchor mismatch' };
     }
 
+    async deleteAllFileLevelComments(file: TFile): Promise<WriteResult> {
+        try {
+            await this.app.fileManager.processFrontMatter(file, (fm) => {
+                const existing = Array.isArray(fm.comments) ? fm.comments : [];
+                fm.comments = mergeFileLevelComments(existing, []);
+            });
+            return { success: true };
+        } catch (e) {
+            return { success: false, reason: e instanceof Error ? e.message : 'write failed' };
+        }
+    }
+
     async deleteFileLevelCommentAt(
         file: TFile,
         index: number,
