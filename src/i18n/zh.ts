@@ -142,6 +142,8 @@ export default {
     "Export as notes": "导出为笔记",
     "Add File Comment": "添加文件评论",
     "File Comment": "文件评论",
+    "File comments": "文件评论",
+    "Add file comment placeholder": "输入评论...",
     "Successfully exported highlights to: ": "成功导出高亮到：",
     "Failed to export highlights: ": "无法导出高亮：",
 

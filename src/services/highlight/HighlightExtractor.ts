@@ -89,14 +89,18 @@ export class HighlightExtractor {
         const fileLevelComments = this.extractFileLevelComments(file);
         if (fileLevelComments.length > 0) {
             highlights.push({
+                id: IdGenerator.generateHighlightId(file.path, -1, ''),
                 text: '',
                 position: -1,
                 isVirtual: true,
-                comments: fileLevelComments.map(c => ({
+                filePath: file.path,
+                fileName: file.basename,
+                comments: fileLevelComments.map((c, i) => ({
                     id: IdGenerator.generateCommentId(),
                     content: c.text,
                     createdAt: this.parseTimestampToMs(c.ts),
                     updatedAt: this.parseTimestampToMs(c.ts),
+                    fileCommentIndex: i,
                 })),
             });
         }

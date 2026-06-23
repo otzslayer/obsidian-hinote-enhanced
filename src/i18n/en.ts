@@ -142,6 +142,8 @@ export default {
     "Export as notes": "Export as notes",
     "Add File Comment": "Add file comment",
     "File Comment": "File comment",
+    "File comments": "File comments",
+    "Add file comment placeholder": "Enter your comment...",
     "Successfully exported highlights to: ": "Successfully exported highlights to: ",
     "Failed to export highlights: ": "Failed to export highlights: ",
 
