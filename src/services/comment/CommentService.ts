@@ -220,8 +220,9 @@ export class CommentService {
                 return;
             }
             highlight.comments = highlight.comments.filter(c => c.id !== commentId);
-            // ordinal 재계산
-            highlight.comments.forEach((c, i) => { c.fileCommentIndex = i; });
+            // ordinal 재계산 — fileCommentIndex가 있는 항목만 재번호 부여
+            let fileLevelIdx = 0;
+            highlight.comments.forEach((c) => { if (c.fileCommentIndex !== undefined) c.fileCommentIndex = fileLevelIdx++; });
             highlight.updatedAt = Date.now();
 
             if (highlight.comments.length === 0) {
@@ -229,8 +230,8 @@ export class CommentService {
                     if (h.id && highlight.id) return h.id !== highlight.id;
                     return !(h.position === highlight.position && h.text === highlight.text);
                 });
-                if (this.onHighlightsUpdate) this.onHighlightsUpdate(this.highlights);
                 if (this.onCardRemove) this.onCardRemove(highlight);
+                if (this.onHighlightsUpdate) this.onHighlightsUpdate(this.highlights);
             } else {
                 if (this.onCardUpdate) {
                     this.onCardUpdate(highlight);

@@ -13,6 +13,7 @@ import { showFileCommentModal } from "../../../components/comment/FileCommentMod
  */
 export class VirtualHighlightManager {
     private addCommentButton: HTMLElement | null = null;
+    private isModalOpen = false;
 
     constructor(
         private app: App,
@@ -53,16 +54,22 @@ export class VirtualHighlightManager {
         getCurrentFile: () => TFile | null;
         onAddFileComment: (file: TFile, text: string) => void | Promise<void>;
     }): Promise<void> {
-        const currentFile = callbacks.getCurrentFile();
+        if (this.isModalOpen) return;
+        this.isModalOpen = true;
+        try {
+            const currentFile = callbacks.getCurrentFile();
 
-        if (!currentFile) {
-            new Notice(t("Please open a file first."));
-            return;
-        }
+            if (!currentFile) {
+                new Notice(t("Please open a file first."));
+                return;
+            }
 
-        const text = await showFileCommentModal(this.app);
-        if (text) {
-            await callbacks.onAddFileComment(currentFile, text);
+            const text = await showFileCommentModal(this.app);
+            if (text) {
+                await callbacks.onAddFileComment(currentFile, text);
+            }
+        } finally {
+            this.isModalOpen = false;
         }
     }
 
