@@ -20,5 +20,13 @@ A Comment attached to a Note as a whole rather than to a specific Highlight. Sto
 ### Orphan Comment
 An Inline Comment Block whose immediately preceding Highlight marker has been deleted or moved. Orphan Comments are tagged `isOrphan: true` in the in-memory model and surfaced in the sidebar as a distinct group. The plugin never auto-deletes Orphan Comments — removal is always an explicit user action.
 
+### Virtual Highlight
+A synthetic HighlightInfo entry (`isVirtual: true`, `position: -1`) that has no corresponding text span in the note. Used to represent file-level Comments in the sidebar alongside real Highlights, so the UI can treat both with the same card rendering path. Not stored in note body; its Comments are persisted in the note's YAML frontmatter.
+
 ### Anchor Safety
-The write-path invariant that prevents note corruption: before patching a note, the writer re-parses the current file content and verifies that the target block matches the expected `(highlight text, ordinal, current comment text)` triplet. On mismatch the write is aborted and the user is notified; the note is left unchanged. This guards against concurrent edits, remote Sync delivery, or stale in-memory state between the read and write operations.
+The write-path invariant that prevents note corruption. Two paths, two anchor checks:
+
+- **Inline path**: before patching a note, the writer re-parses the current file content and verifies that the target block matches the expected `(highlight text, ordinal, current comment text)` triplet.
+- **File-level path**: inside a `processFrontMatter` callback, the writer checks that `comments[fileCommentIndex].text === expectedText` before modifying the array. On mismatch the callback returns early without writing.
+
+On mismatch in either path the write is aborted and the user is notified; the note is left unchanged. Guards against concurrent edits, remote Sync delivery, or stale in-memory state between the read and write operations.
