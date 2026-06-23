@@ -5,6 +5,7 @@ import CommentPlugin from '../../../../main';
 import { t } from '../../../i18n';
 import type { PluginSettings } from '../../../types/settings';
 import { showConfirmModal } from '../../../utils/ConfirmModal';
+import { InlineCommentWriter } from '../../../services/comment/inline/InlineCommentWriter';
 
 type LegacyHighlightSettings = PluginSettings & {
     customHighlightRegex?: string;
@@ -45,6 +46,20 @@ export class HighlightDeletionManager {
                 }
             }
             
+            // 파일 레벨 코멘트 통합 카드 전체 삭제 (position === -1)
+            if (highlight.position === -1) {
+                const file = this.plugin.app.vault.getAbstractFileByPath(highlight.filePath ?? '');
+                if (file instanceof TFile) {
+                    const r = await new InlineCommentWriter(this.plugin.app).deleteAllFileLevelComments(file);
+                    if (!r.success) {
+                        if (!skipNotice) new Notice(t('Failed to delete highlight: ') + (r.reason ?? ''));
+                        return false;
+                    }
+                }
+                if (!skipNotice) new Notice(t('File comment deleted successfully'));
+                return true;
+            }
+
             // 파일의 하이라이트 형식 삭제
             if (highlight.filePath) {
                 await this.removeHighlightFromFile(highlight);
