@@ -2,7 +2,7 @@ import { TFile, App, Notice } from 'obsidian';
 import { HighlightInfo, CommentItem } from '../../types/highlight';
 import { HighlightManager } from '../HighlightManager';
 import { IdGenerator } from '../../utils/IdGenerator';
-import { InlineCommentWriter } from './inline/InlineCommentWriter';
+import { InlineCommentWriter, type WriteResult } from './inline/InlineCommentWriter';
 import CommentPlugin from '../../../main';
 import { t } from '../../i18n';
 import { formatTimestamp } from '../../utils/timestamp';
@@ -152,9 +152,32 @@ export class CommentService {
             return;
         }
 
-        const oldContent = comment.content;
         const now = Date.now();
         const timestamp = formatTimestamp(now);
+
+        // file-level 통합 카드 경로 (ordinal 주소)
+        if (highlight.position === -1) {
+            const index = comment.fileCommentIndex;
+            if (index === undefined) return;
+            const result = await this.inlineWriter.updateFileLevelCommentAt(
+                file, index, comment.content, { text: content, ts: timestamp.slice(0, 16) }
+            );
+            if (!result.success) {
+                new Notice(t("Failed to update comment: ") + (result.reason ?? ''));
+                return;
+            }
+            comment.content = content;
+            comment.updatedAt = now;
+            highlight.updatedAt = now;
+            if (this.onCardUpdate) {
+                this.onCardUpdate(highlight);
+            } else if (this.onRefreshView) {
+                await this.onRefreshView();
+            }
+            return;
+        }
+
+        const oldContent = comment.content;
 
         const result = await this.inlineWriter.updateComment(file, highlight, commentId, content, timestamp);
         if (!result.success) {
@@ -184,6 +207,39 @@ export class CommentService {
     async deleteComment(highlight: HighlightInfo, commentId: string): Promise<void> {
         const file = await this.getFileForHighlight(highlight);
         if (!file || !highlight.comments) return;
+
+        // file-level 통합 카드 경로 (ordinal 주소)
+        if (highlight.position === -1) {
+            const comment = highlight.comments.find(c => c.id === commentId);
+            if (!comment) return;
+            const index = comment.fileCommentIndex;
+            if (index === undefined) return;
+            const result = await this.inlineWriter.deleteFileLevelCommentAt(file, index, comment.content);
+            if (!result.success) {
+                new Notice(t("Failed to delete comment: ") + (result.reason ?? ''));
+                return;
+            }
+            highlight.comments = highlight.comments.filter(c => c.id !== commentId);
+            // ordinal 재계산
+            highlight.comments.forEach((c, i) => { c.fileCommentIndex = i; });
+            highlight.updatedAt = Date.now();
+
+            if (highlight.comments.length === 0) {
+                this.highlights = this.highlights.filter(h => {
+                    if (h.id && highlight.id) return h.id !== highlight.id;
+                    return !(h.position === highlight.position && h.text === highlight.text);
+                });
+                if (this.onHighlightsUpdate) this.onHighlightsUpdate(this.highlights);
+                if (this.onCardRemove) this.onCardRemove(highlight);
+            } else {
+                if (this.onCardUpdate) {
+                    this.onCardUpdate(highlight);
+                } else if (this.onRefreshView) {
+                    await this.onRefreshView();
+                }
+            }
+            return;
+        }
 
         const result = await this.inlineWriter.deleteComment(file, highlight, commentId);
         if (!result.success) {
@@ -278,6 +334,14 @@ export class CommentService {
         return null;
     }
     
+    /**
+     * 파일 레벨 코멘트를 추가합니다 (프론트매터 경로)
+     */
+    async addFileLevelComment(file: TFile, text: string): Promise<WriteResult> {
+        const ts = formatTimestamp(Date.now()).slice(0, 16);
+        return this.inlineWriter.addFileLevelComment(file, { text, ts });
+    }
+
     /**
      * 하이라이트에 플래시카드가 이미 생성되었는지 확인합니다
      */
