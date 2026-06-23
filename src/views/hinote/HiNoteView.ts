@@ -69,7 +69,7 @@ export class HiNoteView extends ItemView {
         this.uiInitializer = new UIInitializer();
         this.eventCoordinator = new EventCoordinator(this.app, this, services.eventManager);
         this.exportManager = new ExportManager(this.app, this.exportService);
-        this.virtualHighlightManager = new VirtualHighlightManager(this.highlightManager);
+        this.virtualHighlightManager = new VirtualHighlightManager(this.app, this.highlightManager);
         this.flashcardViewManager = new FlashcardViewManager(this.app, this.plugin);
     }
 
