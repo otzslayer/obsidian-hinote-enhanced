@@ -97,12 +97,16 @@ export class InlineCommentWriter {
     // ── File-level (frontmatter) operations ──────────────────
 
     async addFileLevelComment(file: TFile, comment: FileLevelComment): Promise<WriteResult> {
-        await this.app.fileManager.processFrontMatter(file, (fm) => {
-            const existing = Array.isArray(fm.comments) ? fm.comments : [];
-            const current = parseFileLevelComments(fm);
-            fm.comments = mergeFileLevelComments(existing, [...current, comment]);
-        });
-        return { success: true };
+        try {
+            await this.app.fileManager.processFrontMatter(file, (fm) => {
+                const existing = Array.isArray(fm.comments) ? fm.comments : [];
+                const current = parseFileLevelComments(fm);
+                fm.comments = mergeFileLevelComments(existing, [...current, comment]);
+            });
+            return { success: true };
+        } catch (e) {
+            return { success: false, reason: e instanceof Error ? e.message : 'write failed' };
+        }
     }
 
     async updateFileLevelCommentAt(

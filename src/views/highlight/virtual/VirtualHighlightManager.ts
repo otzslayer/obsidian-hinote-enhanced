@@ -28,7 +28,7 @@ export class VirtualHighlightManager {
         container: HTMLElement,
         callbacks: {
             getCurrentFile: () => TFile | null;
-            onAddFileComment: (file: TFile, text: string) => void;
+            onAddFileComment: (file: TFile, text: string) => void | Promise<void>;
         }
     ): HTMLElement {
         this.addCommentButton = container.createEl("div", {
@@ -51,7 +51,7 @@ export class VirtualHighlightManager {
      */
     private async handleAddFileComment(callbacks: {
         getCurrentFile: () => TFile | null;
-        onAddFileComment: (file: TFile, text: string) => void;
+        onAddFileComment: (file: TFile, text: string) => void | Promise<void>;
     }): Promise<void> {
         const currentFile = callbacks.getCurrentFile();
 
@@ -62,7 +62,7 @@ export class VirtualHighlightManager {
 
         const text = await showFileCommentModal(this.app);
         if (text) {
-            callbacks.onAddFileComment(currentFile, text);
+            await callbacks.onAddFileComment(currentFile, text);
         }
     }
 

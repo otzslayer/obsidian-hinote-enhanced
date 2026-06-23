@@ -10,12 +10,19 @@ export function showFileCommentModal(app: App): Promise<string | null> {
 
 class FileCommentModal extends Modal {
     private textarea!: HTMLTextAreaElement;
+    private resolved = false;
 
     constructor(
         app: App,
         private resolve: (text: string | null) => void
     ) {
         super(app);
+    }
+
+    private settle(text: string | null): void {
+        if (this.resolved) return;
+        this.resolved = true;
+        this.resolve(text);
     }
 
     onOpen(): void {
@@ -37,12 +44,12 @@ class FileCommentModal extends Modal {
         });
 
         cancelButton.addEventListener("click", () => {
-            this.resolve(null);
+            this.settle(null);
             this.close();
         });
         saveButton.addEventListener("click", () => {
             const text = this.textarea.value.trim();
-            this.resolve(text || null);
+            this.settle(text || null);
             this.close();
         });
 
@@ -50,13 +57,14 @@ class FileCommentModal extends Modal {
             if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 const text = this.textarea.value.trim();
-                this.resolve(text || null);
+                this.settle(text || null);
                 this.close();
             }
         });
     }
 
     onClose(): void {
+        this.settle(null);
         this.contentEl.empty();
     }
 }
