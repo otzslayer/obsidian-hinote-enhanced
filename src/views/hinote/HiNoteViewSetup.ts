@@ -9,9 +9,7 @@ import { setupHighlightRendering } from "./setup/HighlightRenderingSetup";
 import { setupLayoutAndCanvas } from "./setup/LayoutCanvasSetup";
 import { registerHiNoteViewEvents } from "./HiNoteViewEventBindings";
 import { HiNoteViewSetupOptions, HiNoteViewSetupResult } from "./HiNoteViewSetupTypes";
-import { IdGenerator } from "../../utils/IdGenerator";
 import { t } from "../../i18n";
-import type { CommentItem, HighlightInfo } from "../../types/highlight";
 
 export async function setupHiNoteView(options: HiNoteViewSetupOptions): Promise<HiNoteViewSetupResult> {
     const {
@@ -102,39 +100,7 @@ export async function setupHiNoteView(options: HiNoteViewSetupOptions): Promise<
                 const r = await highlightRendering.commentService.addFileLevelComment(file, text);
                 if (!r.success) {
                     new Notice(t("Failed to save comment: ") + (r.reason ?? ''));
-                    return;
                 }
-                const now = Date.now();
-                const existingCard = state.highlights.find(h => h.position === -1);
-                if (existingCard) {
-                    if (!existingCard.comments) existingCard.comments = [];
-                    const newItem: CommentItem = {
-                        id: IdGenerator.generateCommentId(),
-                        content: text,
-                        createdAt: now,
-                        updatedAt: now,
-                        fileCommentIndex: existingCard.comments.length,
-                    };
-                    existingCard.comments.push(newItem);
-                } else {
-                    const newCard: HighlightInfo = {
-                        id: IdGenerator.generateHighlightId(file.path, -1, ''),
-                        text: '',
-                        position: -1,
-                        isVirtual: true,
-                        filePath: file.path,
-                        fileName: file.basename,
-                        comments: [{
-                            id: IdGenerator.generateCommentId(),
-                            content: text,
-                            createdAt: now,
-                            updatedAt: now,
-                            fileCommentIndex: 0,
-                        }],
-                    };
-                    state.highlights.unshift(newCard);
-                }
-                highlightListController.renderHighlights(state.highlights);
             },
         }
     );
