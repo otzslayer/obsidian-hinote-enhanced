@@ -1,3 +1,4 @@
+import { Notice } from "obsidian";
 import { HighlightDataService } from "../../services/highlight";
 import { HighlightListController, HighlightRenderManager, InfiniteScrollManager } from "../highlight";
 import { SelectionManager } from "../selection";
@@ -8,6 +9,7 @@ import { setupHighlightRendering } from "./setup/HighlightRenderingSetup";
 import { setupLayoutAndCanvas } from "./setup/LayoutCanvasSetup";
 import { registerHiNoteViewEvents } from "./HiNoteViewEventBindings";
 import { HiNoteViewSetupOptions, HiNoteViewSetupResult } from "./HiNoteViewSetupTypes";
+import { t } from "../../i18n";
 
 export async function setupHiNoteView(options: HiNoteViewSetupOptions): Promise<HiNoteViewSetupResult> {
     const {
@@ -93,13 +95,13 @@ export async function setupHiNoteView(options: HiNoteViewSetupOptions): Promise<
         uiElements.iconButtonsContainer,
         {
             getCurrentFile: () => state.currentFile,
-            getHighlights: () => state.highlights,
-            onVirtualHighlightCreated: (vh) => {
-                state.highlights.unshift(vh);
-                highlightListController.renderHighlights(state.highlights);
+            onAddFileComment: async (file, text) => {
+                if (!highlightRendering) return;
+                const r = await highlightRendering.commentService.addFileLevelComment(file, text);
+                if (!r.success) {
+                    new Notice(t("Failed to save comment: ") + (r.reason ?? ''));
+                }
             },
-            onShowCommentInput: (card, highlight) => highlightRendering?.commentController.showCommentInput(card, highlight),
-            getHighlightContainer: () => highlightContainer
         }
     );
 

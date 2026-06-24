@@ -56,9 +56,16 @@ export class HighlightContent extends Component {
             cls: `highlight-text-content ${this.highlight.isVirtual ? 'virtual-highlight' : ''} markdown-rendered`
         });
 
+        // file-level 통합 카드(position === -1)는 별도 라벨로 표시
+        if (this.highlight.position === -1) {
+            textContent.setText(t('File comments'));
+            textContent.addClass('file-comments-label');
+            return;
+        }
+
         // 텍스트의 줄바꿈 처리, 빈 값 검사 추가
         const text = this.highlight.text || '';
-        
+
         try {
             // Obsidian의 MarkdownRenderer.render 메서드를 사용해 Markdown 내용 렌더링
             // 복잡한 스타일 규칙 상속을 피하기 위해 this 대신 새 Component 인스턴스 사용

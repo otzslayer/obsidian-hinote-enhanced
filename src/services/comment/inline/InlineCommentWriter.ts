@@ -96,34 +96,64 @@ export class InlineCommentWriter {
 
     // ── File-level (frontmatter) operations ──────────────────
 
-    async addFileLevelComment(file: TFile, comment: FileLevelComment): Promise<void> {
-        await this.app.fileManager.processFrontMatter(file, (fm) => {
-            const existing = Array.isArray(fm.comments) ? fm.comments : [];
-            const current = parseFileLevelComments(fm);
-            fm.comments = mergeFileLevelComments(existing, [...current, comment]);
-        });
+    async addFileLevelComment(file: TFile, comment: FileLevelComment): Promise<WriteResult> {
+        try {
+            await this.app.fileManager.processFrontMatter(file, (fm) => {
+                const existing = Array.isArray(fm.comments) ? fm.comments : [];
+                const current = parseFileLevelComments(fm);
+                fm.comments = mergeFileLevelComments(existing, [...current, comment]);
+            });
+            return { success: true };
+        } catch (e) {
+            return { success: false, reason: e instanceof Error ? e.message : 'write failed' };
+        }
     }
 
-    async updateFileLevelComment(
+    async updateFileLevelCommentAt(
         file: TFile,
-        oldTs: string,
+        index: number,
+        expectedText: string,
         newComment: FileLevelComment
-    ): Promise<void> {
+    ): Promise<WriteResult> {
+        let ok = false;
         await this.app.fileManager.processFrontMatter(file, (fm) => {
             const existing = Array.isArray(fm.comments) ? fm.comments : [];
             const current = parseFileLevelComments(fm);
-            const updated = current.map((c) => (c.ts === oldTs ? newComment : c));
+            if (current[index]?.text !== expectedText) return;
+            const updated = current.map((c, i) => (i === index ? newComment : c));
             fm.comments = mergeFileLevelComments(existing, updated);
+            ok = true;
         });
+        return ok ? { success: true } : { success: false, reason: 'anchor mismatch' };
     }
 
-    async deleteFileLevelComment(file: TFile, ts: string): Promise<void> {
+    async deleteAllFileLevelComments(file: TFile): Promise<WriteResult> {
+        try {
+            await this.app.fileManager.processFrontMatter(file, (fm) => {
+                const existing = Array.isArray(fm.comments) ? fm.comments : [];
+                fm.comments = mergeFileLevelComments(existing, []);
+            });
+            return { success: true };
+        } catch (e) {
+            return { success: false, reason: e instanceof Error ? e.message : 'write failed' };
+        }
+    }
+
+    async deleteFileLevelCommentAt(
+        file: TFile,
+        index: number,
+        expectedText: string
+    ): Promise<WriteResult> {
+        let ok = false;
         await this.app.fileManager.processFrontMatter(file, (fm) => {
             const existing = Array.isArray(fm.comments) ? fm.comments : [];
             const current = parseFileLevelComments(fm);
-            const filtered = current.filter((c) => c.ts !== ts);
+            if (current[index]?.text !== expectedText) return;
+            const filtered = current.filter((_, i) => i !== index);
             fm.comments = mergeFileLevelComments(existing, filtered);
+            ok = true;
         });
+        return ok ? { success: true } : { success: false, reason: 'anchor mismatch' };
     }
 
     // ── Helpers ──────────────────────────────────────────────

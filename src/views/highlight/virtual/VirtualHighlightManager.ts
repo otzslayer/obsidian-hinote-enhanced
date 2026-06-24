@@ -1,7 +1,8 @@
-import { TFile, Notice, setIcon } from "obsidian";
+import { App, TFile, Notice, setIcon } from "obsidian";
 import { HighlightInfo as HiNote, HighlightInfo } from "../../../types/highlight";
 import { HighlightManager } from "../../../services/HighlightManager";
 import { t } from "../../../i18n";
+import { showFileCommentModal } from "../../../components/comment/FileCommentModal";
 
 /**
  * 가상 하이라이트 매니저
@@ -12,8 +13,10 @@ import { t } from "../../../i18n";
  */
 export class VirtualHighlightManager {
     private addCommentButton: HTMLElement | null = null;
+    private isModalOpen = false;
 
     constructor(
+        private app: App,
         private highlightManager: HighlightManager
     ) {}
 
@@ -26,10 +29,7 @@ export class VirtualHighlightManager {
         container: HTMLElement,
         callbacks: {
             getCurrentFile: () => TFile | null;
-            getHighlights: () => HighlightInfo[];
-            onVirtualHighlightCreated: (virtualHighlight: HiNote) => void;
-            onShowCommentInput: (card: HTMLElement, highlight: HiNote) => void;
-            getHighlightContainer: () => HTMLElement;
+            onAddFileComment: (file: TFile, text: string) => void | Promise<void>;
         }
     ): HTMLElement {
         this.addCommentButton = container.createEl("div", {
@@ -52,53 +52,25 @@ export class VirtualHighlightManager {
      */
     private async handleAddFileComment(callbacks: {
         getCurrentFile: () => TFile | null;
-        getHighlights: () => HighlightInfo[];
-        onVirtualHighlightCreated: (virtualHighlight: HiNote) => void;
-        onShowCommentInput: (card: HTMLElement, highlight: HiNote) => void;
-        getHighlightContainer: () => HTMLElement;
+        onAddFileComment: (file: TFile, text: string) => void | Promise<void>;
     }): Promise<void> {
-        const currentFile = callbacks.getCurrentFile();
-        
-        if (!currentFile) {
-            new Notice(t("Please open a file first."));
-            return;
-        }
+        if (this.isModalOpen) return;
+        this.isModalOpen = true;
+        try {
+            const currentFile = callbacks.getCurrentFile();
 
-        // 고유 식별자 생성
-        const timestamp = Date.now();
-        const uniqueId = `file-comment-${timestamp}`;
-
-        // 가상 하이라이트 정보 생성 - 문서 최상단에 보이지 않는 하이라이트 내용 생성
-        const virtualHighlight: HiNote = {
-            id: uniqueId,
-            text: t("File Comment"),  // 파일 댓글의 표시 텍스트
-            filePath: currentFile.path,
-            isVirtual: true,  // 가상 하이라이트임을 표시
-            position: 0,  // 기본 위치
-            paragraphOffset: 0,  // 기본 오프셋
-            blockId: `virtual-${timestamp}`,  // 가상 block ID 생성
-            createdAt: timestamp,
-            updatedAt: timestamp,
-            comments: []  // 빈 댓글 배열 초기화
-        };
-
-        // 먼저 HighlightManager에 저장
-        await this.highlightManager.addHighlight(currentFile, virtualHighlight);
-
-        // 외부에 가상 하이라이트 생성됨을 알림
-        callbacks.onVirtualHighlightCreated(virtualHighlight);
-
-        // 새로 생성된 하이라이트 카드를 찾아 댓글 입력창 자동 열기
-        window.setTimeout(() => {
-            const highlightContainer = callbacks.getHighlightContainer();
-            const highlightCard = highlightContainer.querySelector('.highlight-card') as HTMLElement;
-            if (highlightCard) {
-                // 댓글 입력창 자동 열기
-                callbacks.onShowCommentInput(highlightCard, virtualHighlight);
-                // 상단으로 스크롤
-                highlightContainer.scrollTo({ top: 0, behavior: 'smooth' });
+            if (!currentFile) {
+                new Notice(t("Please open a file first."));
+                return;
             }
-        }, 100);
+
+            const text = await showFileCommentModal(this.app);
+            if (text) {
+                await callbacks.onAddFileComment(currentFile, text);
+            }
+        } finally {
+            this.isModalOpen = false;
+        }
     }
 
     /**

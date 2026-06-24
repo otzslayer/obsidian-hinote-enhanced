@@ -66,6 +66,10 @@ export function registerHiNoteViewEvents(options: HiNoteViewEventBindingOptions)
             fileListManager.invalidateCache();
             void highlightListController.updateHighlights(isInCanvas);
         },
+        onMetadataChange: (file, isInCanvas) => {
+            fileListManager.invalidateCache();
+            void highlightListController.updateHighlights(isInCanvas);
+        },
         onFileCreate: () => {
             fileListManager.invalidateCache();
         },

@@ -3,6 +3,7 @@ export interface CommentItem {
     content: string;
     createdAt: number;
     updatedAt: number;
+    fileCommentIndex?: number; // ordinal index in parseFileLevelComments() — set only for file-level comments
 }
 
 export interface HighlightInfo {

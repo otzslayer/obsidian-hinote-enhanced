@@ -9,6 +9,7 @@ import type { EventManager } from "../../services/EventManager";
 export interface EventCallbacks {
     onFileOpen?: (file: TFile, isInCanvas: boolean) => void;
     onFileModify?: (file: TFile, isInCanvas: boolean) => void;
+    onMetadataChange?: (file: TFile, isInCanvas: boolean) => void;
     onFileCreate?: () => void;
     onFileDelete?: () => void;
     onLayoutChange?: () => void;
@@ -51,6 +52,9 @@ export class EventCoordinator {
 
         // 문서 수정 감지
         this.registerFileModifyEvent(getCurrentFile, isDraggedToMainView);
+
+        // 메타데이터 캐시 변경 감지 (프론트매터 fresh 재추출 트리거)
+        this.registerMetadataChangeEvent(getCurrentFile, isDraggedToMainView);
 
         // 파일 생성 및 삭제 감지
         this.registerFileCreateEvent();
@@ -107,6 +111,31 @@ export class EventCoordinator {
             }
         });
         
+        this.component.registerEvent(ref);
+        this.eventRefs.push(ref);
+    }
+
+    /**
+     * 메타데이터 캐시 변경 이벤트 등록
+     * 프론트매터 재파싱 완료 후 발화하므로 fresh 프론트매터 보장 (KTD1)
+     */
+    private registerMetadataChangeEvent(
+        getCurrentFile: () => TFile | null,
+        isDraggedToMainView: () => boolean
+    ): void {
+        const ref = this.app.metadataCache.on('changed', (file, _data, _cache) => {
+            const currentFile = getCurrentFile();
+
+            if (file === currentFile && !isDraggedToMainView() && file instanceof TFile) {
+                const activeMarkdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
+                const isInCanvas = !activeMarkdownView && this.app.workspace.getActiveFile()?.path !== file.path;
+
+                if (this.callbacks.onMetadataChange) {
+                    this.callbacks.onMetadataChange(file, isInCanvas);
+                }
+            }
+        });
+
         this.component.registerEvent(ref);
         this.eventRefs.push(ref);
     }
