@@ -8,7 +8,7 @@ import { HighlightInfo as HiNote } from "../types/highlight";
 import type { HiNotePluginContext } from "../types/plugin";
 import type CommentPlugin from "../../main";
 import { formatTimestamp } from "../utils/timestamp";
-import { findInlineCommentRanges } from "./inlineCommentRanges";
+import { selectHideableRanges } from "./inlineCommentRanges";
 
 interface EditorHighlightDecorationOptions {
     plugin: HiNotePluginContext;
@@ -61,7 +61,8 @@ export function createEditorHighlightDecorations(options: EditorHighlightDecorat
                 }
 
                 // Hide raw {>>...<<} blocks when syntax is toggled OFF.
-                for (const range of findInlineCommentRanges(docText)) {
+                // Only single-line blocks: multiline spans crash Decoration.replace in CM6.
+                for (const range of selectHideableRanges(docText)) {
                     decorations.push(Decoration.replace({}).range(range.from, range.to));
                 }
             }

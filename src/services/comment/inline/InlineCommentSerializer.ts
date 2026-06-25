@@ -20,7 +20,7 @@ export interface SerializeTarget {
 
 /** Produce the raw {>>...<<} block string. */
 export function serializeBlock(text: string, timestamp: string): string {
-    return `{>>${sanitizeText(text)} ^${timestamp}^<<}`;
+    return `{>>${encodeInlineText(text)} ^${timestamp}^<<}`;
 }
 
 // ── Insert ───────────────────────────────────────────────────
@@ -81,12 +81,14 @@ export function deleteComment(
 // ── Internals ────────────────────────────────────────────────
 
 /**
- * Sanitize text so it cannot prematurely close a {>>...<<} block (KTD1).
- * Inserts a zero-width non-joiner between `<<` and `}`.
+ * Encode comment text for disk storage (KTD-A).
+ * Order is mandatory: backslash escape first, then newline, then <<} guard.
  */
-function sanitizeText(text: string): string {
-    // Break any <<} sequences by inserting zero-width non-joiner (U+200C)
-    return text.replace(/<<}/g, '<‌<}');
+function encodeInlineText(text: string): string {
+    return text
+        .replace(/\\/g, '\\\\')        // ① \ → \\ (must precede step ②)
+        .replace(/\r\n|\r|\n/g, '\\n') // ② all newline variants → \n token
+        .replace(/<<}/g, '<‌<}'); // ③ break premature block close (KTD1)
 }
 
 /**
