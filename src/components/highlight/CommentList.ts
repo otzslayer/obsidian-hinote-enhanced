@@ -66,7 +66,7 @@ export class CommentList extends Component {
                 cls: "hi-note-content markdown-rendered"
             });
 
-            const content = comment.content;
+            const content = comment.content ?? '';
             try {
                 const markdownContent = toHardBreakMarkdown(content);
                 // MarkdownRenderer를 사용해 Markdown 내용 렌더링
