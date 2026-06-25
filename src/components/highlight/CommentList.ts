@@ -67,8 +67,8 @@ export class CommentList extends Component {
             });
 
             const content = comment.content;
-            const markdownContent = toHardBreakMarkdown(content);
             try {
+                const markdownContent = toHardBreakMarkdown(content);
                 // MarkdownRenderer를 사용해 Markdown 내용 렌더링
                 await MarkdownRenderer.render(
                     this.app,
