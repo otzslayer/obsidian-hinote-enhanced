@@ -11,7 +11,7 @@ A contiguous span of text in a Markdown note that has been marked up with a high
 A user-authored annotation attached either to a specific Highlight or to an entire Note (file-level). Each Comment has a text body and a last-modified timestamp. A Highlight may accumulate multiple Comments; their order is their ordinal position in the note text.
 
 ### Inline Comment Block
-The on-disk storage unit for a single Comment: a CriticMarkup `{>>text ^YYYY-MM-DD HH:mm^<<}` span placed immediately after the Highlight marker in the note body. The end-anchored timestamp token (`^YYYY-MM-DD HH:mm^`) is the only metadata stored; all other identifiers are position-derived at parse time.
+The on-disk storage unit for a single Comment: a CriticMarkup `{>>text ^YYYY-MM-DD HH:mm^<<}` span placed immediately after the Highlight marker in the note body. The text body is stored in single-line encoded form — actual newlines become `\n` tokens and backslashes become `\\`; the in-memory representation always holds real characters. The end-anchored timestamp token (`^YYYY-MM-DD HH:mm^`) is the only metadata stored; all other identifiers are position-derived at parse time.
 *Avoid:* sidecar comment, comment block
 
 ### File-level Comment
