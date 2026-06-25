@@ -231,3 +231,98 @@ describe('serializeBlock', () => {
         expect(serializeBlock('🤖 note', FIXED_TS)).toBe(`{>>🤖 note ^${FIXED_TS}^<<}`);
     });
 });
+
+// ── Scenario 5b: updateComment / deleteComment with multiline content ──
+// The anchor comparison (atOrdinal.text === target.currentText) uses decoded text
+// (real \n) on both sides. This test proves the round-trip: serialize an encoded
+// block on disk, then update/delete it using the decoded form as currentText.
+
+describe('updateComment and deleteComment with multiline content', () => {
+    it('updateComment succeeds when currentText contains real newlines (decoded form)', () => {
+        // Disk: '\n' token (backslash + n), not real newline
+        const encodedBlock = serializeBlock('line1\nline2', FIXED_TS);
+        const note = `==hl==${encodedBlock} rest`;
+        const match = mkMatch('hl', note);
+        // The caller supplies decoded content (real \n) as currentText — matching block.text
+        const target: SerializeTarget = {
+            highlightText: 'hl',
+            ordinal: 0,
+            currentText: 'line1\nline2',
+        };
+        const result = updateComment(note, match, target, 'updated', FIXED_TS);
+        expect(result).toContain(`{>>updated ^${FIXED_TS}^<<}`);
+        expect(result).not.toContain('line1');
+    });
+
+    it('deleteComment succeeds when currentText contains real newlines (decoded form)', () => {
+        const encodedBlock = serializeBlock('line1\nline2', FIXED_TS);
+        const note = `==hl==${encodedBlock} rest`;
+        const match = mkMatch('hl', note);
+        const target: SerializeTarget = {
+            highlightText: 'hl',
+            ordinal: 0,
+            currentText: 'line1\nline2',
+        };
+        const result = deleteComment(note, match, target);
+        expect(result).not.toContain('{>>');
+        expect(result).toContain('==hl==');
+        expect(result).toContain(' rest');
+    });
+
+    it('anchor mismatch when currentText is the encoded token (not decoded)', () => {
+        // If a caller accidentally passes the raw token string 'line1\\nline2' (not real \n),
+        // the anchor check correctly fails — the block.text is decoded (real \n).
+        const encodedBlock = serializeBlock('line1\nline2', FIXED_TS);
+        const note = `==hl==${encodedBlock} rest`;
+        const match = mkMatch('hl', note);
+        const target: SerializeTarget = {
+            highlightText: 'hl',
+            ordinal: 0,
+            currentText: 'line1\\nline2', // encoded token, NOT real \n
+        };
+        // Should abort and return original note
+        expect(updateComment(note, match, target, 'updated', FIXED_TS)).toBe(note);
+    });
+});
+
+// ── Scenario 6: newline encoding (KTD-A) ─────────────────
+
+describe('newline encoding in serializeBlock', () => {
+    it('encodes LF newline as \\n token', () => {
+        const result = serializeBlock('line1\nline2', FIXED_TS);
+        expect(result).toBe(`{>>line1\\nline2 ^${FIXED_TS}^<<}`);
+        expect(result).not.toContain('\n');
+    });
+
+    it('normalizes CRLF to \\n token', () => {
+        const result = serializeBlock('line1\r\nline2', FIXED_TS);
+        expect(result).toBe(`{>>line1\\nline2 ^${FIXED_TS}^<<}`);
+        expect(result).not.toContain('\r');
+        expect(result).not.toContain('\n');
+    });
+
+    it('normalizes CR-only to \\n token', () => {
+        const result = serializeBlock('line1\rline2', FIXED_TS);
+        expect(result).toBe(`{>>line1\\nline2 ^${FIXED_TS}^<<}`);
+        expect(result).not.toContain('\r');
+    });
+
+    it('encodes backslash as \\\\', () => {
+        const result = serializeBlock('C:\\path', FIXED_TS);
+        expect(result).toBe(`{>>C:\\\\path ^${FIXED_TS}^<<}`);
+    });
+
+    it('encodes backslash before newline without ambiguity (KTD-A order)', () => {
+        // '\' followed by actual newline: backslash encoded first → '\\' + '\n' → '\\\\n'
+        const result = serializeBlock('a\\\nb', FIXED_TS);
+        expect(result).toBe(`{>>a\\\\\\nb ^${FIXED_TS}^<<}`);
+        expect(result).not.toContain('\n');
+    });
+
+    it('output contains no literal newlines', () => {
+        const multiline = 'first\nsecond\nthird';
+        const result = serializeBlock(multiline, FIXED_TS);
+        expect(result.includes('\n')).toBe(false);
+        expect(result.includes('\r')).toBe(false);
+    });
+});

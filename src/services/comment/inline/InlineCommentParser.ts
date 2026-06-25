@@ -143,6 +143,9 @@ function parseBlockContent(
         content = content.slice(AI_PREFIX.length);
     }
 
+    // Decode escape sequences after timestamp/prefix processing (KTD-B, KTD-C).
+    content = decodeInlineText(content);
+
     return {
         text: content,
         timestamp,
@@ -152,6 +155,34 @@ function parseBlockContent(
         startOffset: blockStart,
         endOffset: blockEnd,
     };
+}
+
+/**
+ * Single left-to-right scan decoder (KTD-B).
+ * `\\` → `\`, `\n` (token) → real newline, unknown `\x` → literal `\x`.
+ * Never chains two .replace() calls — that corrupts `C:\\nginx`.
+ */
+function decodeInlineText(encoded: string): string {
+    let result = '';
+    let i = 0;
+    while (i < encoded.length) {
+        if (encoded[i] === '\\' && i + 1 < encoded.length) {
+            const next = encoded[i + 1];
+            if (next === '\\') {
+                result += '\\';
+            } else if (next === 'n') {
+                result += '\n';
+            } else {
+                result += '\\';
+                result += next;
+            }
+            i += 2;
+        } else {
+            result += encoded[i];
+            i++;
+        }
+    }
+    return result;
 }
 
 /**

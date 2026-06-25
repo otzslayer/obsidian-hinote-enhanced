@@ -1,5 +1,6 @@
 import { CommentItem, HighlightInfo } from "../../types/highlight";
 import { MarkdownRenderer, Component, App } from "obsidian";
+import { toHardBreakMarkdown } from "./commentMarkdown";
 import { t } from "../../i18n";
 
 export class CommentList extends Component {
@@ -65,12 +66,13 @@ export class CommentList extends Component {
                 cls: "hi-note-content markdown-rendered"
             });
 
-            const content = comment.content;
+            const content = comment.content ?? '';
             try {
+                const markdownContent = toHardBreakMarkdown(content);
                 // MarkdownRenderer를 사용해 Markdown 내용 렌더링
                 await MarkdownRenderer.render(
                     this.app,
-                    content,
+                    markdownContent,
                     contentEl,
                     this.highlight.filePath || '',
                     this

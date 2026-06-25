@@ -64,13 +64,17 @@ HiNote embeds comments directly in your note's Markdown source as [CriticMarkup]
 - AI-generated comments are prefixed with `🤖 ` inside the block.
 - File-level comments (not tied to a specific highlight) are stored in the note's `frontmatter` under the `comments` key as a list of `{text, ts}` objects.
 
-### Keyboard shortcut
+### Keyboard shortcuts
 
 | Action | Default shortcut |
 |--------|-----------------|
 | Add comment to selection | `Mod+Shift+C` |
+| Toggle text highlight (edit & reading mode) | `Mod+Shift+S` |
+| Insert newline in comment | `Shift+Enter` |
 
-The shortcut can be rebound in **Settings → Hotkeys**.
+The shortcuts can be rebound in **Settings → Hotkeys**.
+
+> **Tip:** Press `Shift+Enter` in the comment input box to insert a newline. It renders as a CommonMark hard break (`<br>`) in the sidebar. Press `Enter` to save the comment.
 
 ### Obsidian Sync
 
@@ -84,6 +88,7 @@ Comments travel with the `.md` file — no additional sync setup required. Concu
 | **Plugin disabled** | Raw `{>>...<<}` blocks remain in the file but are harmless plain text. |
 | **CriticMarkup plugin installed** | Both plugins may apply styling to `{>>...<<}` blocks, resulting in double decoration. |
 | **Orphan comments** | A `{>>...<<}` block whose preceding highlight marker has been deleted is tagged as an *orphan*. HiNote never auto-deletes orphans; they appear in the sidebar as a separate group. Remove them manually when no longer needed. |
+| **Existing comments with backslash (`\`)** | Backslashes in comment text are encoded as `\\` on disk. If a comment saved before this version contains a `\n` pattern (backslash + `n`, e.g. `C:\nginx`), **the sidebar will immediately show a spurious newline when the note is opened.** Editing and saving the comment will also update the file on disk. |
 
 ### Migrating existing comments
 

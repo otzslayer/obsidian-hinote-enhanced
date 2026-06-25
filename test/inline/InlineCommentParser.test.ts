@@ -198,6 +198,60 @@ describe('parseInlineComments — <mark> highlight pairing', () => {
 });
 
 // ────────────────────────────────────────────────────────────
+// Scenario 9: inline text decoding (KTD-B) — differential cases
+// These tests MUST fail a naive chained .replace() implementation.
+// ────────────────────────────────────────────────────────────
+describe('parseInlineComments — inline text decoding (KTD-B)', () => {
+    function parseText(diskContent: string): string {
+        // Wrap disk content in a minimal note and parse
+        const note = `==hl=={>>${diskContent} ^2024-01-01 00:00^<<}`;
+        const match = mkMatch('hl', note);
+        const { pairedComments } = parseInlineComments(note, [match]);
+        return pairedComments[0].comments[0].text;
+    }
+
+    // Differential case 1: `\\` on disk → `\` in memory (NOT newline)
+    // A 2-pass (.replace(/\\n/→nl) THEN .replace(/\\\\/→\)) corrupts this:
+    // the `\\n` in `\\nginx` matches the first pass and becomes newline.
+    it('C:\\\\nginx on disk → C:\\nginx in memory (not a newline)', () => {
+        // diskContent contains two actual backslashes: C:\\nginx
+        const text = parseText('C:\\\\nginx');
+        expect(text).toBe('C:\\nginx'); // one backslash, no newline
+        expect(text).not.toContain('\n');
+    });
+
+    // Differential case 2: `\n` token on disk → real newline in memory
+    it('\\n token on disk decodes to real newline', () => {
+        // diskContent: line1\nline2 (literal backslash + n, NOT a real newline)
+        const text = parseText('line1\\nline2');
+        expect(text).toBe('line1\nline2'); // real newline between them
+    });
+
+    // Differential case 3: undefined `\x` sequence → kept as literal
+    it('unknown \\t sequence stays as literal \\t', () => {
+        const text = parseText('a\\tb');
+        expect(text).toBe('a\\tb'); // backslash + t, not a tab
+    });
+
+    // Round-trip: backslash immediately before a newline encodes then decodes correctly
+    it('backslash before newline round-trips correctly', () => {
+        // `a` + `\` + newline + `b` encodes to `a\\` + `\n` token, then decodes back
+        const diskContent = 'a\\\\\\nb'; // a + \\ + \n(token) + b
+        const text = parseText(diskContent);
+        expect(text).toBe('a\\\nb'); // a + \ + newline + b
+    });
+
+    // Legacy backward compat: real newline on disk (old format) passes through unchanged
+    it('legacy real newline on disk passes through (backward compat)', () => {
+        const note = '==hl=={>>line1\nline2 ^2024-01-01 00:00^<<}';
+        const match = mkMatch('hl', note);
+        const { pairedComments } = parseInlineComments(note, [match]);
+        const text = pairedComments[0].comments[0].text;
+        expect(text).toBe('line1\nline2'); // real newline preserved
+    });
+});
+
+// ────────────────────────────────────────────────────────────
 // Scenario 8: empty note / no comments — no error
 // ────────────────────────────────────────────────────────────
 describe('parseInlineComments — edge cases', () => {
