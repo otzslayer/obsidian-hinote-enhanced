@@ -1,4 +1,5 @@
 import { Plugin } from 'obsidian';
+import type CommentPlugin from '../../main';
 import { WindowManager } from '../plugin/WindowManager';
 import type { HighlightDecorator } from '../editor/HighlightDecorator';
 import { registerOpenCommentPanelCommand } from './openCommentPanel';
@@ -6,6 +7,7 @@ import { registerOpenMainWindowCommand } from './openMainWindow';
 import { registerToggleInlineCommentSyntaxCommand } from './toggleInlineCommentSyntax';
 import { registerToggleHighlightCommand } from './toggleHighlight';
 import { InlineMigrationRunner } from '../migration/InlineMigrationRunner';
+import { registerOpenStatsDashboardCommand } from './openStatsDashboard';
 
 /**
  * 모든 명령 등록
@@ -31,6 +33,9 @@ export function registerCommands(
 
     // 일회성 마이그레이션 명령 등록
     new InlineMigrationRunner(plugin.app).registerCommand(plugin);
+
+    // 하이라이트 통계 대시보드 명령 등록
+    registerOpenStatsDashboardCommand(plugin as CommentPlugin, ensureInitialized);
 }
 
 /**

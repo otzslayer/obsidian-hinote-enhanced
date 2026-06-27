@@ -289,6 +289,15 @@ export default {
     "Multi-block selection is not supported": "Multi-block selection is not supported",
     "Selected text not found in source (may contain inline markdown)": "Selected text not found in source (may contain inline markdown)",
     "Selected text is ambiguous (appears multiple times)": "Selected text is ambiguous (appears multiple times)",
-    "Selection overlaps an existing highlight": "Selection overlaps an existing highlight"
+    "Selection overlaps an existing highlight": "Selection overlaps an existing highlight",
+
+// Highlight dashboard
+    "Highlight dashboard": "Highlight dashboard",
+    "Total highlights": "Total highlights",
+    "Total comments": "Total comments",
+    "Notes with highlights": "Notes with highlights",
+    "Top notes by highlights": "Top notes by highlights",
+    "Top notes by comments": "Top notes by comments",
+    "No data to display": "No data to display"
 
 };

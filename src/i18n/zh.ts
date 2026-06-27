@@ -296,5 +296,14 @@ export default {
     "Multi-block selection is not supported": "不支持跨块选择",
     "Selected text not found in source (may contain inline markdown)": "在源文件中未找到选中文本（可能包含内联 Markdown）",
     "Selected text is ambiguous (appears multiple times)": "选中文本有歧义（出现多次）",
-    "Selection overlaps an existing highlight": "选择与已有高亮重叠"
+    "Selection overlaps an existing highlight": "选择与已有高亮重叠",
+
+// 高亮统计仪表盘
+    "Highlight dashboard": "高亮统计仪表盘",
+    "Total highlights": "高亮总数",
+    "Total comments": "评论总数",
+    "Notes with highlights": "含高亮的笔记数",
+    "Top notes by highlights": "高亮最多的笔记",
+    "Top notes by comments": "评论最多的笔记",
+    "No data to display": "暂无数据"
 };

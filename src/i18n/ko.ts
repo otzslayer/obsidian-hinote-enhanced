@@ -289,6 +289,15 @@ export default {
     "Multi-block selection is not supported": "여러 블록에 걸친 선택은 지원되지 않습니다",
     "Selected text not found in source (may contain inline markdown)": "선택한 텍스트를 원본에서 찾을 수 없습니다 (인라인 마크다운이 포함되어 있을 수 있습니다)",
     "Selected text is ambiguous (appears multiple times)": "선택한 텍스트가 모호합니다 (여러 번 나타납니다)",
-    "Selection overlaps an existing highlight": "선택 영역이 기존 하이라이트와 겹칩니다"
+    "Selection overlaps an existing highlight": "선택 영역이 기존 하이라이트와 겹칩니다",
+
+// 하이라이트 통계 대시보드
+    "Highlight dashboard": "하이라이트 통계 대시보드",
+    "Total highlights": "전체 하이라이트",
+    "Total comments": "전체 코멘트",
+    "Notes with highlights": "하이라이트 포함 노트",
+    "Top notes by highlights": "하이라이트 많은 노트 Top 10",
+    "Top notes by comments": "코멘트 많은 노트 Top 10",
+    "No data to display": "표시할 데이터가 없습니다"
 
 };
