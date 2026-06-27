@@ -298,6 +298,7 @@ export default {
     "Notes with highlights": "하이라이트 포함 노트",
     "Top notes by highlights": "하이라이트 많은 노트 Top 10",
     "Top notes by comments": "코멘트 많은 노트 Top 10",
-    "No data to display": "표시할 데이터가 없습니다"
+    "No data to display": "표시할 데이터가 없습니다",
+    "Open highlight dashboard": "하이라이트 통계 대시보드 열기"
 
 };

@@ -305,5 +305,6 @@ export default {
     "Notes with highlights": "含高亮的笔记数",
     "Top notes by highlights": "高亮最多的笔记",
     "Top notes by comments": "评论最多的笔记",
-    "No data to display": "暂无数据"
+    "No data to display": "暂无数据",
+    "Open highlight dashboard": "打开高亮统计仪表盘"
 };

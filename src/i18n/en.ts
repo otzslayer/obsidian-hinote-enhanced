@@ -298,6 +298,7 @@ export default {
     "Notes with highlights": "Notes with highlights",
     "Top notes by highlights": "Top notes by highlights",
     "Top notes by comments": "Top notes by comments",
-    "No data to display": "No data to display"
+    "No data to display": "No data to display",
+    "Open highlight dashboard": "Open highlight dashboard"
 
 };

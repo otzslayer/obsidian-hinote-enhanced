@@ -1,7 +1,7 @@
 import { Modal } from 'obsidian';
 import type CommentPlugin from '../../../main';
 import { t } from '../../i18n';
-import { computeHighlightStats, HighlightStats } from '../../services/stats/HighlightStatsService';
+import { computeHighlightStats, HighlightStats, NoteRankEntry } from '../../services/stats/HighlightStatsService';
 
 export class HighlightStatsModal extends Modal {
     constructor(private plugin: CommentPlugin) {
@@ -51,7 +51,7 @@ export class HighlightStatsModal extends Modal {
         card.createEl('div', { cls: 'hinote-stats-card-label', text: label });
     }
 
-    private renderRankingSection(container: HTMLElement, title: string, entries: { filePath: string; fileName: string; count: number }[]): void {
+    private renderRankingSection(container: HTMLElement, title: string, entries: NoteRankEntry[]): void {
         container.createEl('h4', { text: title, cls: 'hinote-stats-section-title' });
 
         if (entries.length === 0) {
@@ -65,7 +65,7 @@ export class HighlightStatsModal extends Modal {
             const nameEl = item.createEl('span', { text: entry.fileName, cls: 'hinote-stats-ranking-name' });
             item.createEl('span', { text: String(entry.count), cls: 'hinote-stats-ranking-count' });
             nameEl.addEventListener('click', () => {
-                this.app.workspace.openLinkText(entry.filePath, '');
+                void this.app.workspace.openLinkText(entry.filePath, '');
                 this.close();
             });
         }
