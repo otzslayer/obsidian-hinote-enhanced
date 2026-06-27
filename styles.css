@@ -3804,3 +3804,95 @@ textarea.flashcard-modal-input {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
+
+/* ===================================
+   12. HIGHLIGHT STATS DASHBOARD
+   하이라이트 통계 대시보드
+   =================================== */
+
+.hinote-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.hinote-stats-card {
+    background-color: var(--background-secondary);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+}
+
+.hinote-stats-card-value {
+    font-size: 2em;
+    font-weight: 700;
+    color: var(--text-accent);
+    line-height: 1.2;
+}
+
+.hinote-stats-card-label {
+    font-size: 0.8em;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.hinote-stats-empty {
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: 12px 0;
+}
+
+.hinote-stats-error {
+    color: var(--text-error);
+    text-align: center;
+    padding: 12px 0;
+}
+
+.hinote-stats-section-title {
+    font-size: 1em;
+    font-weight: 600;
+    margin: 20px 0 8px;
+    color: var(--text-normal);
+    border-bottom: 1px solid var(--background-modifier-border);
+    padding-bottom: 4px;
+}
+
+.hinote-stats-ranking {
+    list-style: decimal inside;
+    margin: 0;
+    padding: 0;
+}
+
+.hinote-stats-ranking-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 4px;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.hinote-stats-ranking-item:last-child {
+    border-bottom: none;
+}
+
+.hinote-stats-ranking-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    color: var(--text-accent);
+}
+
+.hinote-stats-ranking-name:hover {
+    text-decoration: underline;
+}
+
+.hinote-stats-ranking-count {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin-left: 8px;
+    white-space: nowrap;
+}

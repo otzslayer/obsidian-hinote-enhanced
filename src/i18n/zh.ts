@@ -306,5 +306,7 @@ export default {
     "Top notes by highlights": "高亮最多的笔记",
     "Top notes by comments": "评论最多的笔记",
     "No data to display": "暂无数据",
-    "Open highlight dashboard": "打开高亮统计仪表盘"
+    "Open highlight dashboard": "打开高亮统计仪表盘",
+    "Failed to load stats": "加载高亮统计数据失败",
+    "Plugin initialization failed": "插件初始化失败"
 };

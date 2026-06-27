@@ -96,7 +96,12 @@ describe('computeHighlightStats', () => {
 
     it('파일 11개 → 랭킹 정확히 10개로 절단', () => {
         const files = Array.from({ length: 11 }, (_, i) =>
-            makeFile(`file${i}.md`, `file${i}`, [makeHighlight({ text: `h${i}` })])
+            makeFile(`file${i}.md`, `file${i}`, [
+                makeHighlight({
+                    text: `h${i}`,
+                    comments: [{ id: `c${i}`, content: `comment${i}`, createdAt: 0, updatedAt: 0 }],
+                }),
+            ])
         );
         const result = computeHighlightStats(files);
         expect(result.topByHighlights).toHaveLength(10);

@@ -24,6 +24,10 @@ export class HighlightStatsModal extends Modal {
                 highlights,
             }));
             stats = computeHighlightStats(files);
+        } catch (err) {
+            contentEl.createEl('p', { text: t('Failed to load stats'), cls: 'hinote-stats-error' });
+            console.error('[HiNote] Stats load failed', err);
+            return;
         } finally {
             loading.remove();
         }
@@ -65,7 +69,10 @@ export class HighlightStatsModal extends Modal {
             const nameEl = item.createEl('span', { text: entry.fileName, cls: 'hinote-stats-ranking-name' });
             item.createEl('span', { text: String(entry.count), cls: 'hinote-stats-ranking-count' });
             nameEl.addEventListener('click', () => {
-                void this.app.workspace.openLinkText(entry.filePath, '');
+                const file = this.app.vault.getFileByPath(entry.filePath);
+                if (file) {
+                    void this.app.workspace.getLeaf(false).openFile(file);
+                }
                 this.close();
             });
         }

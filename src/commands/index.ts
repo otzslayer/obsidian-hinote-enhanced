@@ -1,4 +1,3 @@
-import { Plugin } from 'obsidian';
 import type CommentPlugin from '../../main';
 import { WindowManager } from '../plugin/WindowManager';
 import type { HighlightDecorator } from '../editor/HighlightDecorator';
@@ -14,7 +13,7 @@ import { registerOpenStatsDashboardCommand } from './openStatsDashboard';
  * 명령 등록의 통합 진입점
  */
 export function registerCommands(
-    plugin: Plugin,
+    plugin: CommentPlugin,
     windowManager: WindowManager,
     ensureInitialized: () => Promise<void>,
     getDecorator: () => HighlightDecorator
@@ -35,13 +34,13 @@ export function registerCommands(
     new InlineMigrationRunner(plugin.app).registerCommand(plugin);
 
     // 하이라이트 통계 대시보드 명령 등록
-    registerOpenStatsDashboardCommand(plugin as CommentPlugin, ensureInitialized);
+    registerOpenStatsDashboardCommand(plugin, ensureInitialized);
 }
 
 /**
  * 창 관리자 인스턴스 반환
  * main.ts의 리본 버튼에서 사용
  */
-export function createWindowManager(plugin: Plugin): WindowManager {
+export function createWindowManager(plugin: CommentPlugin): WindowManager {
     return new WindowManager(plugin.app);
 }

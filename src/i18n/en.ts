@@ -299,6 +299,8 @@ export default {
     "Top notes by highlights": "Top notes by highlights",
     "Top notes by comments": "Top notes by comments",
     "No data to display": "No data to display",
-    "Open highlight dashboard": "Open highlight dashboard"
+    "Open highlight dashboard": "Open highlight dashboard",
+    "Failed to load stats": "Failed to load highlight statistics",
+    "Plugin initialization failed": "Plugin initialization failed"
 
 };

@@ -68,7 +68,7 @@ export function computeHighlightStats(files: StatsInputFile[]): HighlightStats {
         totalHighlights,
         totalComments,
         notesWithHighlights,
-        topByHighlights: highlightRank.sort(sortRank).slice(0, TOP_N),
-        topByComments: commentRank.sort(sortRank).slice(0, TOP_N),
+        topByHighlights: highlightRank.filter(e => e.count > 0).sort(sortRank).slice(0, TOP_N),
+        topByComments: commentRank.filter(e => e.count > 0).sort(sortRank).slice(0, TOP_N),
     };
 }
