@@ -2,6 +2,14 @@
 
 Shared domain vocabulary for this project — entities, named processes, and status concepts with project-specific meaning. Seeded with core domain vocabulary, then accretes as ce-compound and ce-compound-refresh process learnings; direct edits are fine. Glossary only, not a spec or catch-all.
 
+## Highlight Statistics Domain
+
+### Highlight Statistics
+The aggregate counts computed across all indexed notes in the vault: total real Highlights, total Comments (including file-level Comments on Virtual Highlights), and the count of notes that contain at least one real Highlight. Produced by the pure `computeHighlightStats` function from a snapshot of all notes' HighlightInfo arrays.
+
+### Note Rank Entry
+A per-note aggregate used in top-N rankings: the note's path, display name, and a single count value (either its highlight count or its comment count). Rankings include only entries with a non-zero count and are sorted descending by count, then ascending by name for tie-breaking.
+
 ## Comment Storage Domain
 
 ### Highlight
