@@ -35,67 +35,95 @@
 
 /* @settings
 
-name: HiNote
+name: HiNote Enhanced
 id: highlight-comment-settings
 settings:
-    - 
+    -
         id: highlight-comment-general
-        title: 高亮卡片
+        title: Highlight card
+        title.zh: 高亮卡片
+        title.ko: 하이라이트 카드
         type: heading
         level: 1
-    - 
+    -
         id: highlight-text-settings
-        title: 文本设置
+        title: Text settings
+        title.zh: 文本设置
+        title.ko: 텍스트 설정
         type: heading
         level: 2
-    - 
+    -
         id: highlight-text-font-size
-        title: 高亮文本字号
+        title: Highlight text size
+        title.zh: 高亮文本字号
+        title.ko: 하이라이트 텍스트 크기
         type: variable-number
         default: 12
         format: px
-        description: 调整高亮文本的字体大小
-    - 
+        description: Adjust the font size of the highlight text
+        description.zh: 调整高亮文本的字体大小
+        description.ko: 하이라이트 텍스트의 글자 크기를 조정합니다
+    -
         id: highlight-text-font-family
-        title: 高亮文本字体
+        title: Highlight text font
+        title.zh: 高亮文本字体
+        title.ko: 하이라이트 텍스트 글꼴
         type: variable-text
         default: ''
-        description: 留空则保持 Obsidian 默认字体，可自由输入（如 Pretendard, sans-serif）
-    - 
+        description: Leave empty to keep Obsidian's default font. Free text input (e.g. Pretendard, sans-serif)
+        description.zh: 留空则保持 Obsidian 默认字体，可自由输入（如 Pretendard, sans-serif）
+        description.ko: "비워두면 Obsidian 기본 폰트를 유지합니다. 자유 입력 가능(예: Pretendard, sans-serif)"
+    -
         id: highlight-text-line-height
-        title: 高亮文本行高
+        title: Highlight text line height
+        title.zh: 高亮文本行高
+        title.ko: 하이라이트 텍스트 행간
         type: variable-number-slider
         default: 1.5
         min: 1
         max: 2
         step: 0.1
-    - 
+    -
         id: highlight-note-settings
-        title: 评论设置
+        title: Comment settings
+        title.zh: 评论设置
+        title.ko: 코멘트 설정
         type: heading
         level: 2
-    - 
+    -
         id: hi-note-font-size
-        title: 评论文本字号
+        title: Comment text size
+        title.zh: 评论文本字号
+        title.ko: 코멘트 텍스트 크기
         type: variable-number
         default: 13
         format: px
-        description: 调整评论文本的字体大小
-    - 
+        description: Adjust the font size of the comment text
+        description.zh: 调整评论文本的字体大小
+        description.ko: 코멘트 텍스트의 글자 크기를 조정합니다
+    -
         id: hi-note-font-family
-        title: 评论文本字体
+        title: Comment text font
+        title.zh: 评论文本字体
+        title.ko: 코멘트 텍스트 글꼴
         type: variable-text
         default: ''
-        description: 留空则保持 Obsidian 默认字体，可自由输入（如 Pretendard, sans-serif）
-    - 
+        description: Leave empty to keep Obsidian's default font. Free text input (e.g. Pretendard, sans-serif)
+        description.zh: 留空则保持 Obsidian 默认字体，可自由输入（如 Pretendard, sans-serif）
+        description.ko: "비워두면 Obsidian 기본 폰트를 유지합니다. 자유 입력 가능(예: Pretendard, sans-serif)"
+    -
         id: hi-note-line-height
-        title: 评论文本行高
+        title: Comment text line height
+        title.zh: 评论文本行高
+        title.ko: 코멘트 텍스트 행간
         type: variable-number-slider
         default: 1.5
         min: 1
         max: 2
         step: 0.1
-        description: 调整评论文本的行间距
+        description: Adjust the line spacing of the comment text
+        description.zh: 调整评论文本的行间距
+        description.ko: 코멘트 텍스트의 줄 간격을 조정합니다
 */
 
 /* ===================================
