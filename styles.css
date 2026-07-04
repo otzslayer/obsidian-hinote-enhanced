@@ -56,6 +56,12 @@ settings:
         format: px
         description: 调整高亮文本的字体大小
     - 
+        id: highlight-text-font-family
+        title: 高亮文本字体
+        type: variable-text
+        default: ''
+        description: 留空则保持 Obsidian 默认字体，可自由输入（如 Pretendard, sans-serif）
+    - 
         id: highlight-text-line-height
         title: 高亮文本行高
         type: variable-number-slider
@@ -75,6 +81,12 @@ settings:
         default: 13
         format: px
         description: 调整评论文本的字体大小
+    - 
+        id: hi-note-font-family
+        title: 评论文本字体
+        type: variable-text
+        default: ''
+        description: 留空则保持 Obsidian 默认字体，可自由输入（如 Pretendard, sans-serif）
     - 
         id: hi-note-line-height
         title: 评论文本行高
@@ -507,6 +519,7 @@ settings:
     color: var(--text-muted);
     line-height: var(--highlight-text-line-height, 1.5);
     font-size: var(--highlight-text-font-size, 12px);
+    font-family: var(--highlight-text-font-family, inherit);
     flex-grow: 1;
     padding: 2px 0;
     overflow-wrap: break-word;
@@ -540,6 +553,7 @@ settings:
     color: var(--text-normal);
     font-size: var(--hi-note-font-size, 13px);
     line-height: var(--hi-note-line-height, 1.5);
+    font-family: var(--hi-note-font-family, inherit);
     margin-bottom: 0;
     cursor: text;
     transition: background-color 0.2s ease;
