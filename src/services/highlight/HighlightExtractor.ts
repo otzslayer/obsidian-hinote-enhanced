@@ -158,18 +158,29 @@ export class HighlightExtractor {
             );
         }
 
+        // 인라인 코드(백틱) 내부의 == , <mark> 등은 하이라이트 구분자가 아니라
+        // 리터럴 텍스트다. 하지만 블록 코드/코멘트와 달리 인라인 코드는 하이라이트
+        // 안에 포함될 수 있으므로(예: ==foo `bar` baz==) 단순 제외로는 실제
+        // 하이라이트까지 사라진다. 코드 구간을 동일 길이의 공백으로 마스킹한 사본에서
+        // 매칭해 코드 내부의 == 가 구분자로 참여하지 못하게 하고, 실제 텍스트는
+        // 원본 content 에서 다시 잘라내 보존한다.
+        const maskedContent = HighlightExtractor.maskInlineCode(content);
+        // 마스킹된 사본에서 얻은 매치 인덱스로 원본을 재파싱하기 위한 비전역 패턴
+        const groupPattern = new RegExp(pattern.source, pattern.flags.replace('g', ''));
+
         let match: RegExpExecArray | null;
-        while ((match = pattern.exec(content)) !== null) {
+        while ((match = pattern.exec(maskedContent)) !== null) {
             const safeMatch = match;
-            const fullMatch = safeMatch[0];
             const matchStart = safeMatch.index;
-            const matchEnd = matchStart + fullMatch.length;
+            const matchEnd = matchStart + safeMatch[0].length;
+            // 실제 텍스트는 원본에서 잘라낸다 (마스킹된 사본은 공백이므로).
+            const fullMatch = content.slice(matchStart, matchEnd);
 
             // 코드 블록 또는 인라인 코멘트 안에 있는 매칭은 건너뜁니다
             if (overlapsExcludedRange(matchStart, matchEnd, excludedRanges)) {
                 continue;
             }
-            
+
             // 추가 확인: == 형식으로 매칭된 경우 앞뒤에 추가 = 기호가 없는지 확인합니다
             // ===text=== 또는 URL의 ==가 잘못 매칭되는 것을 방지합니다
             if (fullMatch.startsWith('==') && fullMatch.endsWith('==')) {
@@ -179,10 +190,12 @@ export class HighlightExtractor {
                     continue; // 추가 = 기호로 둘러싸인 매칭은 건너뜁니다
                 }
             }
-            
-            // 첫 번째 비어 있지 않은 캡처 그룹을 텍스트 내용으로 사용합니다
-            // 캡처 그룹이 없으면 전체 매칭 내용을 사용합니다
-            let text = safeMatch.slice(1).find(group => group !== undefined);
+
+            // 첫 번째 비어 있지 않은 캡처 그룹을 텍스트 내용으로 사용합니다.
+            // 캡처 그룹은 원본 fullMatch 에서 다시 추출해야 마스킹된 공백이 아닌
+            // 실제 텍스트가 담긴다. 캡처 그룹이 없으면 전체 매칭 내용을 사용합니다.
+            const groupMatch = groupPattern.exec(fullMatch);
+            let text = groupMatch?.slice(1).find(group => group !== undefined);
             if (!text) {
                 text = fullMatch; // 캡처 그룹이 없으면 전체 매칭 내용을 사용합니다
             }
@@ -222,6 +235,17 @@ export class HighlightExtractor {
                 highlights.push(highlight);
             }
         }
+    }
+
+    /**
+     * 인라인 코드(백틱) 구간을 동일 길이의 공백으로 치환합니다.
+     * 길이를 보존하므로 매치 인덱스가 원본과 그대로 정렬됩니다. 코드 스팬은
+     * 줄바꿈을 넘지 않으므로(단일 백틱 규칙) 내용에서 개행을 제외해, 짝이
+     * 맞지 않는 백틱이 문단을 넘어 실제 하이라이트를 가리는 것을 방지합니다.
+     */
+    private static maskInlineCode(content: string): string {
+        const inlineCodeRe = /(`+)(?:[^`\r\n]|(?!\1)`)+?\1(?!`)/g;
+        return content.replace(inlineCodeRe, match => ' '.repeat(match.length));
     }
 
     private createContextAnchors(
