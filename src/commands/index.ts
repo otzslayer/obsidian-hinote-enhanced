@@ -25,7 +25,7 @@ export function registerCommands(
     registerOpenMainWindowCommand(plugin, windowManager, ensureInitialized);
 
     // 인라인 코멘트 문법 토글 명령 등록
-    registerToggleInlineCommentSyntaxCommand(plugin, getDecorator);
+    registerToggleInlineCommentSyntaxCommand(plugin, ensureInitialized, getDecorator);
 
     // 통합 하이라이트 토글 명령 등록 (Mod+Shift+S)
     // 레지스트리는 플러그인 필드에서 읽으므로 getDecorator 가 필요 없다.
