@@ -8,6 +8,14 @@ import { parseInlineComments, type HighlightMatch, type InlineCommentBlock } fro
 import { parseFileLevelComments, type FileLevelComment } from '../comment/inline/FrontmatterComments';
 
 /**
+ * ES2022 RegExp d(hasIndices) 플래그의 매치 결과.
+ * tsconfig lib 이 ES7 까지라 indices 타입이 없어 명시적으로 좁혀 쓴다.
+ */
+interface RegExpExecArrayWithIndices extends RegExpExecArray {
+    indices?: Array<[number, number] | undefined>;
+}
+
+/**
  * 하이라이트 추출기
  * 역할:
  * 1. 파일 내용에서 하이라이트 텍스트 추출
@@ -165,12 +173,17 @@ export class HighlightExtractor {
         // 매칭해 코드 내부의 == 가 구분자로 참여하지 못하게 하고, 실제 텍스트는
         // 원본 content 에서 다시 잘라내 보존한다.
         const maskedContent = HighlightExtractor.maskInlineCode(content);
-        // 마스킹된 사본에서 얻은 매치 인덱스로 원본을 재파싱하기 위한 비전역 패턴
-        const groupPattern = new RegExp(pattern.source, pattern.flags.replace('g', ''));
+        // 캡처 그룹의 오프셋을 얻기 위해 d(hasIndices) 를 붙인 사본으로 매칭한다.
+        // 마스킹은 길이를 보존하므로 이 오프셋은 원본 content 에도 그대로 유효하다.
+        // 플래그를 런타임 문자열로 붙여 tsconfig target(ES6) 의 리터럴 검사를 피한다.
+        const indexedPattern = new RegExp(
+            pattern.source,
+            pattern.flags.includes('d') ? pattern.flags : pattern.flags + 'd'
+        );
 
         let match: RegExpExecArray | null;
-        while ((match = pattern.exec(maskedContent)) !== null) {
-            const safeMatch = match;
+        while ((match = indexedPattern.exec(maskedContent)) !== null) {
+            const safeMatch = match as RegExpExecArrayWithIndices;
             const matchStart = safeMatch.index;
             const matchEnd = matchStart + safeMatch[0].length;
             // 실제 텍스트는 원본에서 잘라낸다 (마스킹된 사본은 공백이므로).
@@ -192,10 +205,12 @@ export class HighlightExtractor {
             }
 
             // 첫 번째 비어 있지 않은 캡처 그룹을 텍스트 내용으로 사용합니다.
-            // 캡처 그룹은 원본 fullMatch 에서 다시 추출해야 마스킹된 공백이 아닌
-            // 실제 텍스트가 담긴다. 캡처 그룹이 없으면 전체 매칭 내용을 사용합니다.
-            const groupMatch = groupPattern.exec(fullMatch);
-            let text = groupMatch?.slice(1).find(group => group !== undefined);
+            // 그룹 범위는 마스킹 사본의 매치에서 얻어 원본에서 잘라낸다 —
+            // 마스킹되지 않은 fullMatch 를 재파싱하면 코드 구간 안의 == 가 다시
+            // 구분자로 살아나 텍스트가 매치 경계보다 짧게 잘린다.
+            // 캡처 그룹이 없으면 전체 매칭 내용을 사용합니다.
+            const groupRange = safeMatch.indices?.slice(1).find(range => range !== undefined);
+            let text = groupRange ? content.slice(groupRange[0], groupRange[1]) : undefined;
             if (!text) {
                 text = fullMatch; // 캡처 그룹이 없으면 전체 매칭 내용을 사용합니다
             }
