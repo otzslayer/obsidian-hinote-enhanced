@@ -1,7 +1,6 @@
 import { Plugin, MarkdownView, Platform } from 'obsidian';
 import { t } from '../i18n';
 import { ReadingModeHighlighter } from '../services/highlight/ReadingModeHighlighter';
-import type { HighlightDecorator } from '../editor/HighlightDecorator';
 import type { HiNotePluginContext } from '../types/plugin';
 
 /** Obsidian 내부 명령 API — 공개 타입에 없어 명시적으로 좁혀 쓴다. */
@@ -14,12 +13,9 @@ interface AppWithCommands {
  *
  * - source 모드: 네이티브 editor:toggle-highlight 에 위임 (토글 온/오프 포함).
  * - preview 모드: ReadingModeHighlighter 로 선택 텍스트를 ==...== 로 삽입.
- *
- * getDecorator 는 lazy getter — 서비스 초기화 후 호출되므로 직접 참조하지 않는다.
  */
 export function registerToggleHighlightCommand(
     plugin: Plugin,
-    getDecorator: () => HighlightDecorator,
 ): void {
     // 읽기 모드 하이라이트는 Mod+Shift+S 단축키 기반 데스크톱 기능이다.
     // 모바일/터치 트리거는 plan 의 Scope Boundaries 에서 후속 작업으로 보류했으므로,
@@ -57,11 +53,10 @@ export function registerToggleHighlightCommand(
                 }
             } else {
                 // preview 모드
-                const decorator = getDecorator();
                 const highlighter = new ReadingModeHighlighter(
                     ctx.app,
                     ctx.highlightService,
-                    decorator.sectionLineRegistry,
+                    ctx.sectionLineRegistry,
                 );
                 void highlighter.highlightSelection().catch((e) => {
                     console.error('[HiNote] reading-mode highlight failed', e);

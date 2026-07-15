@@ -69,6 +69,7 @@ export class Plugin {
     app = new App();
     manifest = { id: 'hi-note', name: 'HiNote', version: '0.5.7' };
     addCommand = (_cmd: unknown) => {};
+    registerMarkdownPostProcessor = (fn: unknown, _sortOrder?: number) => fn;
     registerEvent = (_evt: unknown) => {};
     registerDomEvent = (_el: unknown, _type: string, _handler: unknown) => {};
     loadData = async () => ({});

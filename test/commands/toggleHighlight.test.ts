@@ -36,12 +36,10 @@ function makePlugin(
         },
         addCommand,
         highlightService: {},
+        sectionLineRegistry: {},
     };
 
-    const mockDecorator = { sectionLineRegistry: {} };
-    const getDecorator = () => mockDecorator as never;
-
-    return { plugin, addCommand, executeCommandById, getDecorator, replaceSelection };
+    return { plugin, addCommand, executeCommandById, replaceSelection };
 }
 
 function getCheckCallback(addCommand: ReturnType<typeof vi.fn>) {
@@ -55,8 +53,8 @@ describe('registerToggleHighlightCommand', () => {
     });
 
     it('명령이 Mod+Shift+S hotkey와 함께 등록된다', () => {
-        const { plugin, addCommand, getDecorator } = makePlugin('preview');
-        registerToggleHighlightCommand(plugin as never, getDecorator);
+        const { plugin, addCommand } = makePlugin('preview');
+        registerToggleHighlightCommand(plugin as never);
 
         expect(addCommand).toHaveBeenCalledOnce();
         const cmd = addCommand.mock.calls[0][0];
@@ -65,10 +63,10 @@ describe('registerToggleHighlightCommand', () => {
     });
 
     it('모바일에서는 명령을 등록하지 않는다 (데스크톱 전용)', () => {
-        const { plugin, addCommand, getDecorator } = makePlugin('preview');
+        const { plugin, addCommand } = makePlugin('preview');
         (Platform as { isMobile: boolean }).isMobile = true;
         try {
-            registerToggleHighlightCommand(plugin as never, getDecorator);
+            registerToggleHighlightCommand(plugin as never);
             expect(addCommand).not.toHaveBeenCalled();
         } finally {
             (Platform as { isMobile: boolean }).isMobile = false;
@@ -76,60 +74,60 @@ describe('registerToggleHighlightCommand', () => {
     });
 
     it('활성 MarkdownView 없음 → checkCallback false', () => {
-        const { plugin, addCommand, getDecorator } = makePlugin('preview', false);
-        registerToggleHighlightCommand(plugin as never, getDecorator);
+        const { plugin, addCommand } = makePlugin('preview', false);
+        registerToggleHighlightCommand(plugin as never);
         const cb = getCheckCallback(addCommand);
         expect(cb(true)).toBe(false);
     });
 
     it('checking=true 이면 true 반환', () => {
-        const { plugin, addCommand, getDecorator } = makePlugin('preview');
-        registerToggleHighlightCommand(plugin as never, getDecorator);
+        const { plugin, addCommand } = makePlugin('preview');
+        registerToggleHighlightCommand(plugin as never);
         const cb = getCheckCallback(addCommand);
         expect(cb(true)).toBe(true);
     });
 
     it('source 모드 → executeCommandById("editor:toggle-highlight") 호출', () => {
-        const { plugin, addCommand, executeCommandById, getDecorator } = makePlugin('source');
-        registerToggleHighlightCommand(plugin as never, getDecorator);
+        const { plugin, addCommand, executeCommandById } = makePlugin('source');
+        registerToggleHighlightCommand(plugin as never);
         const cb = getCheckCallback(addCommand);
         cb(false);
         expect(executeCommandById).toHaveBeenCalledWith('editor:toggle-highlight');
     });
 
     it('source 모드 + 네이티브 부재 + 평문 선택 → ==sel== 폴백 래핑', () => {
-        const { plugin, addCommand, getDecorator, replaceSelection } = makePlugin('source', true, {
+        const { plugin, addCommand, replaceSelection } = makePlugin('source', true, {
             nativeExecuted: false,
             selection: 'hello',
         });
-        registerToggleHighlightCommand(plugin as never, getDecorator);
+        registerToggleHighlightCommand(plugin as never);
         getCheckCallback(addCommand)(false);
         expect(replaceSelection).toHaveBeenCalledWith('==hello==');
     });
 
     it('source 모드 + 네이티브 부재 + 이미 하이라이트된 선택 → 토글오프(마커 제거)', () => {
-        const { plugin, addCommand, getDecorator, replaceSelection } = makePlugin('source', true, {
+        const { plugin, addCommand, replaceSelection } = makePlugin('source', true, {
             nativeExecuted: false,
             selection: '==hello==',
         });
-        registerToggleHighlightCommand(plugin as never, getDecorator);
+        registerToggleHighlightCommand(plugin as never);
         getCheckCallback(addCommand)(false);
         expect(replaceSelection).toHaveBeenCalledWith('hello');
     });
 
     it('source 모드 + 네이티브 부재 + 빈 선택 → 무동작(==== 삽입 안 함)', () => {
-        const { plugin, addCommand, getDecorator, replaceSelection } = makePlugin('source', true, {
+        const { plugin, addCommand, replaceSelection } = makePlugin('source', true, {
             nativeExecuted: false,
             selection: '',
         });
-        registerToggleHighlightCommand(plugin as never, getDecorator);
+        registerToggleHighlightCommand(plugin as never);
         getCheckCallback(addCommand)(false);
         expect(replaceSelection).not.toHaveBeenCalled();
     });
 
     it('preview 모드 → ReadingModeHighlighter.highlightSelection 호출', () => {
-        const { plugin, addCommand, getDecorator } = makePlugin('preview');
-        registerToggleHighlightCommand(plugin as never, getDecorator);
+        const { plugin, addCommand } = makePlugin('preview');
+        registerToggleHighlightCommand(plugin as never);
         const cb = getCheckCallback(addCommand);
         cb(false);
         expect(ReadingModeHighlighter).toHaveBeenCalledOnce();

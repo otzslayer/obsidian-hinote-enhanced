@@ -5,9 +5,11 @@ import { InitializationManager } from './src/services/InitializationManager';
 import { WindowManager } from './src/plugin/WindowManager';
 import type { PluginServices } from './src/plugin/PluginServices';
 import { migrateSettings, normalizeSettings } from './src/settings/SettingsMigration';
+import { SectionLineRegistry } from './src/editor/SectionLineRegistry';
 import {
 	createPluginWindowManager,
 	registerPluginCommands,
+	registerPluginMarkdownPostProcessors,
 	registerPluginRibbon,
 	registerPluginVaultEvents,
 	registerPluginViews
@@ -17,6 +19,11 @@ export default class CommentPlugin extends Plugin {
 	settings: PluginSettings;
 	private initManager: InitializationManager;
 	private windowManager: WindowManager;
+
+	// 읽기 모드 블록 → 소스 줄범위 레지스트리.
+	// 서비스가 아니라 플러그인이 소유한다 — 지연 초기화 이전의 렌더도 잡아야 하므로
+	// 던지는 게터(requireInitializedServices 계열)가 아닌 평범한 필드여야 한다.
+	readonly sectionLineRegistry = new SectionLineRegistry();
 
 	// 외부 접근을 위한 서비스 인스턴스 공개
 	get services(): PluginServices | null { return this.initManager.currentServices; }
@@ -53,6 +60,7 @@ export default class CommentPlugin extends Plugin {
 		this.windowManager = createPluginWindowManager(this);
 
 		registerPluginViews(this);
+		registerPluginMarkdownPostProcessors(this);
 		registerPluginRibbon(this, this.windowManager);
 		registerPluginCommands(this, this.windowManager);
 
