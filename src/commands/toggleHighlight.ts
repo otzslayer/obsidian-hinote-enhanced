@@ -75,6 +75,11 @@ export function registerToggleHighlightCommand(
                     );
                     await highlighter.highlightSelection();
                 })().catch((e) => {
+                    // ReadingModeHighlighter 는 예상 실패 모드마다 스스로 Notice 후
+                    // return 하므로 여기까지 오는 것은 예상 밖 예외(주로 vault.process
+                    // 거부)뿐이다 — 이중 알림이 아니다. 알리지 않으면 이 수정이
+                    // 없애려던 '단축키가 죽은 것처럼 보임' 증상이 그대로 재현된다.
+                    new Notice(t('Reading-mode highlight failed'));
                     console.error('[HiNote] reading-mode highlight failed', e);
                 });
             }

@@ -173,6 +173,26 @@ describe('registerToggleHighlightCommand', () => {
             expect(ensureInitialized).not.toHaveBeenCalled();
         });
 
+        // 초기화 이후의 예외(주로 vault.process 거부)는 ReadingModeHighlighter 가
+        // Notice 를 띄우는 예상 실패 모드가 아니므로 — 그쪽은 Notice 후 return 한다 —
+        // 여기서 알리지 않으면 이 수정이 없애려던 '단축키가 죽은 것처럼 보임' 증상이
+        // 그대로 재현된다.
+        it('초기화 이후 하이라이트 삽입 실패 → Notice, 예외는 밖으로 새지 않는다', async () => {
+            const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const { plugin, addCommand, ensureInitialized } = makePlugin('preview');
+            (ReadingModeHighlighter as ReturnType<typeof vi.fn>).mockImplementationOnce(() => ({
+                highlightSelection: vi.fn().mockRejectedValue(new Error('vault write failed')),
+            }));
+            registerToggleHighlightCommand(plugin as never, ensureInitialized);
+
+            expect(() => getCheckCallback(addCommand)(false)).not.toThrow();
+            await flush();
+
+            expect(noticeMessages).toContain('Reading-mode highlight failed');
+            expect(consoleError).toHaveBeenCalled();
+            consoleError.mockRestore();
+        });
+
         it('초기화 실패 → Notice 후 중단, 예외는 밖으로 새지 않는다 (R4)', async () => {
             const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
             const { plugin, addCommand, ensureInitialized } = makePlugin('preview', true, {
