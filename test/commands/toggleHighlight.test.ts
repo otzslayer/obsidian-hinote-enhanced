@@ -48,7 +48,11 @@ function makePlugin(
     const addCommand = vi.fn();
     const replaceSelection = vi.fn();
 
+    // 실제 ensureServicesInitialized() 처럼 진짜로 나중에 완료된다.
+    // 즉시 initialized 를 세우면 await 를 지워도 테스트가 통과해 버려 —
+    // await 가 부하를 지는지 증명하지 못한다.
     const ensureInitialized = vi.fn(async () => {
+        await Promise.resolve();
         if (opts.initFails) throw new Error('init failed');
         initialized = true;
     });
