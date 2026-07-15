@@ -29,7 +29,7 @@ export function registerCommands(
 
     // 통합 하이라이트 토글 명령 등록 (Mod+Shift+S)
     // 레지스트리는 플러그인 필드에서 읽으므로 getDecorator 가 필요 없다.
-    registerToggleHighlightCommand(plugin);
+    registerToggleHighlightCommand(plugin, ensureInitialized);
 
     // 일회성 마이그레이션 명령 등록
     new InlineMigrationRunner(plugin.app).registerCommand(plugin);

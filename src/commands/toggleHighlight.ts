@@ -1,4 +1,4 @@
-import { Plugin, MarkdownView, Platform } from 'obsidian';
+import { Plugin, MarkdownView, Notice, Platform } from 'obsidian';
 import { t } from '../i18n';
 import { ReadingModeHighlighter } from '../services/highlight/ReadingModeHighlighter';
 import type { HiNotePluginContext } from '../types/plugin';
@@ -13,9 +13,13 @@ interface AppWithCommands {
  *
  * - source 모드: 네이티브 editor:toggle-highlight 에 위임 (토글 온/오프 포함).
  * - preview 모드: ReadingModeHighlighter 로 선택 텍스트를 ==...== 로 삽입.
+ *
+ * 이 명령은 서비스 초기화 트리거가 아니므로(사이드바·리본·설정 탭만 트리거) 콜드
+ * 스타트 첫 입력에서 실행 시점에 직접 초기화한다.
  */
 export function registerToggleHighlightCommand(
     plugin: Plugin,
+    ensureInitialized: () => Promise<void>,
 ): void {
     // 읽기 모드 하이라이트는 Mod+Shift+S 단축키 기반 데스크톱 기능이다.
     // 모바일/터치 트리거는 plan 의 Scope Boundaries 에서 후속 작업으로 보류했으므로,
@@ -52,13 +56,25 @@ export function registerToggleHighlightCommand(
                     }
                 }
             } else {
-                // preview 모드
-                const highlighter = new ReadingModeHighlighter(
-                    ctx.app,
-                    ctx.highlightService,
-                    ctx.sectionLineRegistry,
-                );
-                void highlighter.highlightSelection().catch((e) => {
+                // preview 모드 — ctx.highlightService 는 초기화 전에 던지는 게터이므로
+                // 반드시 await ensureInitialized() 뒤에서 읽는다.
+                // checkCallback 은 동기 시그니처라 비동기 작업은 fire-and-forget 으로 띄운다.
+                void (async () => {
+                    try {
+                        await ensureInitialized();
+                    } catch (err) {
+                        new Notice(t('Plugin initialization failed'));
+                        console.error('[HiNote] Failed to initialize for reading-mode highlight', err);
+                        return;
+                    }
+
+                    const highlighter = new ReadingModeHighlighter(
+                        ctx.app,
+                        ctx.highlightService,
+                        ctx.sectionLineRegistry,
+                    );
+                    await highlighter.highlightSelection();
+                })().catch((e) => {
                     console.error('[HiNote] reading-mode highlight failed', e);
                 });
             }
