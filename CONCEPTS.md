@@ -2,6 +2,28 @@
 
 Shared domain vocabulary for this project — entities, named processes, and status concepts with project-specific meaning. Seeded with core domain vocabulary, then accretes as ce-compound and ce-compound-refresh process learnings; direct edits are fine. Glossary only, not a spec or catch-all.
 
+## Plugin Initialization Domain
+
+### Service Graph
+The bundle of long-lived services the plugin runs on, constructed in one shot the first time it is needed rather than at plugin load. Construction is idempotent and one-way: once built it lives for the rest of the session, and nothing tears it down until the plugin unloads.
+
+Building it is not side-effect-free — it registers editor extensions and file watchers, and reconfiguring the editor in that step discards whatever text selection the reading view currently holds. It is also synchronous despite being reached through an asynchronous accessor, so the whole construction completes in the same turn as whatever triggered it, before any suspension point. Both properties matter to callers: anything reading volatile ambient state (a selection, focus, an in-flight gesture) must not be the thing that causes the Service Graph to be built.
+
+### Initialization Trigger
+A user-facing surface — a view, a control, or a command — whose first use causes the Service Graph to be built. Which surfaces qualify is a deliberate design choice, not an accident of wiring: a surface becomes a Trigger precisely by reaching for something only the Service Graph provides.
+
+A command that needs nothing beyond Plugin-Owned State is deliberately *not* a Trigger, and the reading-view highlight command is the standing example — making it one would destroy the selection it exists to read.
+
+### Plugin-Owned State
+State the plugin instance holds directly, outside the Service Graph, and therefore readable from the moment the plugin loads. The defining property is availability, not cost: a dependency qualifies for promotion here only when constructing it is pure allocation, with every registration, timer, and I/O deferred to a separate initialization step the Service Graph still performs.
+
+Accessors for Service Graph members throw before the graph exists; Plugin-Owned State never does. That difference is the whole point — it is what lets a command run correctly on a Cold Start. When state is promoted, the Service Graph shares the same instance rather than constructing its own, so a lazily-built index and an eagerly-available command cannot drift onto different copies.
+
+### Cold Start
+A session in which no Initialization Trigger has fired yet — the plugin is loaded and its commands are registered, but the Service Graph does not exist. The state a restored note sits in immediately after a restart, before the user touches any HiNote surface.
+
+Cold Start is the condition under which lifecycle defects surface and the one a mocked test suite cannot observe, since it is defined by the absence of real construction. Verifying it requires a genuine restart with no Initialization Trigger touched first; any procedure that opens a triggering surface before the check silently converts the test into a warm one.
+
 ## Highlight Statistics Domain
 
 ### Highlight Statistics
