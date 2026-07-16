@@ -25,10 +25,13 @@ export function registerCommands(
     registerOpenMainWindowCommand(plugin, windowManager, ensureInitialized);
 
     // 인라인 코멘트 문법 토글 명령 등록
-    registerToggleInlineCommentSyntaxCommand(plugin, getDecorator);
+    registerToggleInlineCommentSyntaxCommand(plugin, ensureInitialized, getDecorator);
 
     // 통합 하이라이트 토글 명령 등록 (Mod+Shift+S)
-    registerToggleHighlightCommand(plugin, getDecorator);
+    // 필요한 highlightService·sectionLineRegistry 가 둘 다 플러그인 필드라
+    // getDecorator 도 ensureInitialized 도 필요 없다 — 이 경로에서 초기화를 돌리면
+    // CM6 재구성이 읽기 모드의 DOM Selection 을 지운다(toggleHighlight.ts 주석 참조).
+    registerToggleHighlightCommand(plugin);
 
     // 일회성 마이그레이션 명령 등록
     new InlineMigrationRunner(plugin.app).registerCommand(plugin);

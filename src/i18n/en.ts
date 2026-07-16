@@ -301,6 +301,7 @@ export default {
     "No data to display": "No data to display",
     "Open highlight dashboard": "Open highlight dashboard",
     "Failed to load stats": "Failed to load highlight statistics",
-    "Plugin initialization failed": "Plugin initialization failed"
+    "Plugin initialization failed": "Plugin initialization failed",
+    "Reading-mode highlight failed": "Reading-mode highlight failed"
 
 };

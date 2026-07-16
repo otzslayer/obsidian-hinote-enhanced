@@ -308,5 +308,6 @@ export default {
     "No data to display": "暂无数据",
     "Open highlight dashboard": "打开高亮统计仪表盘",
     "Failed to load stats": "加载高亮统计数据失败",
-    "Plugin initialization failed": "插件初始化失败"
+    "Plugin initialization failed": "插件初始化失败",
+    "Reading-mode highlight failed": "阅读模式高亮失败"
 };
