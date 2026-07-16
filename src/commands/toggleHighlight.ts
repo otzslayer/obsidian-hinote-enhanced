@@ -14,12 +14,17 @@ interface AppWithCommands {
  * - source 모드: 네이티브 editor:toggle-highlight 에 위임 (토글 온/오프 포함).
  * - preview 모드: ReadingModeHighlighter 로 선택 텍스트를 ==...== 로 삽입.
  *
- * 이 명령은 서비스 초기화 트리거가 아니므로(사이드바·리본·설정 탭만 트리거) 콜드
- * 스타트 첫 입력에서 실행 시점에 직접 초기화한다.
+ * **이 명령은 서비스 지연 초기화를 트리거하지 않는다** — 다른 다섯 명령과 다른 유일한
+ * 지점이고, 의도적이다. 필요한 것은 plugin 이 소유한 highlightService 와
+ * sectionLineRegistry 둘뿐인데, 둘 다 초기화와 무관한 평범한 필드다.
+ *
+ * 여기서 초기화를 돌리면 안 된다: InitializationManager.initialize() 가
+ * registerEditorExtension 으로 CM6 를 재구성하면서 읽기 모드의 DOM Selection 을
+ * 지우고, 그러면 선택을 읽는 시점엔 이미 비어 있어 콜드 스타트 첫 입력이 항상
+ * "No text selected" 로 끝난다. 실제 볼트에서 재현된 결함이다.
  */
 export function registerToggleHighlightCommand(
     plugin: Plugin,
-    ensureInitialized: () => Promise<void>,
 ): void {
     // 읽기 모드 하이라이트는 Mod+Shift+S 단축키 기반 데스크톱 기능이다.
     // 모바일/터치 트리거는 plan 의 Scope Boundaries 에서 후속 작업으로 보류했으므로,
@@ -56,25 +61,14 @@ export function registerToggleHighlightCommand(
                     }
                 }
             } else {
-                // preview 모드 — ctx.highlightService 는 초기화 전에 던지는 게터이므로
-                // 반드시 await ensureInitialized() 뒤에서 읽는다.
-                // checkCallback 은 동기 시그니처라 비동기 작업은 fire-and-forget 으로 띄운다.
-                void (async () => {
-                    try {
-                        await ensureInitialized();
-                    } catch (err) {
-                        new Notice(t('Plugin initialization failed'));
-                        console.error('[HiNote] Failed to initialize for reading-mode highlight', err);
-                        return;
-                    }
-
-                    const highlighter = new ReadingModeHighlighter(
-                        ctx.app,
-                        ctx.highlightService,
-                        ctx.sectionLineRegistry,
-                    );
-                    await highlighter.highlightSelection();
-                })().catch((e) => {
+                // preview 모드 — 초기화를 기다리지 않는다(위 주석 참조).
+                // 하이라이터를 같은 틱에 만들어 DOM Selection 이 살아 있는 동안 읽는다.
+                const highlighter = new ReadingModeHighlighter(
+                    ctx.app,
+                    ctx.highlightService,
+                    ctx.sectionLineRegistry,
+                );
+                void highlighter.highlightSelection().catch((e) => {
                     // ReadingModeHighlighter 는 예상 실패 모드마다 스스로 Notice 후
                     // return 하므로 여기까지 오는 것은 예상 밖 예외(주로 vault.process
                     // 거부)뿐이다 — 이중 알림이 아니다. 알리지 않으면 이 수정이

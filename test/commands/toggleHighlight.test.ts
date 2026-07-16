@@ -27,35 +27,18 @@ import { registerToggleHighlightCommand } from '../../src/commands/toggleHighlig
 import { ReadingModeHighlighter } from '../../src/services/highlight/ReadingModeHighlighter';
 
 /**
- * 기본값은 **콜드 스타트**(initialized: false) 다.
- *
- * highlightService 를 던지는 게터로 두어 main.ts 의 requireInitializedServices() 를
- * 그대로 흉내 낸다 — 이 게터가 버그의 전제 조건이므로, 평범한 객체로 두면
- * 스위트가 초록이어도 아무것도 증명하지 못한다.
+ * highlightService 와 sectionLineRegistry 는 둘 다 CommentPlugin 이 onload 에서
+ * 소유하는 평범한 필드다 — 던지는 게터가 아니므로 초기화 여부와 무관하게 안전하다.
+ * 그래서 이 명령은 초기화 트리거가 필요 없고, 목도 초기화 상태를 흉내 낼 필요가 없다.
  */
 function makePlugin(
     mode: string,
     hasView = true,
-    opts: {
-        nativeExecuted?: boolean;
-        selection?: string;
-        initialized?: boolean;
-        initFails?: boolean;
-    } = {},
+    opts: { nativeExecuted?: boolean; selection?: string } = {},
 ) {
-    let initialized = opts.initialized ?? false;
     const executeCommandById = vi.fn().mockReturnValue(opts.nativeExecuted ?? true);
     const addCommand = vi.fn();
     const replaceSelection = vi.fn();
-
-    // 실제 ensureServicesInitialized() 처럼 진짜로 나중에 완료된다.
-    // 즉시 initialized 를 세우면 await 를 지워도 테스트가 통과해 버려 —
-    // await 가 부하를 지는지 증명하지 못한다.
-    const ensureInitialized = vi.fn(async () => {
-        await Promise.resolve();
-        if (opts.initFails) throw new Error('init failed');
-        initialized = true;
-    });
 
     const view = hasView
         ? {
@@ -66,28 +49,21 @@ function makePlugin(
 
     const plugin = {
         app: {
-            workspace: {
-                getActiveViewOfType: () => view,
-            },
+            workspace: { getActiveViewOfType: () => view },
             commands: { executeCommandById },
         },
         addCommand,
+        highlightService: {},
         sectionLineRegistry: {},
-        get highlightService() {
-            if (!initialized) throw new Error('HiNote services have not been initialized.');
-            return {};
-        },
     };
 
-    return { plugin, addCommand, executeCommandById, replaceSelection, ensureInitialized };
+    return { plugin, addCommand, executeCommandById, replaceSelection };
 }
 
 function getCheckCallback(addCommand: ReturnType<typeof vi.fn>) {
-    const call = addCommand.mock.calls[0];
-    return call[0].checkCallback as (checking: boolean) => boolean | void;
+    return addCommand.mock.calls[0][0].checkCallback as (checking: boolean) => boolean | void;
 }
 
-/** checkCallback 은 동기 fire-and-forget 이므로 단언 전에 비동기 꼬리를 흘려보낸다. */
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
 describe('registerToggleHighlightCommand', () => {
@@ -97,8 +73,8 @@ describe('registerToggleHighlightCommand', () => {
     });
 
     it('명령이 Mod+Shift+S hotkey와 함께 등록된다', () => {
-        const { plugin, addCommand, ensureInitialized } = makePlugin('preview');
-        registerToggleHighlightCommand(plugin as never, ensureInitialized);
+        const { plugin, addCommand } = makePlugin('preview');
+        registerToggleHighlightCommand(plugin as never);
 
         expect(addCommand).toHaveBeenCalledOnce();
         const cmd = addCommand.mock.calls[0][0];
@@ -107,154 +83,113 @@ describe('registerToggleHighlightCommand', () => {
     });
 
     it('모바일에서는 명령을 등록하지 않는다 (데스크톱 전용)', () => {
-        const { plugin, addCommand, ensureInitialized } = makePlugin('preview');
+        const { plugin, addCommand } = makePlugin('preview');
         (Platform as { isMobile: boolean }).isMobile = true;
         try {
-            registerToggleHighlightCommand(plugin as never, ensureInitialized);
+            registerToggleHighlightCommand(plugin as never);
             expect(addCommand).not.toHaveBeenCalled();
         } finally {
             (Platform as { isMobile: boolean }).isMobile = false;
         }
     });
 
-    it('활성 MarkdownView 없음 → checkCallback false (초기화 여부와 무관)', () => {
-        const { plugin, addCommand, ensureInitialized } = makePlugin('preview', false);
-        registerToggleHighlightCommand(plugin as never, ensureInitialized);
-        const cb = getCheckCallback(addCommand);
-        expect(cb(true)).toBe(false);
-        expect(ensureInitialized).not.toHaveBeenCalled();
+    it('활성 MarkdownView 없음 → checkCallback false', () => {
+        const { plugin, addCommand } = makePlugin('preview', false);
+        registerToggleHighlightCommand(plugin as never);
+        expect(getCheckCallback(addCommand)(true)).toBe(false);
     });
 
-    it('checking=true 이면 서비스 초기화 없이 true 반환', () => {
-        const { plugin, addCommand, ensureInitialized } = makePlugin('preview');
-        registerToggleHighlightCommand(plugin as never, ensureInitialized);
-        const cb = getCheckCallback(addCommand);
-        expect(cb(true)).toBe(true);
-        expect(ensureInitialized).not.toHaveBeenCalled();
+    it('checking=true 이면 true 반환', () => {
+        const { plugin, addCommand } = makePlugin('preview');
+        registerToggleHighlightCommand(plugin as never);
+        expect(getCheckCallback(addCommand)(true)).toBe(true);
     });
 
-    describe('콜드 스타트 (서비스 초기화 이전)', () => {
+    /**
+     * 이 명령의 콜드 스타트 계약: 서비스 초기화를 **절대** 트리거하지 않는다.
+     *
+     * InitializationManager.initialize() 는 registerEditorExtension 으로 CM6 를
+     * 재구성하며, 그 과정이 읽기 모드의 DOM Selection 을 지운다. 그래서 초기화를
+     * 기다린 뒤 activeWindow.getSelection() 을 읽으면 콜드 스타트 첫 입력이
+     * "No text selected" 로 끝난다 — 실제 볼트에서 재현된 결함이다.
+     *
+     * 아래 두 테스트는 그 재발을 막는 구조적 가드다: 하이라이터가 checkCallback 과
+     * 같은 틱에 만들어져야 하므로, await 를 다시 넣으면 즉시 깨진다.
+     */
+    describe('콜드 스타트 계약 — 초기화를 기다리지 않는다', () => {
+        it('preview 모드에서 하이라이터가 같은 틱에 동기로 만들어진다', () => {
+            const { plugin, addCommand } = makePlugin('preview');
+            registerToggleHighlightCommand(plugin as never);
+
+            getCheckCallback(addCommand)(false);
+
+            // flush 하지 않는다 — await 가 끼어 있으면 여기서 아직 0회다
+            expect(ReadingModeHighlighter).toHaveBeenCalledOnce();
+        });
+
         it('preview 모드 첫 입력이 예외 없이 하이라이트를 삽입한다 (R1)', async () => {
-            const { plugin, addCommand, ensureInitialized } = makePlugin('preview');
-            registerToggleHighlightCommand(plugin as never, ensureInitialized);
-            const cb = getCheckCallback(addCommand);
+            const { plugin, addCommand } = makePlugin('preview');
+            registerToggleHighlightCommand(plugin as never);
 
-            expect(() => cb(false)).not.toThrow();
+            expect(() => getCheckCallback(addCommand)(false)).not.toThrow();
             await flush();
 
-            expect(ensureInitialized).toHaveBeenCalledOnce();
-            expect(ReadingModeHighlighter).toHaveBeenCalledOnce();
             const instance = (ReadingModeHighlighter as ReturnType<typeof vi.fn>).mock.results[0]
                 .value;
             expect(instance.highlightSelection).toHaveBeenCalled();
         });
 
-        it('ensureInitialized 가 ReadingModeHighlighter 생성보다 먼저 호출된다', async () => {
-            const { plugin, addCommand, ensureInitialized } = makePlugin('preview');
-            registerToggleHighlightCommand(plugin as never, ensureInitialized);
-            getCheckCallback(addCommand)(false);
-            await flush();
-
-            const initOrder = ensureInitialized.mock.invocationCallOrder[0];
-            const ctorOrder = (ReadingModeHighlighter as ReturnType<typeof vi.fn>).mock
-                .invocationCallOrder[0];
-            expect(initOrder).toBeLessThan(ctorOrder);
-        });
-
-        it('source 모드는 초기화 없이 네이티브 명령에 위임한다 (R5)', async () => {
-            const { plugin, addCommand, executeCommandById, ensureInitialized } =
-                makePlugin('source');
-            registerToggleHighlightCommand(plugin as never, ensureInitialized);
+        it('source 모드는 네이티브 명령에 위임한다 (R5)', () => {
+            const { plugin, addCommand, executeCommandById } = makePlugin('source');
+            registerToggleHighlightCommand(plugin as never);
 
             expect(() => getCheckCallback(addCommand)(false)).not.toThrow();
-            await flush();
-
             expect(executeCommandById).toHaveBeenCalledWith('editor:toggle-highlight');
-            expect(ensureInitialized).not.toHaveBeenCalled();
-        });
-
-        // 초기화 이후의 예외(주로 vault.process 거부)는 ReadingModeHighlighter 가
-        // Notice 를 띄우는 예상 실패 모드가 아니므로 — 그쪽은 Notice 후 return 한다 —
-        // 여기서 알리지 않으면 이 수정이 없애려던 '단축키가 죽은 것처럼 보임' 증상이
-        // 그대로 재현된다.
-        it('초기화 이후 하이라이트 삽입 실패 → Notice, 예외는 밖으로 새지 않는다', async () => {
-            const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-            const { plugin, addCommand, ensureInitialized } = makePlugin('preview');
-            (ReadingModeHighlighter as ReturnType<typeof vi.fn>).mockImplementationOnce(() => ({
-                highlightSelection: vi.fn().mockRejectedValue(new Error('vault write failed')),
-            }));
-            registerToggleHighlightCommand(plugin as never, ensureInitialized);
-
-            expect(() => getCheckCallback(addCommand)(false)).not.toThrow();
-            await flush();
-
-            expect(noticeMessages).toContain('Reading-mode highlight failed');
-            expect(consoleError).toHaveBeenCalled();
-            consoleError.mockRestore();
-        });
-
-        it('초기화 실패 → Notice 후 중단, 예외는 밖으로 새지 않는다 (R4)', async () => {
-            const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-            const { plugin, addCommand, ensureInitialized } = makePlugin('preview', true, {
-                initFails: true,
-            });
-            registerToggleHighlightCommand(plugin as never, ensureInitialized);
-
-            expect(() => getCheckCallback(addCommand)(false)).not.toThrow();
-            await flush();
-
-            expect(ensureInitialized).toHaveBeenCalledOnce();
-            expect(noticeMessages).toContain('Plugin initialization failed');
-            expect(ReadingModeHighlighter).not.toHaveBeenCalled();
-            consoleError.mockRestore();
         });
     });
 
-    it('초기화 이후 두 번째 입력도 동일하게 동작한다', async () => {
-        const { plugin, addCommand, ensureInitialized } = makePlugin('preview', true, {
-            initialized: true,
-        });
-        registerToggleHighlightCommand(plugin as never, ensureInitialized);
-        const cb = getCheckCallback(addCommand);
+    it('하이라이트 삽입 실패 → Notice, 예외는 밖으로 새지 않는다', async () => {
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const { plugin, addCommand } = makePlugin('preview');
+        (ReadingModeHighlighter as ReturnType<typeof vi.fn>).mockImplementationOnce(() => ({
+            highlightSelection: vi.fn().mockRejectedValue(new Error('vault write failed')),
+        }));
+        registerToggleHighlightCommand(plugin as never);
 
-        cb(false);
-        await flush();
-        cb(false);
+        expect(() => getCheckCallback(addCommand)(false)).not.toThrow();
         await flush();
 
-        expect(ensureInitialized).toHaveBeenCalledTimes(2);
-        expect(ReadingModeHighlighter).toHaveBeenCalledTimes(2);
+        expect(noticeMessages).toContain('Reading-mode highlight failed');
+        expect(consoleError).toHaveBeenCalled();
+        consoleError.mockRestore();
     });
 
     it('source 모드 + 네이티브 부재 + 평문 선택 → ==sel== 폴백 래핑', () => {
-        const { plugin, addCommand, replaceSelection, ensureInitialized } = makePlugin(
-            'source',
-            true,
-            { nativeExecuted: false, selection: 'hello' },
-        );
-        registerToggleHighlightCommand(plugin as never, ensureInitialized);
+        const { plugin, addCommand, replaceSelection } = makePlugin('source', true, {
+            nativeExecuted: false,
+            selection: 'hello',
+        });
+        registerToggleHighlightCommand(plugin as never);
         getCheckCallback(addCommand)(false);
         expect(replaceSelection).toHaveBeenCalledWith('==hello==');
     });
 
     it('source 모드 + 네이티브 부재 + 이미 하이라이트된 선택 → 토글오프(마커 제거)', () => {
-        const { plugin, addCommand, replaceSelection, ensureInitialized } = makePlugin(
-            'source',
-            true,
-            { nativeExecuted: false, selection: '==hello==' },
-        );
-        registerToggleHighlightCommand(plugin as never, ensureInitialized);
+        const { plugin, addCommand, replaceSelection } = makePlugin('source', true, {
+            nativeExecuted: false,
+            selection: '==hello==',
+        });
+        registerToggleHighlightCommand(plugin as never);
         getCheckCallback(addCommand)(false);
         expect(replaceSelection).toHaveBeenCalledWith('hello');
     });
 
     it('source 모드 + 네이티브 부재 + 빈 선택 → 무동작(==== 삽입 안 함)', () => {
-        const { plugin, addCommand, replaceSelection, ensureInitialized } = makePlugin(
-            'source',
-            true,
-            { nativeExecuted: false, selection: '' },
-        );
-        registerToggleHighlightCommand(plugin as never, ensureInitialized);
+        const { plugin, addCommand, replaceSelection } = makePlugin('source', true, {
+            nativeExecuted: false,
+            selection: '',
+        });
+        registerToggleHighlightCommand(plugin as never);
         getCheckCallback(addCommand)(false);
         expect(replaceSelection).not.toHaveBeenCalled();
     });

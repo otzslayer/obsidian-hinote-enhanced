@@ -1,6 +1,5 @@
 import { HighlightDecorator } from '../editor/HighlightDecorator';
 import { FSRSManager } from '../flashcard';
-import { HighlightService } from './HighlightService';
 import { HiNoteDataManager } from '../storage/HiNoteDataManager';
 import { CanvasService } from './CanvasService';
 import { EventManager } from './EventManager';
@@ -56,11 +55,10 @@ export class InitializationManager {
         // 아키텍처 레이어를 초기화합니다
         const highlightRepository = new HighlightRepository(dataManager);
 
-        // 하이라이트 서비스를 초기화합니다 (공유 인스턴스)
-        const highlightService = new HighlightService(
-            this.plugin.app,
-            () => this.plugin.settings,
-        );
+        // 하이라이트 서비스는 플러그인이 소유한 인스턴스를 공유합니다.
+        // 읽기 모드 하이라이트 명령이 초기화 없이 같은 서비스를 쓰므로,
+        // 여기서 새로 만들면 인덱스와 명령이 서로 다른 인스턴스를 보게 됩니다.
+        const highlightService = this.plugin.highlightService;
         // 비동기로 인덱스를 구축하여 초기화를 차단하지 않습니다
         void highlightService.initialize();
 
