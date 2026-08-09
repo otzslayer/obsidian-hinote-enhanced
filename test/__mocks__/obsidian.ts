@@ -116,6 +116,39 @@ export class MarkdownRenderer {
     };
 }
 
+// 테스트에서는 지연 없이 즉시 호출한다.
+export function debounce<T extends (...args: never[]) => unknown>(
+    fn: T,
+    _timeout?: number,
+    _resetTimer?: boolean
+): T {
+    return fn;
+}
+
+export class Events {
+    private handlers = new Map<string, Array<(...args: unknown[]) => unknown>>();
+
+    on = (name: string, callback: (...args: unknown[]) => unknown) => {
+        const list = this.handlers.get(name) ?? [];
+        list.push(callback);
+        this.handlers.set(name, list);
+        return { unload: () => {} };
+    };
+    off = (name: string, callback: (...args: unknown[]) => unknown) => {
+        const list = this.handlers.get(name);
+        if (!list) return;
+        this.handlers.set(name, list.filter(fn => fn !== callback));
+    };
+    trigger = (name: string, ...args: unknown[]) => {
+        for (const fn of this.handlers.get(name) ?? []) fn(...args);
+    };
+}
+
+// i18n 이 Obsidian 표시 언어를 읽는 경로. 테스트는 항상 영어로 고정한다.
+export const moment = {
+    locale: (): string => 'en',
+};
+
 export function normalizePath(path: string): string {
     return path.replace(/\\/g, '/').replace(/\/+/g, '/');
 }
